@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Damage Calculator</title>
+<style>
+body {
+  font-family: sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+.div-calculator {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 400px;
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+input[type="text"], select {
+  width: calc(100% - 12px);
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+#damageResult, #scientificResult, #wordResult {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #e9f7ef;
+  border: 1px solid #bce0c8;
+  border-radius: 4px;
+  color: #333;
+}
+</style>
+<script>
+function calculateDamage() {
+  let chakraMax = document.getElementById("chakraMax").value;
+  let baseDamage = document.getElementById("baseDamage").value;
+  let damagePerChakra = document.getElementById("damagePerChakra").value;
+  let chakraUsed = chakraMax - 1;
+
+  if (isNaN(chakraMax) || isNaN(baseDamage) || isNaN(damagePerChakra)) {
+    alert("Please enter valid numbers.");
+    return;
+  }
+
+  let damageIncrease = BigInt(chakraUsed) * BigInt(damagePerChakra);
+  let totalDamage = BigInt(baseDamage) + damageIncrease;
+
+  let additionalDamage = document.getElementById("additionalDamage").value;
+  if(additionalDamage != ""){
+      if(document.getElementById("damageType").value === "add"){
+          totalDamage += BigInt(additionalDamage);
+      } else {
+          totalDamage *= BigInt(additionalDamage);
+      }
+  }
+
+  document.getElementById("damageResult").innerHTML = "<p>Total Damage: " + totalDamage + "</p>";
+  document.getElementById("scientificResult").innerHTML = "<p>Scientific Notation: " + toScientificNotation(totalDamage) + "</p>";
+  document.getElementById("wordResult").innerHTML = "<p>Word Format: " + numberToWords(totalDamage) + "</p>";
+}
+
+function toScientificNotation(number) {
+    let numStr = number.toString();
+    if(numStr.length <= 15){
+        return number.toString();
+    }
+    let firstDigit = numStr[0];
+    let decimalPart = numStr.substring(1, 15);
+    let exponent = numStr.length - 1;
+    return firstDigit + "." + decimalPart + "e+" + exponent;
+}
+
+function numberToWords(number) {
+    let numStr = number.toString();
+    if(numStr.length <= 15){
+        return number.toString();
+    }
+
+    let num = BigInt(number);
+    if(num == 0n){
+        return "Zero";
+    }
+
+    const units = ["", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", "Septillion", "Octillion", "Nonillion", "Decillion", "Undecillion", "Duodecillion", "Tredecillion", "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septendecillion", "Octodecillion", "Novemdecillion", "Vigintillion"];
+
+    let parts = [];
+    let i = 0;
+    while (num > 0n) {
+        let chunk = num % 1000n;
+        if (chunk > 0n) {
+            parts.unshift(`${convertChunkToWords(chunk)} ${units[i]}`);
+        }
+        num = num / 1000n;
+        i++;
+    }
+    return parts.join(" ").trim();
+}
+
+function convertChunkToWords(chunk) {
+    const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+    const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+    const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+
+    let words = [];
+    let hundred = Math.floor(chunk / 100n);
+    let remainder = chunk % 100n;
+    let ten = Math.floor(remainder / 10n);
+    let one = remainder % 10n;
+
+    if (hundred > 0n) {
+        words.push(ones[hundred], "Hundred");
+    }
+    if (ten === 1n) {
+        words.push(teens[one]);
+    } else if (ten > 1n) {
+        words.push(tens[ten], ones[one]);
+    } else if (one > 0n) {
+        words.push(ones[one]);
+    }
+
+    return words.filter(word => word !== "").join(" ");
+}
+</script>
+</head>
+<body>
+  <div class="div-calculator">
+    <h1>Damage Calculator</h1>
+    <label for="chakraMax">Chakra Max:</label>
+    <input type="text" id="chakraMax"> <br>
+
+    <label for="baseDamage">Base Damage:</label>
+    <input type="text" id="baseDamage"> <br>
+
+    <label for="damagePerChakra">Damage Per Chakra:</label>
+    <input type="text" id="damagePerChakra"> <br>
+
+    <label for="additionalDamage">Additional Damage/Multiplier:</label>
+    <input type="text" id="additionalDamage"> <br>
+
+    <label for="damageType">Type:</label>
+    <select id="damageType">
+      <option value="add">Add</option>
+      <option value="multiply">Multiply</option>
+    </select> <br>
+
+    <button onclick="calculateDamage()">Calculate Damage</button>
+
+    <div id="damageResult"></div>
+    <div id="scientificResult"></div>
+    <div id="wordResult"></div>
+  </div>
+</body>
+</html>
