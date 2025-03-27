@@ -254,7 +254,6 @@ function calculateDamage() {
   let percentageIncrease = 0n;
   let equation = baseDamage.toString();
 
-  // Handle Chakra Damage
   if (damageType === "chakra") {
     const chakraMax = parseInput(document.getElementById("chakraMax").value);
     const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
