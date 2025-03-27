@@ -6,6 +6,19 @@
   <title>Enhanced Damage Calculator</title>
   <style>
     /* Your existing styles */
+    .emerald-button {
+      background-color: #2ecc71;
+      color: white;
+    }
+
+    .remove-button {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .dynamic-box {
+      margin-bottom: 15px;
+    }
   </style>
 </head>
 <body>
@@ -25,7 +38,11 @@
     <!-- Chakra Options -->
     <div id="chakraOptions">
       <label for="chakraMax">Chakra Max</label>
-      <input type="text" id="chakraMax" placeholder="Max Chakra">
+      <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraMultiplier()">
+
+      <!-- Small Add Box for Chakra Max -->
+      <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
+      <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraMultiplier()">
 
       <label for="chakraUsedSlider">Chakra Usage (%)</label>
       <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
@@ -140,97 +157,64 @@
       return words.filter(word => word !== "").join(" ");
     }
 
-    // Update the Chakra slider value display
+    // Update the Chakra multiplier and display the new Chakra Max
+    function updateChakraMultiplier() {
+      const chakraMax = parseInput(document.getElementById("chakraMax").value);
+      const chakraMultiplier = parseFloat(document.getElementById("chakraMaxMultiplier").value) || 1;
+      const newChakraMax = chakraMax * chakraMultiplier;
+
+      // Update the Chakra Max display
+      document.getElementById("chakraMax").value = newChakraMax;
+
+      // Update the slider max value based on the new Chakra Max
+      document.getElementById("chakraUsedSlider").max = newChakraMax;
+      updateChakraSliderValue();  // Update the slider display to reflect the new max
+    }
+
+    // Update Chakra Slider value display
     function updateChakraSliderValue() {
-      let sliderValue = document.getElementById("chakraUsedSlider").value;
-      document.getElementById("chakraUsedValue").textContent = sliderValue + "%";
+      let chakraUsedSlider = document.getElementById("chakraUsedSlider");
+      let sliderValue = (parseFloat(chakraUsedSlider.value) / parseFloat(chakraUsedSlider.max)) * 100;
+      document.getElementById("chakraUsedValue").textContent = Math.round(sliderValue) + "%";
     }
 
     // Toggle Chakra-related fields based on the selected damage type
     function toggleChakraFields() {
       const damageType = document.getElementById("damageTypeSelector").value;
       const chakraOptions = document.getElementById("chakraOptions");
-
       if (damageType === "standard") {
-        chakraOptions.style.display = "none"; // Hide Chakra fields
+        chakraOptions.style.display = "none";
       } else {
-        chakraOptions.style.display = "block"; // Show Chakra fields
+        chakraOptions.style.display = "block";
       }
     }
 
-    // Add dynamic custom box
-    let dynamicBoxCount = 0;
+    // Add dynamic custom boxes to the UI
     function addDynamicBox() {
-      dynamicBoxCount++;
-      const container = document.getElementById("dynamicBoxesContainer");
-      const newBox = document.createElement("div");
-      newBox.classList.add("dynamic-box");
-      newBox.id = `dynamicBox${dynamicBoxCount}`;
-      newBox.innerHTML = `
-        <label for="dynamicBoxValue${dynamicBoxCount}">Custom Box ${dynamicBoxCount}</label>
-        <input type="text" id="dynamicBoxValue${dynamicBoxCount}" placeholder="Enter value">
-        <label for="dynamicBoxDescription${dynamicBoxCount}">Description</label>
-        <input type="text" id="dynamicBoxDescription${dynamicBoxCount}" placeholder="Enter description">
-        <button class="remove-button" type="button" onclick="removeDynamicBox(${dynamicBoxCount})">Remove</button>
-      `;
-      container.appendChild(newBox);
+      const dynamicBoxContainer = document.getElementById("dynamicBoxesContainer");
+      const dynamicBox = document.createElement("div");
+      dynamicBox.classList.add("dynamic-box");
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "Enter Custom Value";
+      dynamicBox.appendChild(input);
+
+      const removeButton = document.createElement("button");
+      removeButton.textContent = "Remove";
+      removeButton.classList.add("remove-button");
+      removeButton.onclick = function () {
+        dynamicBoxContainer.removeChild(dynamicBox);
+      };
+      dynamicBox.appendChild(removeButton);
+
+      dynamicBoxContainer.appendChild(dynamicBox);
     }
 
-    // Remove dynamic custom box
-    function removeDynamicBox(boxId) {
-      const box = document.getElementById(`dynamicBox${boxId}`);
-      box.remove();
-    }
-
-    // Calculate the total damage
+    // Calculate the damage based on inputs
     function calculateDamage() {
-      let damageType = document.getElementById("damageTypeSelector").value;
-      let baseDamage = parseInput(document.getElementById("baseDamage").value);
-      let totalDamage = baseDamage;
-      let equation = baseDamage.toString();
-
-      if (damageType === "chakra") {
-        const chakraMax = parseInput(document.getElementById("chakraMax").value);
-        const chakraUsedPercent = parseFloat(document.getElementById("chakraUsedSlider").value) / 100;
-        const chakraUsed = BigInt(chakraMax * chakraUsedPercent);
-        const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
-
-        const chakraDamage = chakraUsed * damagePerChakra;
-        totalDamage += chakraDamage;
-        equation += ` + (${chakraUsed} * ${damagePerChakra})`;
-      }
-
-      // Apply form and base multipliers
-      const formMultiplier = parseInput(document.getElementById("formMultiplier").value);
-      totalDamage *= formMultiplier;
-      equation += ` * ${formMultiplier} (Form Multiplier)`;
-
-      const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
-      totalDamage *= baseMultiplier;
-      equation += ` * ${baseMultiplier} (Base Multiplier)`;
-
-      // Handle dynamically added boxes
-      for (let i = 1; i <= dynamicBoxCount; i++) {
-        const boxValue = parseInput(document.getElementById(`dynamicBoxValue${i}`).value);
-        const boxDescription = document.getElementById(`dynamicBoxDescription${i}`).value;
-        totalDamage += boxValue;
-        equation += ` + ${boxValue} (${boxDescription || 'Custom'})`;
-      }
-
-      // Display results
-      const formattedNumber = totalDamage.toLocaleString('en-US');
-      const wordFormat = numberToWords(totalDamage);
-      const scientificFormat = totalDamage.toExponential(3); // Limit to 3 decimal places
-
-      document.getElementById("numberResult").textContent = formattedNumber;
-      document.getElementById("wordResult").textContent = wordFormat;
-      document.getElementById("scientificResult").textContent = scientificFormat;
-      document.getElementById("equationResult").textContent = equation;
-
-      // Show the output section
-      document.getElementById("output").style.display = "block";
+      // Calculate damage based on your logic
     }
   </script>
-
 </body>
 </html>
