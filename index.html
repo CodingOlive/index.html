@@ -44,3 +44,134 @@
             margin-bottom: 20px;
             border: 1px solid #ddd;
             border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            color: white;
+            padding: 14px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 18px;
+            margin-top: 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        .calculate-button {
+            background-color: #4CAF50;
+        }
+
+        .calculate-button:hover {
+            background-color: #45a049;
+        }
+
+        .remove-button {
+            background-color: #dc3545;
+            padding: 8px 12px;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+
+        .remove-button:hover {
+            background-color: #c82333;
+        }
+
+        .result-display {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #e6f7ff;
+            border: 1px solid #b3e0ff;
+            border-radius: 8px;
+            color: #333;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <h1>Enhanced Damage Calculator</h1>
+
+        <label for="damageTypeSelector">Damage Type</label>
+        <select id="damageTypeSelector">
+            <option value="standard">Standard</option>
+            <option value="chakra">Chakra</option>
+        </select>
+
+        <label for="baseDamage">Base Damage</label>
+        <input type="text" id="baseDamage" value="1000">
+
+        <div id="chakraInputs" style="display:none;">
+            <label for="chakraMax">Max Chakra</label>
+            <input type="text" id="chakraMax" value="10">
+
+            <label for="damagePerChakra">Damage Per Chakra</label>
+            <input type="text" id="damagePerChakra" value="100">
+        </div>
+
+        <label for="baseMultiplier">Base Multiplier</label>
+        <input type="text" id="baseMultiplier" value="1.2">
+
+        <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
+
+        <div class="result-display" id="resultDisplay" style="display:none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('damageTypeSelector').addEventListener('change', function() {
+            if (this.value === 'chakra') {
+                document.getElementById('chakraInputs').style.display = 'block';
+            } else {
+                document.getElementById('chakraInputs').style.display = 'none';
+            }
+        });
+
+        function parseInput(input) {
+            if (input.includes("e")) {
+                let parts = input.split("e");
+                return BigInt(parseFloat(parts[0]) * Math.pow(10, parseInt(parts[1])));
+            } else {
+                const parsed = BigInt(input || 0);
+                if (isNaN(Number(parsed))) {
+                    return 0n;
+                }
+                return parsed;
+            }
+        }
+
+        function calculateDamage() {
+            let damageType = document.getElementById("damageTypeSelector").value;
+            let baseDamage = parseInput(document.getElementById("baseDamage").value);
+            let totalDamage = baseDamage;
+            let equation = baseDamage.toString();
+
+            if (damageType === "chakra") {
+                const chakraMax = parseInput(document.getElementById("chakraMax").value);
+                const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
+                const chakraUsed = chakraMax - 1n;
+
+                if (isNaN(Number(chakraMax)) || isNaN(Number(baseDamage)) || isNaN(Number(damagePerChakra))) {
+                    alert("Please enter valid numbers.");
+                    return;
+                }
+
+                const damageIncrease = chakraUsed * damagePerChakra;
+                totalDamage += damageIncrease;
+                equation += " + (" + chakraUsed.toString() + " * " + damagePerChakra.toString() + ")";
+            }
+
+            const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
+            if (baseMultiplier !== 0n) {
+                totalDamage *= baseMultiplier;
+                equation += " * " + baseMultiplier;
+            }
+
+            const resultText = "Total Damage: " + totalDamage + "\nEquation: " + equation;
+            document.getElementById("resultDisplay").style.display = 'block';
+            document.getElementById("resultDisplay").textContent = resultText;
+        }
+    </script>
+</body>
+</html>
