@@ -1,6 +1,153 @@
-<script>
-let additionalInputCount = 0; // Declare additionalInputCount here
+<!DOCTYPE html>
+<html>
+<head>
+<title>Damage Calculator</title>
+<style>
+/* --- CSS Styles --- */
+body {
+  font-family: sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
 
+.div-calculator {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 400px;
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+input[type="text"],
+select {
+  width: calc(100% - 12px);
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+button {
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.calculate-button {
+  background-color: #4CAF50;
+}
+
+.calculate-button:hover {
+  background-color: #45a049;
+}
+
+#damageResult,
+#scientificResult,
+#wordResult,
+#equationResult {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #e9f7ef;
+  border: 1px solid #bce0c8;
+  border-radius: 4px;
+  color: #333;
+}
+
+.additional-input-group {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.modifier-indicator {
+  display: inline-block;
+  margin-left: 5px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #555;
+  width: 15px;
+  text-align: center;
+}
+
+.modifier-toggle-button {
+  display: inline-block;
+  background-color: #ddd;
+  color: #333;
+  padding: 2px 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 5px;
+  width: 25px;
+  text-align: center;
+}
+
+.modifier-toggle-button:hover {
+  background-color: #ccc;
+}
+
+.remove-button {
+  display: inline-block;
+  background-color: #dc3545;
+  color: white;
+  padding: 2px 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 5px;
+  width: 25px;
+  text-align: center;
+}
+
+.remove-button:hover {
+  background-color: #c82333;
+}
+
+.add-button {
+  background-color: #007bff;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.add-button:hover {
+  background-color: #0056b3;
+}
+</style>
+<script>
 // --- Helper Functions ---
 
 /**
@@ -101,12 +248,13 @@ function convertChunkToWords(chunk) {
  */
 function calculateDamage() {
   console.log("calculateDamage() called"); // Debugging
-  let damageType = document.getElementById("damageTypeSelector").value;
-  let baseDamage = parseInput(document.getElementById("baseDamage").value;
+  const damageType = document.getElementById("damageTypeSelector").value;
+  let baseDamage = parseInput(document.getElementById("baseDamage").value);
   let totalDamage = baseDamage;
   let percentageIncrease = 0n;
   let equation = baseDamage.toString();
 
+  // Handle Chakra Damage
   if (damageType === "chakra") {
     const chakraMax = parseInput(document.getElementById("chakraMax").value);
     const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
@@ -129,7 +277,7 @@ function calculateDamage() {
     equation += " * " + baseMultiplier.toString();
   }
 
-  const formMultiplier = parseInput(document.getElementById("formMultiplier").value);
+  const formMultiplier = parseInput(document.getElementById("formMultiplier").value;
   if (formMultiplier !== 0n) {
     totalDamage *= formMultiplier;
     equation += " * " + formMultiplier.toString();
@@ -178,15 +326,59 @@ function calculateDamage() {
 // --- DOM Manipulation Functions ---
 
 /**
- * Toggles the visibility of chakra-specific input fields.
+ * Updates the equation display in real-time.
  */
-function toggleChakraInputs() {
+function updateEquation() {
   const damageType = document.getElementById("damageTypeSelector").value;
-  const chakraInputs = document.getElementById("chakraInputs");
-  const normalDamageInputs = document.getElementById("normalDamageInputs");
+  const baseDamage = parseInput(document.getElementById("baseDamage").value);
+  let equation = baseDamage.toString();
 
-  chakraInputs.style.display = damageType === "chakra" ? "block" : "none";
-  normalDamageInputs.style.display = damageType === "normal" ? "block" : "none";
+  if (damageType === "chakra") {
+    const chakraMax = parseInput(document.getElementById("chakraMax").value);
+    const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
+    const chakraUsed = chakraMax - 1n;
+
+    if (!isNaN(Number(chakraMax)) && !isNaN(Number(baseDamage)) && !isNaN(Number(damagePerChakra))) {
+      equation += " + (" + chakraUsed.toString() + " * " + damagePerChakra.toString() + ")";
+    }
+  }
+
+  const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
+  if (baseMultiplier !== 0n) {
+    equation += " * " + baseMultiplier.toString();
+  }
+
+  const formMultiplier = parseInput(document.getElementById("formMultiplier").value);
+  if (formMultiplier !== 0n) {
+    equation += " * " + formMultiplier.toString();
+  }
+
+  // Handle additional inputs
+  for (let i = 1; i <= additionalInputCount; i++) {
+    const additionalValue = document.getElementById("additionalValue" + i).value;
+    if (additionalValue !== "") {
+      const parsedValue = parseInput(additionalValue);
+      const modifierType = document.getElementById("modifierType" + i).textContent;
+      const isPercent = document.getElementById("isPercent" + i).checked;
+
+      if (modifierType === "+") {
+        if (isPercent) {
+          equation += " + (" + baseDamage.toString() + " * " + parsedValue.toString() + " / 100)";
+        } else {
+          equation += " + " + parsedValue.toString();
+        }
+      } else { // *
+        if (isPercent) {
+          equation += " + (" + baseDamage.toString() + " * " + parsedValue.toString() + " / 100)";
+        } else {
+          equation += " * " + parsedValue.toString();
+        }
+        equation += " * " + parsedValue.toString();
+      }
+    }
+  }
+
+  document.getElementById("equationResult").innerHTML = "<p>Equation: " + equation + "</p>";
 }
 
 /**
@@ -222,7 +414,7 @@ function addAdditionalInput() {
 function toggleModifier(index) {
   console.log("toggleModifier() called with index:", index); // Debugging
   const modifier = document.getElementById("modifierType" + index);
-  modifier.textContent = modifier.textContent === "+" ? "*" : "*";
+  modifier.textContent = modifier.textContent === "+" ? "*" : "+";
   updateEquation();
 }
 
