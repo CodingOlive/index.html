@@ -3,7 +3,7 @@
 <head>
 <title>Damage Calculator</title>
 <style>
-/* CSS Styles (with changes for calculate button) */
+/* CSS Styles */
 body {
   font-family: sans-serif;
   background-color: #f4f4f4;
@@ -35,7 +35,8 @@ label {
   color: #555;
 }
 
-input[type="text"], select {
+input[type="text"],
+select {
   width: calc(100% - 12px);
   padding: 10px;
   margin-bottom: 15px;
@@ -69,7 +70,10 @@ button:hover {
   background-color: #45a049; /* Darker Green */
 }
 
-#damageResult, #scientificResult, #wordResult, #equationResult {
+#damageResult,
+#scientificResult,
+#wordResult,
+#equationResult {
   margin-top: 20px;
   padding: 15px;
   background-color: #e9f7ef;
@@ -131,7 +135,7 @@ button:hover {
 }
 
 .add-button {
-  background-color: #007bff; /* Blue */
+  background-color: #007bff;
   color: white;
   padding: 5px 10px;
   border: none;
@@ -142,7 +146,7 @@ button:hover {
 }
 
 .add-button:hover {
-  background-color: #0056b3; /* Darker Blue */
+  background-color: #0056b3;
 }
 </style>
 <script>
@@ -245,6 +249,8 @@ function convertChunkToWords(chunk) {
  * Calculates the damage based on user inputs.
  */
 function calculateDamage() {
+  console.log("calculateDamage() called"); // Debugging
+
   const damageType = document.getElementById("damageTypeSelector").value;
   let baseDamage = parseInput(document.getElementById("baseDamage").value);
   let totalDamage = baseDamage;
@@ -268,7 +274,7 @@ function calculateDamage() {
   }
 
   // Handle Base and Form Multipliers
-  const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value;
+  const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
   if (baseMultiplier !== 0n) {
     totalDamage *= baseMultiplier;
     equation += " * " + baseMultiplier.toString();
@@ -324,8 +330,9 @@ function calculateDamage() {
  * Updates the equation display in real-time.
  */
 function updateEquation() {
+  console.log("updateEquation() called"); // Debugging
   const damageType = document.getElementById("damageTypeSelector").value;
-  const baseDamage = parseInput(document.getElementById("baseDamage").value;
+  const baseDamage = parseInput(document.getElementById("baseDamage").value);
   let equation = baseDamage.toString();
 
   if (damageType === "chakra") {
@@ -373,7 +380,7 @@ function updateEquation() {
     }
   }
 
-  document.getElementById("equationResult").innerHTML = "<p>Equation: " + equation + "</p>";
+  document.getElementById("equationResult").innerHTML = "<p>Equation: " + buildEquation() + "</p>";
 }
 
 // --- DOM Manipulation Functions ---
@@ -382,6 +389,7 @@ function updateEquation() {
  * Toggles the visibility of chakra-specific input fields.
  */
 function toggleChakraInputs() {
+  console.log("toggleChakraInputs() called"); // Debugging
   const damageType = document.getElementById("damageTypeSelector").value;
   const chakraInputs = document.getElementById("chakraInputs");
   const normalDamageInputs = document.getElementById("normalDamageInputs");
@@ -394,6 +402,7 @@ function toggleChakraInputs() {
  * Adds a new input box for additional damage/multiplier.
  */
 function addAdditionalInput() {
+  console.log("addAdditionalInput() called"); // Debugging
   additionalInputCount++;
 
   const additionalInputsDiv = document.getElementById("additionalInputs");
@@ -420,6 +429,7 @@ function addAdditionalInput() {
  * @param {number} index The index of the input box.
  */
 function toggleModifier(index) {
+  console.log("toggleModifier() called with index:", index); // Debugging
   const modifier = document.getElementById("modifierType" + index);
   modifier.textContent = modifier.textContent === "+" ? "*" : "+";
   updateEquation();
@@ -430,6 +440,7 @@ function toggleModifier(index) {
  * @param {number} index The index of the input box to remove.
  */
 function removeAdditionalInput(index) {
+  console.log("removeAdditionalInput() called with index:", index); // Debugging
   const inputGroup = document.querySelector(`#additionalInputs div:nth-child(${index})`);
   inputGroup.remove();
   updateEquation();
