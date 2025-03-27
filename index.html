@@ -129,6 +129,21 @@ button:hover {
 .remove-button:hover {
   background-color: #c82333;
 }
+
+.add-button {
+  background-color: #007bff; /* Blue */
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.add-button:hover {
+  background-color: #0056b3; /* Darker Blue */
+}
 </style>
 <script>
 // --- Helper Functions ---
@@ -345,6 +360,7 @@ function updateEquation() {
         } else {
           equation += " * " + parsedValue.toString();
         }
+        equation += " * " + parsedValue.toString();
       }
     }
   }
