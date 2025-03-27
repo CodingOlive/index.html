@@ -3,7 +3,7 @@
 <head>
 <title>Damage Calculator</title>
 <style>
-/* CSS Styles (with changes for calculate button) */
+/* CSS Styles */
 body {
   font-family: sans-serif;
   background-color: #f4f4f4;
@@ -35,7 +35,8 @@ label {
   color: #555;
 }
 
-input[type="text"], select {
+input[type="text"],
+select {
   width: calc(100% - 12px);
   padding: 10px;
   margin-bottom: 15px;
@@ -45,7 +46,6 @@ input[type="text"], select {
 }
 
 button {
-  /* Default button styles */
   color: white;
   padding: 12px 20px;
   border: none;
@@ -57,19 +57,21 @@ button {
 }
 
 button:hover {
-  /* Default button hover style */
+  background-color: #45a049;
 }
 
-/* Calculate button specific styles */
 .calculate-button {
-  background-color: #4CAF50; /* Green */
+  background-color: #4CAF50;
 }
 
 .calculate-button:hover {
-  background-color: #45a049; /* Darker Green */
+  background-color: #45a049;
 }
 
-#damageResult, #scientificResult, #wordResult, #equationResult {
+#damageResult,
+#scientificResult,
+#wordResult,
+#equationResult {
   margin-top: 20px;
   padding: 15px;
   background-color: #e9f7ef;
@@ -131,7 +133,7 @@ button:hover {
 }
 
 .add-button {
-  background-color: #007bff; /* Blue */
+  background-color: #007bff;
   color: white;
   padding: 5px 10px;
   border: none;
@@ -142,7 +144,7 @@ button:hover {
 }
 
 .add-button:hover {
-  background-color: #0056b3; /* Darker Blue */
+  background-color: #0056b3;
 }
 </style>
 <script>
@@ -249,6 +251,7 @@ function calculateDamage() {
   let baseDamage = parseInput(document.getElementById("baseDamage").value);
   let totalDamage = baseDamage;
   let percentageIncrease = 0n;
+  let equation = baseDamage.toString();
 
   // Handle Chakra Damage
   if (damageType === "chakra") {
@@ -263,17 +266,20 @@ function calculateDamage() {
 
     const damageIncrease = chakraUsed * damagePerChakra;
     totalDamage += damageIncrease;
+    equation += " + (" + chakraUsed.toString() + " * " + damagePerChakra.toString() + ")";
   }
 
   // Handle Base and Form Multipliers
   const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
   if (baseMultiplier !== 0n) {
     totalDamage *= baseMultiplier;
+    equation += " * " + baseMultiplier.toString();
   }
 
-  const formMultiplier = parseInput(document.getElementById("formMultiplier").value;
+  const formMultiplier = parseInput(document.getElementById("formMultiplier").value);
   if (formMultiplier !== 0n) {
     totalDamage *= formMultiplier;
+    equation += " * " + formMultiplier.toString();
   }
 
   // Handle additional inputs
@@ -287,14 +293,18 @@ function calculateDamage() {
       if (modifierType === "+") {
         if (isPercent) {
           percentageIncrease += (totalDamage * parsedValue) / 100n;
+          equation += " + (" + totalDamage.toString() + " * " + parsedValue.toString() + " / 100)";
         } else {
           totalDamage += parsedValue;
+          equation += " + " + parsedValue.toString();
         }
       } else { // *
         if (isPercent) {
           percentageIncrease += (totalDamage * parsedValue) / 100n;
+          equation += " + (" + totalDamage.toString() + " * " + parsedValue.toString() + " / 100)";
         } else {
           totalDamage *= parsedValue;
+          equation += " * " + parsedValue.toString();
         }
         totalDamage *= (isPercent ? 1n : parsedValue);
       }
