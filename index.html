@@ -63,50 +63,47 @@
       transition: background-color 0.3s ease;
     }
 
-    .calculate-button {
-      background-color: #4CAF50;
-    }
-
-    .calculate-button:hover {
-      background-color: #45a049;
-    }
-
-    .chakra-total {
-      font-size: 14px;
-      font-weight: bold;
-      color: #3366cc;
+    .add-box-button {
+      background-color: #008CBA;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin-bottom: 10px;
+    }
+
+    .dynamic-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .dynamic-box button {
+      background-color: #ff4d4d;
+      width: 25px;
+      height: 25px;
+      font-size: 14px;
+      padding: 0;
     }
   </style>
 </head>
 <body>
+
   <div class="calculator-container">
     <h1>Enhanced Damage Calculator</h1>
+    <button class="add-box-button" onclick="addDynamicBox()">+</button>
 
     <label for="baseDamage">Base Damage</label>
     <input type="text" id="baseDamage" placeholder="Enter Base Damage">
 
-    <label for="chakraMax">Chakra Max</label>
-    <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraTotal()">
-
-    <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
-    <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal()">
-
-    <div class="chakra-total">
-      <label>Chakra Total:</label>
-      <span id="chakraTotalValue">0</span>
-    </div>
-
-    <label for="chakraUsedSlider">Chakra Usage (%)</label>
-    <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
-    <span id="chakraUsedValue">100%</span>
-
-    <label for="damagePerChakra">Damage per Chakra</label>
-    <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
+    <div id="dynamicBoxesContainer"></div>
 
     <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
-
-    <div id="output">
+    <div id="output" class="output-container">
       <h2>Results</h2>
       <p><strong>Equation:</strong> <span id="equationResult"></span></p>
       <p><strong>Number Format:</strong> <span id="numberResult"></span></p>
@@ -120,38 +117,46 @@
       return isNaN(parseFloat(input)) ? 0 : parseFloat(input);
     }
 
-    function updateChakraTotal() {
-      const chakraMax = parseInput(document.getElementById("chakraMax").value);
-      const chakraMultiplier = parseInput(document.getElementById("chakraMaxMultiplier").value);
-      const chakraTotal = chakraMax * chakraMultiplier;
-      document.getElementById("chakraTotalValue").textContent = chakraTotal.toLocaleString();
-    }
-
-    function updateChakraSliderValue() {
-      const slider = document.getElementById("chakraUsedSlider");
-      document.getElementById("chakraUsedValue").textContent = slider.value + "%";
+    function addDynamicBox() {
+      const container = document.getElementById("dynamicBoxesContainer");
+      const box = document.createElement("div");
+      box.classList.add("dynamic-box");
+      box.innerHTML = `
+        <select>
+          <option value="additive">Additive</option>
+          <option value="multiplier">Multiplier</option>
+        </select>
+        <input type="text" placeholder="Enter Value">
+        <input type="text" placeholder="Label (e.g., Buff)">
+        <button onclick="this.parentElement.remove()">×</button>
+      `;
+      container.appendChild(box);
     }
 
     function calculateDamage() {
-      const baseDamage = parseInput(document.getElementById("baseDamage").value);
-      const chakraTotal = parseInput(document.getElementById("chakraTotalValue").textContent);
-      const chakraUsed = parseInput(document.getElementById("chakraUsedSlider").value) / 100;
-      const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
-      const chakraUsedValue = chakraTotal * chakraUsed;
-      const totalDamage = baseDamage + (chakraUsedValue * damagePerChakra);
-
-      document.getElementById("equationResult").textContent = `${baseDamage} + (${chakraUsedValue} * ${damagePerChakra})`;
+      let baseDamage = parseInput(document.getElementById("baseDamage").value);
+      let totalDamage = baseDamage;
+      let equation = `${baseDamage}`;
+      
+      document.querySelectorAll(".dynamic-box").forEach(box => {
+        const type = box.children[0].value;
+        const value = parseInput(box.children[1].value);
+        const label = box.children[2].value || "Unnamed";
+        
+        if (type === "additive") {
+          totalDamage += value;
+          equation += ` + ${value} (${label})`;
+        } else {
+          totalDamage *= value;
+          equation += ` * ${value} (${label})`;
+        }
+      });
+      
+      document.getElementById("equationResult").textContent = equation;
       document.getElementById("numberResult").textContent = totalDamage.toLocaleString();
       document.getElementById("scientificResult").textContent = totalDamage.toExponential();
-      document.getElementById("wordResult").textContent = numberToWords(totalDamage);
-    }
-
-    function numberToWords(num) {
-      if (num < 1e12) {
-        return new Intl.NumberFormat('en', { notation: 'compact' }).format(num);
-      }
-      return num.toExponential().replace("e+", " × 10^");
     }
   </script>
+
 </body>
 </html>
