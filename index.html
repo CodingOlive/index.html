@@ -1,230 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Enhanced Damage Calculator</title>
-<style>
-  body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f0f8ff;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Damage Calculator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
 
-  .calculator-container {
-    background-color: #ffffff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 500px;
-  }
+        .calculator-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 500px;
+        }
 
-  h1 {
-    text-align: center;
-    color: #3366cc;
-    margin-bottom: 25px;
-  }
+        h1 {
+            text-align: center;
+            color: #3366cc;
+            margin-bottom: 25px;
+        }
 
-  label {
-    display: block;
-    margin-bottom: 8px;
-    color: #333;
-    font-weight: 600;
-  }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
 
-  input[type="text"],
-  select {
-    width: calc(100% - 22px);
-    padding: 12px;
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    box-sizing: border-box;
-    font-size: 16px;
-  }
-
-  button {
-    color: white;
-    padding: 14px 25px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    width: 100%;
-    font-size: 18px;
-    margin-top: 15px;
-    transition: background-color 0.3s ease;
-  }
-
-  .calculate-button {
-    background-color: #4CAF50;
-  }
-
-  .calculate-button:hover {
-    background-color: #45a049;
-  }
-
-  .add-button {
-    background-color: #007bff;
-    margin-left: 10px;
-  }
-
-  .add-button:hover {
-    background-color: #0056b3;
-  }
-
-  .remove-button {
-    background-color: #dc3545;
-    padding: 8px 12px;
-    font-size: 14px;
-    margin-left: 5px;
-  }
-
-  .remove-button:hover {
-    background-color: #c82333;
-  }
-
-  .additional-input-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-  }
-
-  .modifier-indicator {
-    margin: 0 10px;
-    font-weight: bold;
-    font-size: 16px;
-    color: #555;
-    width: 20px;
-    text-align: center;
-  }
-
-  .modifier-toggle-button {
-    background-color: #ddd;
-    color: #333;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  .modifier-toggle-button:hover {
-    background-color: #ccc;
-  }
-
-  .result-display {
-    margin-top: 25px;
-    padding: 20px;
-    background-color: #e6f7ff;
-    border: 1px solid #b3e0ff;
-    border-radius: 8px;
-    color: #333;
-    font-size: 16px;
-  }
-</style>
-<script>
-  let additionalInputCount = 0;
-
-  function parseInput(input) {
-    if (input.includes("e")) {
-      let parts = input.split("e");
-      return BigInt(parseFloat(parts[0]) * Math.pow(10, parseInt(parts[1])));
-    } else {
-      const parsed = BigInt(input || 0);
-      if (isNaN(Number(parsed))) {
-        return 0n;
-      }
-      return parsed;
-    }
-  }
-
-  function toScientificNotation(number) {
-    let numStr = number.toString();
-    if (numStr.length <= 15) {
-      return numStr;
-    }
-    let firstDigit = numStr[0];
-    let decimalPart = numStr.substring(1, 15);
-    let exponent = numStr.length - 1;
-    return firstDigit + "." + decimalPart + "e+" + exponent;
-  }
-
-  function numberToWords(number) {
-    let numStr = number.toString();
-    if (numStr.length <= 15) {
-      return numStr;
-    }
-
-    let numBigInt = BigInt(number);
-    if (numBigInt === 0n) {
-      return "Zero";
-    }
-
-    const units = ["", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", "Septillion", "Octillion", "Nonillion", "Decillion", "Undecillion", "Duodecillion", "Tredecillion", "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septendecillion", "Octodecillion", "Novemdecillion", "Vigintillion"];
-
-    let parts = [];
-    let i = 0;
-    while (numBigInt > 0n) {
-      let chunk = numBigInt % 1000n;
-      if (chunk > 0n) {
-        parts.unshift(`${convertChunkToWords(chunk)} ${units[i]}`);
-      }
-      numBigInt = numBigInt / 1000n;
-      i++;
-    }
-    return parts.join(" ").trim();
-  }
-
-  function convertChunkToWords(chunk) {
-    const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
-    const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-    const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
-
-    let words = [];
-    const hundred = Math.floor(chunk / 100n);
-    const remainder = chunk % 100n;
-    const ten = Math.floor(remainder / 10n);
-    const one = remainder % 10n;
-
-    if (hundred > 0n) {
-      words.push(ones[hundred], "Hundred");
-    }
-    if (ten === 1n) {
-      words.push(teens[one]);
-    } else if (ten > 1n) {
-      words.push(tens[ten], ones[one]);
-    } else if (one > 0n) {
-      words.push(ones[one]);
-    }
-
-    return words.filter(word => word !== "").join(" ");
-  }
-
-  function calculateDamage() {
-    let damageType = document.getElementById("damageTypeSelector").value;
-    let baseDamage = parseInput(document.getElementById("baseDamage").value);
-    let totalDamage = baseDamage;
-    let percentageIncrease = 0n;
-    let equation = baseDamage.toString();
-
-    if (damageType === "chakra") {
-      const chakraMax = parseInput(document.getElementById("chakraMax").value);
-      const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
-      const chakraUsed = chakraMax - 1n;
-
-      if (isNaN(Number(chakraMax)) || isNaN(Number(baseDamage)) || isNaN(Number(damagePerChakra))) {
-        alert("Please enter valid numbers.");
-        return;
-      }
-
-      const damageIncrease = chakraUsed * damagePerChakra;
-      totalDamage += damageIncrease;
-      equation += " + (" + chakraUsed.toString() + " * " + damagePerChakra.toString() + ")";
-    }
-
-    const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
-    if (baseMultiplier !== 0n) {
-      totalDamage *= baseMultiplier;
-      equation += " * " + baseMultiplier
+        input[type="text"],
+        select {
+            width: calc(100% - 22px);
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
