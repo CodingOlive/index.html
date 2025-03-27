@@ -120,6 +120,13 @@
       margin-right: 10px;
     }
 
+    /* Styling the Chakra slider value display */
+    #chakraUsedValue {
+      color: red; /* Makes the slider value text red */
+      font-weight: bold;
+      font-size: 18px;
+    }
+
   </style>
 </head>
 <body>
@@ -131,7 +138,7 @@
     <input type="text" id="baseDamage" placeholder="Enter Base Damage">
 
     <label for="damageTypeSelector">Damage Type</label>
-    <select id="damageTypeSelector">
+    <select id="damageTypeSelector" onchange="toggleChakraFields()">
       <option value="chakra">Chakra</option>
       <option value="standard">Standard</option>
     </select>
@@ -254,33 +261,43 @@
       document.getElementById("chakraUsedValue").textContent = sliderValue + "%";
     }
 
-    // Add dynamic input boxes to the form
+    // Toggle Chakra-related fields based on the selected damage type
+    function toggleChakraFields() {
+      const damageType = document.getElementById("damageTypeSelector").value;
+      const chakraOptions = document.getElementById("chakraOptions");
+
+      if (damageType === "standard") {
+        chakraOptions.style.display = "none"; // Hide Chakra fields
+      } else {
+        chakraOptions.style.display = "block"; // Show Chakra fields
+      }
+    }
+
+    // Add dynamic custom box
     let dynamicBoxCount = 0;
     function addDynamicBox() {
       dynamicBoxCount++;
-      const container = document.getElementById('dynamicBoxesContainer');
-      const newBox = document.createElement('div');
-      newBox.classList.add('dynamic-box');
-      newBox.setAttribute('id', `dynamicBox${dynamicBoxCount}`);
-
+      const container = document.getElementById("dynamicBoxesContainer");
+      const newBox = document.createElement("div");
+      newBox.classList.add("dynamic-box");
+      newBox.id = `dynamicBox${dynamicBoxCount}`;
       newBox.innerHTML = `
-        <label for="dynamicBoxValue${dynamicBoxCount}">Additional Value ${dynamicBoxCount}</label>
+        <label for="dynamicBoxValue${dynamicBoxCount}">Custom Box ${dynamicBoxCount}</label>
         <input type="text" id="dynamicBoxValue${dynamicBoxCount}" placeholder="Enter value">
         <label for="dynamicBoxDescription${dynamicBoxCount}">Description</label>
         <input type="text" id="dynamicBoxDescription${dynamicBoxCount}" placeholder="Enter description">
         <button class="remove-button" type="button" onclick="removeDynamicBox(${dynamicBoxCount})">Remove</button>
       `;
-
       container.appendChild(newBox);
     }
 
-    // Remove dynamically added input boxes
+    // Remove dynamic custom box
     function removeDynamicBox(boxId) {
       const box = document.getElementById(`dynamicBox${boxId}`);
       box.remove();
     }
 
-    // Calculate Damage function
+    // Calculate the total damage
     function calculateDamage() {
       let damageType = document.getElementById("damageTypeSelector").value;
       let baseDamage = parseInput(document.getElementById("baseDamage").value);
