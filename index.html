@@ -57,22 +57,24 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      width: 100%;
       font-size: 14px;
-      margin-top: 8px;
       transition: background-color 0.3s ease;
     }
 
-    .add-box-button {
-      background-color: #008CBA;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
+    .plus-button {
+      background-color: #3498db;
       font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 5px 10px;
       margin-bottom: 10px;
+    }
+
+    .calculate-button {
+      background-color: #4CAF50;
+      width: 100%;
+    }
+
+    .calculate-button:hover {
+      background-color: #45a049;
     }
 
     .dynamic-box {
@@ -81,28 +83,53 @@
       gap: 10px;
       margin-bottom: 10px;
     }
-
-    .dynamic-box button {
-      background-color: #ff4d4d;
-      width: 25px;
-      height: 25px;
-      font-size: 14px;
-      padding: 0;
-    }
   </style>
 </head>
 <body>
 
   <div class="calculator-container">
     <h1>Enhanced Damage Calculator</h1>
-    <button class="add-box-button" onclick="addDynamicBox()">+</button>
+    <button class="plus-button" onclick="addDynamicBox()">+</button>
 
     <label for="baseDamage">Base Damage</label>
     <input type="text" id="baseDamage" placeholder="Enter Base Damage">
 
+    <label for="damageTypeSelector">Damage Type</label>
+    <select id="damageTypeSelector" onchange="toggleChakraFields()">
+      <option value="chakra">Chakra</option>
+      <option value="standard">Standard</option>
+    </select>
+
+    <div id="chakraOptions">
+      <label for="chakraMax">Chakra Max</label>
+      <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraTotal()">
+
+      <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
+      <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal()">
+
+      <div class="chakra-total">
+        <label>Chakra Total:</label>
+        <span id="chakraTotalValue">0</span>
+      </div>
+
+      <label for="chakraUsedSlider">Chakra Usage (%)</label>
+      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
+      <span id="chakraUsedValue">100%</span>
+
+      <label for="damagePerChakra">Damage per Chakra</label>
+      <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
+    </div>
+
+    <label for="formMultiplier">Form Multiplier</label>
+    <input type="text" id="formMultiplier" placeholder="Enter Form Multiplier">
+
+    <label for="baseMultiplier">Base Multiplier</label>
+    <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
+
     <div id="dynamicBoxesContainer"></div>
 
     <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
+
     <div id="output" class="output-container">
       <h2>Results</h2>
       <p><strong>Equation:</strong> <span id="equationResult"></span></p>
@@ -113,48 +140,20 @@
   </div>
 
   <script>
-    function parseInput(input) {
-      return isNaN(parseFloat(input)) ? 0 : parseFloat(input);
-    }
-
     function addDynamicBox() {
       const container = document.getElementById("dynamicBoxesContainer");
       const box = document.createElement("div");
       box.classList.add("dynamic-box");
       box.innerHTML = `
+        <input type="text" placeholder="Label">
         <select>
-          <option value="additive">Additive</option>
           <option value="multiplier">Multiplier</option>
+          <option value="additive">Additive</option>
         </select>
         <input type="text" placeholder="Enter Value">
-        <input type="text" placeholder="Label (e.g., Buff)">
-        <button onclick="this.parentElement.remove()">×</button>
+        <button onclick="this.parentElement.remove()">X</button>
       `;
       container.appendChild(box);
-    }
-
-    function calculateDamage() {
-      let baseDamage = parseInput(document.getElementById("baseDamage").value);
-      let totalDamage = baseDamage;
-      let equation = `${baseDamage}`;
-      
-      document.querySelectorAll(".dynamic-box").forEach(box => {
-        const type = box.children[0].value;
-        const value = parseInput(box.children[1].value);
-        const label = box.children[2].value || "Unnamed";
-        
-        if (type === "additive") {
-          totalDamage += value;
-          equation += ` + ${value} (${label})`;
-        } else {
-          totalDamage *= value;
-          equation += ` * ${value} (${label})`;
-        }
-      });
-      
-      document.getElementById("equationResult").textContent = equation;
-      document.getElementById("numberResult").textContent = totalDamage.toLocaleString();
-      document.getElementById("scientificResult").textContent = totalDamage.toExponential();
     }
   </script>
 
