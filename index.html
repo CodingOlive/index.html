@@ -18,46 +18,48 @@
 
     .calculator-container {
       background-color: #ffffff;
-      padding: 30px;
+      padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 500px;
+      width: 480px;
     }
 
     h1 {
       text-align: center;
       color: #3366cc;
-      margin-bottom: 25px;
+      font-size: 22px;
+      margin-bottom: 20px;
     }
 
     label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       color: #333;
       font-weight: 600;
+      font-size: 14px;
     }
 
     input[type="text"],
     select,
     input[type="range"] {
       width: calc(100% - 22px);
-      padding: 12px;
-      margin-bottom: 20px;
+      padding: 10px;
+      margin-bottom: 15px;
       border: 1px solid #ddd;
       border-radius: 6px;
       box-sizing: border-box;
-      font-size: 16px;
+      font-size: 14px;
     }
 
     button {
       color: white;
-      padding: 14px 25px;
+      padding: 12px 20px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
       width: 100%;
-      font-size: 18px;
-      margin-top: 15px;
+      font-size: 16px;
+      margin-top: 10px;
       transition: background-color 0.3s ease;
     }
 
@@ -81,9 +83,9 @@
     .remove-button {
       background-color: #dc3545;
       color: white;
-      font-size: 14px;
-      padding: 8px 12px;
-      margin-top: 10px;
+      font-size: 12px;
+      padding: 6px 10px;
+      margin-top: 8px;
     }
 
     .remove-button:hover {
@@ -91,24 +93,35 @@
     }
 
     .dynamic-box {
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
 
     .dynamic-box input {
-      width: calc(100% - 80px);
+      width: calc(100% - 70px);
     }
 
     .dynamic-box button {
       margin-left: 10px;
-      padding: 8px 12px;
+      padding: 6px 10px;
     }
 
     #chakraUsedValue {
       color: red;
+      font-size: 14px;
     }
 
     .slider-container {
-      margin-bottom: 20px;
+      margin-bottom: 15px;
+    }
+
+    .scientific-display {
+      font-size: 14px;
+      color: #ff6347;
+    }
+
+    .output-container p {
+      font-size: 14px;
+      margin: 5px 0;
     }
   </style>
 </head>
@@ -131,9 +144,12 @@
       <label for="chakraMax">Chakra Max</label>
       <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraMultiplier()">
 
-      <!-- Small Add Box for Chakra Max -->
+      <!-- Chakra Max Multiplier with Real-Time Scientific Notation -->
       <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
       <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraMultiplier()">
+
+      <!-- Display Chakra Max in Scientific Notation if above 1 million -->
+      <div id="scientificDisplay" class="scientific-display"></div>
 
       <label for="chakraUsedSlider">Chakra Usage (%)</label>
       <div class="slider-container">
@@ -160,7 +176,7 @@
 
     <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
 
-    <div id="output">
+    <div id="output" class="output-container">
       <h2>Results</h2>
       <p><strong>Equation:</strong> <span id="equationResult"></span></p>
       <p><strong>Number Format:</strong> <span id="numberResult"></span></p>
@@ -196,7 +212,6 @@
         return "Zero";
       }
 
-      // Extended units array for larger numbers (added centillion and beyond)
       const units = [
         "", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", 
         "Septillion", "Octillion", "Nonillion", "Decillion", "Undecillion", "Duodecillion", "Tredecillion",
@@ -256,8 +271,15 @@
       const chakraMultiplier = parseFloat(document.getElementById("chakraMaxMultiplier").value) || 1;
       const newChakraMax = chakraMax * chakraMultiplier;
 
-      // Update the Chakra Max display
+      // Update Chakra Max value
       document.getElementById("chakraMax").value = newChakraMax;
+
+      // Display Chakra Max in scientific notation if above 1 million
+      if (newChakraMax > 1e6) {
+        document.getElementById("scientificDisplay").textContent = `Chakra Max: ${newChakraMax.toExponential(2)}`;
+      } else {
+        document.getElementById("scientificDisplay").textContent = '';
+      }
 
       // Adjust the slider max value based on the new Chakra Max
       document.getElementById("chakraUsedSlider").max = newChakraMax;
