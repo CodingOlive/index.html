@@ -120,27 +120,26 @@
     </div>
 
     <script>
+        // Show/hide chakra input fields based on selected damage type
         document.getElementById('damageTypeSelector').addEventListener('change', function() {
+            const chakraInputs = document.getElementById('chakraInputs');
             if (this.value === 'chakra') {
-                document.getElementById('chakraInputs').style.display = 'block';
+                chakraInputs.style.display = 'block';
             } else {
-                document.getElementById('chakraInputs').style.display = 'none';
+                chakraInputs.style.display = 'none';
             }
         });
 
+        // Function to parse input and handle scientific notation
         function parseInput(input) {
-            if (input.includes("e")) {
-                let parts = input.split("e");
-                return BigInt(parseFloat(parts[0]) * Math.pow(10, parseInt(parts[1])));
-            } else {
-                const parsed = BigInt(input || 0);
-                if (isNaN(Number(parsed))) {
-                    return 0n;
-                }
-                return parsed;
+            const parsed = parseFloat(input);
+            if (isNaN(parsed)) {
+                return 0;
             }
+            return parsed;
         }
 
+        // Function to calculate damage
         function calculateDamage() {
             let damageType = document.getElementById("damageTypeSelector").value;
             let baseDamage = parseInput(document.getElementById("baseDamage").value);
@@ -150,27 +149,30 @@
             if (damageType === "chakra") {
                 const chakraMax = parseInput(document.getElementById("chakraMax").value);
                 const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
-                const chakraUsed = chakraMax - 1n;
+                const chakraUsed = chakraMax - 1; // Assume chakraUsed is max - 1
 
-                if (isNaN(Number(chakraMax)) || isNaN(Number(baseDamage)) || isNaN(Number(damagePerChakra))) {
-                    alert("Please enter valid numbers.");
+                // Validate input
+                if (isNaN(chakraMax) || isNaN(damagePerChakra)) {
+                    alert("Please enter valid numbers for Chakra.");
                     return;
                 }
 
                 const damageIncrease = chakraUsed * damagePerChakra;
                 totalDamage += damageIncrease;
-                equation += " + (" + chakraUsed.toString() + " * " + damagePerChakra.toString() + ")";
+                equation += ` + (${chakraUsed} * ${damagePerChakra})`;
             }
 
             const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
-            if (baseMultiplier !== 0n) {
+            if (baseMultiplier !== 0) {
                 totalDamage *= baseMultiplier;
-                equation += " * " + baseMultiplier;
+                equation += ` * ${baseMultiplier}`;
             }
 
-            const resultText = "Total Damage: " + totalDamage + "\nEquation: " + equation;
-            document.getElementById("resultDisplay").style.display = 'block';
-            document.getElementById("resultDisplay").textContent = resultText;
+            // Display results
+            const resultText = `Total Damage: ${totalDamage}\nEquation: ${equation}`;
+            const resultDisplay = document.getElementById("resultDisplay");
+            resultDisplay.style.display = 'block';
+            resultDisplay.textContent = resultText;
         }
     </script>
 </body>
