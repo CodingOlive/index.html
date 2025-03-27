@@ -265,20 +265,22 @@
 
       newBox.innerHTML = `
         <label for="dynamicBoxValue${dynamicBoxCount}">Additional Value ${dynamicBoxCount}</label>
-        <input type="text" id="dynamicBoxValue${dynamicBoxCount}" placeholder="Enter Value for Box ${dynamicBoxCount}">
-        <input type="text" id="dynamicBoxDescription${dynamicBoxCount}" placeholder="Description of value">
-        <button class="remove-button" onclick="removeDynamicBox(${dynamicBoxCount})">Remove</button>
+        <input type="text" id="dynamicBoxValue${dynamicBoxCount}" placeholder="Enter value">
+        <label for="dynamicBoxDescription${dynamicBoxCount}">Description</label>
+        <input type="text" id="dynamicBoxDescription${dynamicBoxCount}" placeholder="Enter description">
+        <button class="remove-button" type="button" onclick="removeDynamicBox(${dynamicBoxCount})">Remove</button>
       `;
+
       container.appendChild(newBox);
     }
 
-    // Remove dynamic input boxes
+    // Remove dynamically added input boxes
     function removeDynamicBox(boxId) {
       const box = document.getElementById(`dynamicBox${boxId}`);
       box.remove();
     }
 
-    // Calculate damage and display results
+    // Calculate Damage function
     function calculateDamage() {
       let damageType = document.getElementById("damageTypeSelector").value;
       let baseDamage = parseInput(document.getElementById("baseDamage").value);
