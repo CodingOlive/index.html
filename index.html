@@ -157,7 +157,7 @@ button:hover {
  */
 function parseInput(input) {
   if (input.includes("e")) {
-    const parts = input.split("e");
+    let parts = input.split("e");
     return BigInt(parseFloat(parts[0]) * Math.pow(10, parseInt(parts[1])));
   } else {
     return BigInt(input || 0);
@@ -248,12 +248,13 @@ function convertChunkToWords(chunk) {
  */
 function calculateDamage() {
   console.log("calculateDamage() called"); // Debugging
-  const damageType = document.getElementById("damageTypeSelector").value;
+  let damageType = document.getElementById("damageTypeSelector").value;
   let baseDamage = parseInput(document.getElementById("baseDamage").value);
   let totalDamage = baseDamage;
   let percentageIncrease = 0n;
   let equation = baseDamage.toString();
 
+  // Handle Chakra Damage
   if (damageType === "chakra") {
     const chakraMax = parseInput(document.getElementById("chakraMax").value);
     const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
@@ -413,7 +414,7 @@ function addAdditionalInput() {
 function toggleModifier(index) {
   console.log("toggleModifier() called with index:", index); // Debugging
   const modifier = document.getElementById("modifierType" + index);
-  modifier.textContent = modifier.textContent === "+" ? "*" : "+";
+  modifier.textContent = modifier.textContent === "+" ? "*" : "*";
   updateEquation();
 }
 
