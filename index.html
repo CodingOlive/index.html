@@ -57,30 +57,59 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      width: 100%;
       font-size: 14px;
+      margin-top: 8px;
       transition: background-color 0.3s ease;
-    }
-
-    .plus-button {
-      background-color: #3498db;
-      font-size: 18px;
-      padding: 5px 10px;
-      margin-bottom: 10px;
     }
 
     .calculate-button {
       background-color: #4CAF50;
-      width: 100%;
     }
 
     .calculate-button:hover {
       background-color: #45a049;
     }
 
-    .dynamic-box {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .emerald-button {
+      background-color: #2ecc71;
+      color: white;
+    }
+
+    .emerald-button:hover {
+      background-color: #27ae60;
+    }
+
+    .plus-button {
+      background-color: #008CBA;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: block;
+      margin: 0 auto 10px auto;
+    }
+
+    .slider-container {
+      margin-bottom: 12px;
+    }
+
+    .output-container p {
+      font-size: 13px;
+      margin: 5px 0;
+    }
+
+    .output-container h2 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .chakra-total {
+      font-size: 14px;
+      font-weight: bold;
+      color: #3366cc;
       margin-bottom: 10px;
     }
   </style>
@@ -89,8 +118,9 @@
 
   <div class="calculator-container">
     <h1>Enhanced Damage Calculator</h1>
-    <button class="plus-button" onclick="addDynamicBox()">+</button>
 
+    <button class="plus-button" onclick="addDynamicBox()">+</button>
+    
     <label for="baseDamage">Base Damage</label>
     <input type="text" id="baseDamage" placeholder="Enter Base Damage">
 
@@ -113,8 +143,10 @@
       </div>
 
       <label for="chakraUsedSlider">Chakra Usage (%)</label>
-      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
-      <span id="chakraUsedValue">100%</span>
+      <div class="slider-container">
+        <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
+        <span id="chakraUsedValue">100%</span>
+      </div>
 
       <label for="damagePerChakra">Damage per Chakra</label>
       <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
@@ -143,16 +175,10 @@
     function addDynamicBox() {
       const container = document.getElementById("dynamicBoxesContainer");
       const box = document.createElement("div");
-      box.classList.add("dynamic-box");
-      box.innerHTML = `
-        <input type="text" placeholder="Label">
-        <select>
-          <option value="multiplier">Multiplier</option>
-          <option value="additive">Additive</option>
-        </select>
-        <input type="text" placeholder="Enter Value">
-        <button onclick="this.parentElement.remove()">X</button>
-      `;
+      box.innerHTML = `<select><option value='multiplier'>Multiplier</option><option value='additive'>Additive</option></select>
+                       <input type="text" placeholder="Enter Value">
+                       <input type="text" placeholder="Label">
+                       <button onclick="this.parentElement.remove()">Remove</button>`;
       container.appendChild(box);
     }
   </script>
