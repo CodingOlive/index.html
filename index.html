@@ -70,29 +70,52 @@ button:hover {
 
 .additional-input-group {
   margin-bottom: 10px;
+  display: flex;
+  align-items: center;
 }
 
 .modifier-indicator {
   display: inline-block;
   margin-left: 5px;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 14px;
   color: #555;
+  width: 15px;
+  text-align: center;
 }
 
-.add-button {
-  background-color: #007bff; /* Blue */
+.modifier-toggle-button {
+  background-color: #ddd;
+  color: #333;
+  padding: 2px 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 5px;
+  width: 25px;
+  text-align: center;
+}
+
+.modifier-toggle-button:hover {
+  background-color: #ccc;
+}
+
+.remove-button {
+  background-color: #dc3545;
   color: white;
-  padding: 5px 10px;
+  padding: 2px 5px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   margin-left: 5px;
+  width: 25px;
+  text-align: center;
 }
 
-.add-button:hover {
-  background-color: #0056b3;
+.remove-button:hover {
+  background-color: #c82333;
 }
 </style>
 <script>
@@ -118,7 +141,7 @@ function calculateDamage() {
     totalDamage += damageIncrease;
   }
 
-  let baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
+  let baseMultiplier = parseInput(document.getElementById("baseMultiplier").value;
   if (baseMultiplier !== 0n) {
     totalDamage *= baseMultiplier;
   }
@@ -130,33 +153,35 @@ function calculateDamage() {
 
   // Handle additional inputs
   for (let i = 1; i <= additionalInputCount; i++) {
-    let additionalValue = parseInput(document.getElementById("additionalValue" + i).value);
-    if (additionalValue !== 0n) {
-      let modifierType = document.getElementById("modifierType" + i).textContent; // Get text content
+    let additionalValue = document.getElementById("additionalValue" + i).value;
+    if (additionalValue !== "") {
+      let parsedValue = parseInput(additionalValue);
+      let modifierType = document.getElementById("modifierType" + i).textContent;
       let isPercent = document.getElementById("isPercent" + i).checked;
 
       if (modifierType === "+") {
         if (isPercent) {
-          percentageIncrease += (totalDamage * additionalValue) / 100n;
+          percentageIncrease += (totalDamage * parsedValue) / 100n;
         } else {
-          totalDamage += additionalValue;
+          totalDamage += parsedValue;
         }
       } else { // *
         if (isPercent) {
-          percentageIncrease += (totalDamage * additionalValue) / 100n;
+          percentageIncrease += (totalDamage * parsedValue) / 100n;
         } else {
-          totalDamage *= additionalValue;
+          totalDamage *= parsedValue;
         }
-        totalDamage *= (isPercent ? 1n : additionalValue); // If percent, multiply by 1
+        totalDamage *= (isPercent ? 1n : parsedValue);
       }
     }
   }
 
-  totalDamage += percentageIncrease; // Add percentage increase last
+  totalDamage += percentageIncrease;
 
-  document.getElementById("damageResult").innerHTML = "<p>Total Damage: " + totalDamage + "</p>";
-  document.getElementById("scientificResult").innerHTML = "<p>Scientific Notation: " + toScientificNotation(totalDamage) + "</p>";
-  document.getElementById("wordResult").innerHTML = "<p>Word Format: " + numberToWords(totalDamage) + "</p>";
+  let finalDamage = totalDamage;
+  document.getElementById("damageResult").innerHTML = "<p>Final Damage: " + finalDamage + "</p>";
+  document.getElementById("scientificResult").innerHTML = "<p>Scientific Notation: " + toScientificNotation(finalDamage) + "</p>";
+  document.getElementById("wordResult").innerHTML = "<p>Word Format: " + numberToWords(finalDamage) + "</p>";
 }
 
 function parseInput(input) {
@@ -250,7 +275,8 @@ function addAdditionalInput() {
     <label for="additionalValue${additionalInputCount}">Additional Value:</label>
     <input type="text" id="additionalValue${additionalInputCount}">
     <span class="modifier-indicator" id="modifierType${additionalInputCount}">+</span>
-    <button class="add-button" onclick="toggleModifier('${additionalInputCount}')">+/-</button>
+    <button class="modifier-toggle-button" onclick="toggleModifier('${additionalInputCount}')">+/-</button>
+    <button class="remove-button" onclick="removeAdditionalInput('${additionalInputCount}')">-</button>
     <label for="isPercent${additionalInputCount}">Is Percent:</label>
     <input type="checkbox" id="isPercent${additionalInputCount}">
     <br>
@@ -262,6 +288,11 @@ function addAdditionalInput() {
 function toggleModifier(index) {
   let modifier = document.getElementById("modifierType" + index);
   modifier.textContent = modifier.textContent === "+" ? "*" : "+";
+}
+
+function removeAdditionalInput(index) {
+  let inputGroup = document.querySelector(`#additionalInputs div:nth-child(${index})`);
+  inputGroup.remove();
 }
 </script>
 </head>
@@ -295,6 +326,8 @@ function toggleModifier(index) {
     <input type="text" id="baseDamage"> <br>
 
     <div id="additionalInputs"></div>
+
+    <button onclick="calculateDamage()">Calculate</button>
 
     <div id="damageResult"></div>
     <div id="scientificResult"></div>
