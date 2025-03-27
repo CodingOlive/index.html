@@ -59,7 +59,7 @@ button:hover {
   background-color: #45a049;
 }
 
-#damageResult, #scientificResult, #wordResult {
+#damageResult, #scientificResult, #wordResult, #equationResult {
   margin-top: 20px;
   padding: 15px;
   background-color: #e9f7ef;
@@ -85,6 +85,7 @@ button:hover {
 }
 
 .modifier-toggle-button {
+  display: inline-block;
   background-color: #ddd;
   color: #333;
   padding: 2px 5px;
@@ -102,6 +103,7 @@ button:hover {
 }
 
 .remove-button {
+  display: inline-block;
   background-color: #dc3545;
   color: white;
   padding: 2px 5px;
@@ -126,6 +128,7 @@ function calculateDamage() {
   let baseDamage = parseInput(document.getElementById("baseDamage").value);
   let totalDamage = baseDamage;
   let percentageIncrease = 0n;
+  let equation = baseDamage.toString();
 
   if (damageType === "chakra") {
     let chakraMax = parseInput(document.getElementById("chakraMax").value);
@@ -139,16 +142,19 @@ function calculateDamage() {
 
     let damageIncrease = chakraUsed * damagePerChakra;
     totalDamage += damageIncrease;
+    equation += " + (" + chakraUsed.toString() + " * " + damagePerChakra.toString() + ")";
   }
 
-  let baseMultiplier = parseInput(document.getElementById("baseMultiplier").value;
+  let baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
   if (baseMultiplier !== 0n) {
     totalDamage *= baseMultiplier;
+    equation += " * " + baseMultiplier.toString();
   }
 
   let formMultiplier = parseInput(document.getElementById("formMultiplier").value);
   if (formMultiplier !== 0n) {
     totalDamage *= formMultiplier;
+    equation += " * " + formMultiplier.toString();
   }
 
   // Handle additional inputs
@@ -162,16 +168,19 @@ function calculateDamage() {
       if (modifierType === "+") {
         if (isPercent) {
           percentageIncrease += (totalDamage * parsedValue) / 100n;
+          equation += " + (" + totalDamage.toString() + " * " + parsedValue.toString() + " / 100)";
         } else {
           totalDamage += parsedValue;
+          equation += " + " + parsedValue.toString();
         }
       } else { // *
         if (isPercent) {
           percentageIncrease += (totalDamage * parsedValue) / 100n;
+          equation += " + (" + totalDamage.toString() + " * " + parsedValue.toString() + " / 100)";
         } else {
           totalDamage *= parsedValue;
+          equation += " * " + parsedValue.toString();
         }
-        totalDamage *= (isPercent ? 1n : parsedValue);
       }
     }
   }
@@ -179,6 +188,8 @@ function calculateDamage() {
   totalDamage += percentageIncrease;
 
   let finalDamage = totalDamage;
+
+  document.getElementById("equationResult").innerHTML = "<p>Equation: " + equation + "</p>";
   document.getElementById("damageResult").innerHTML = "<p>Final Damage: " + finalDamage + "</p>";
   document.getElementById("scientificResult").innerHTML = "<p>Scientific Notation: " + toScientificNotation(finalDamage) + "</p>";
   document.getElementById("wordResult").innerHTML = "<p>Word Format: " + numberToWords(finalDamage) + "</p>";
@@ -273,26 +284,195 @@ function addAdditionalInput() {
 
   newInputGroup.innerHTML = `
     <label for="additionalValue${additionalInputCount}">Additional Value:</label>
-    <input type="text" id="additionalValue${additionalInputCount}">
+    <input type="text" id="additionalValue${additionalInputCount}" oninput="updateEquation()">
     <span class="modifier-indicator" id="modifierType${additionalInputCount}">+</span>
     <button class="modifier-toggle-button" onclick="toggleModifier('${additionalInputCount}')">+/-</button>
     <button class="remove-button" onclick="removeAdditionalInput('${additionalInputCount}')">-</button>
     <label for="isPercent${additionalInputCount}">Is Percent:</label>
-    <input type="checkbox" id="isPercent${additionalInputCount}">
+    <input type="checkbox" id="isPercent${additionalInputCount}" onchange="updateEquation()">
     <br>
   `;
 
   additionalInputsDiv.appendChild(newInputGroup);
+  updateEquation(); // Update equation after adding input
 }
 
 function toggleModifier(index) {
   let modifier = document.getElementById("modifierType" + index);
   modifier.textContent = modifier.textContent === "+" ? "*" : "+";
+  updateEquation(); // Update equation after toggling
 }
 
 function removeAdditionalInput(index) {
   let inputGroup = document.querySelector(`#additionalInputs div:nth-child(${index})`);
   inputGroup.remove();
+  updateEquation(); // Update equation after removing input
+}
+
+function updateEquation() {
+  let damageType = document.getElementById("damageTypeSelector").value;
+  let baseDamage = parseInput(document.getElementById("baseDamage").value);
+  let equation = baseDamage.toString();
+
+  if (damageType === "chakra") {
+    let chakraMax = parseInput(document.getElementById("chakraMax").value);
+    let damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
+    let chakraUsed = chakraMax - 1n;
+
+    if (!isNaN(Number(chakraMax)) && !isNaN(Number(baseDamage)) && !isNaN(Number(damagePerChakra))) {
+      equation += " + (" + chakraUsed.toString() + " * " + damagePerChakra.toString() + ")";
+    }
+  }
+
+  let baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
+  if (baseMultiplier !== 0n) {
+    equation += " * " + baseMultiplier.toString();
+  }
+
+  let formMultiplier = parseInput(document.getElementById("formMultiplier").value);
+  if (formMultiplier !== 0n) {
+    equation += " * " + formMultiplier.toString();
+  }
+
+  // Handle additional inputs
+  for (let i = 1; i <= additionalInputCount; i++) {
+    let additionalValue = document.getElementById("additionalValue" + i).value;
+    if (additionalValue !== "") {
+      let parsedValue = parseInput(additionalValue);
+      let modifierType = document.getElementById("modifierType" + i).textContent;
+      let isPercent = document.getElementById("isPercent" + i).checked;
+
+      if (modifierType === "+") {
+        if (isPercent) {
+          equation += " + (" + baseDamage.toString() + " * " + parsedValue.toString() + " / 100)";
+        } else {
+          equation += " + " + parsedValue.toString();
+        }
+      } else { // *
+        if (isPercent) {
+          equation += " + (" + baseDamage.toString() + " * " + parsedValue.toString() + " / 100)";
+        } else {
+          equation += " * " + parsedValue.toString();
+        }
+      }
+    }
+  }
+
+  document.getElementById("equationResult").innerHTML = "<p>Equation: " + equation + "</p>";
+}
+
+function parseInput(input) {
+  if (input.includes("e")) {
+    let parts = input.split("e");
+    return BigInt(parseFloat(parts[0]) * Math.pow(10, parseInt(parts[1])));
+  } else {
+    return BigInt(input || 0);
+  }
+}
+
+function toScientificNotation(number) {
+  let numStr = number.toString();
+  if (numStr.length <= 15) {
+    return number.toString();
+  }
+  let firstDigit = numStr[0];
+  let decimalPart = numStr.substring(1, 15);
+  let exponent = numStr.length - 1;
+  return firstDigit + "." + decimalPart + "e+" + exponent;
+}
+
+function numberToWords(number) {
+  let numStr = number.toString();
+  if (numStr.length <= 15) {
+    return number.toString();
+  }
+
+  let num = BigInt(number);
+  if (num == 0n) {
+    return "Zero";
+  }
+
+  const units = ["", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", "Septillion", "Octillion", "Nonillion", "Decillion", "Undecillion", "Duodecillion", "Tredecillion", "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septendecillion", "Octodecillion", "Novemdecillion", "Vigintillion"];
+
+  let parts = [];
+  let i = 0;
+  while (num > 0n) {
+    let chunk = num % 1000n;
+    if (chunk > 0n) {
+      parts.unshift(`${convertChunkToWords(chunk)} ${units[i]}`);
+    }
+    num = num / 1000n;
+    i++;
+  }
+  return parts.join(" ").trim();
+}
+
+function convertChunkToWords(chunk) {
+  const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+  const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+  const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+
+  let words = [];
+  let hundred = Math.floor(chunk / 100n);
+  let remainder = chunk % 100n;
+  let ten = Math.floor(remainder / 10n);
+  let one = remainder % 10n;
+
+  if (hundred > 0n) {
+    words.push(ones[hundred], "Hundred");
+  }
+  if (ten === 1n) {
+    words.push(teens[one]);
+  } else if (ten > 1n) {
+    words.push(tens[ten], ones[one]);
+  } else if (one > 0n) {
+    words.push(ones[one]);
+  }
+
+  return words.filter(word => word !== "").join(" ");
+}
+
+function toggleChakraInputs() {
+  let damageType = document.getElementById("damageTypeSelector").value;
+  let chakraInputs = document.getElementById("chakraInputs");
+  let normalDamageInputs = document.getElementById("normalDamageInputs");
+
+  chakraInputs.style.display = damageType === "chakra" ? "block" : "none";
+  normalDamageInputs.style.display = damageType === "normal" ? "block" : "none";
+}
+
+function addAdditionalInput() {
+  additionalInputCount++;
+
+  let additionalInputsDiv = document.getElementById("additionalInputs");
+  let newInputGroup = document.createElement("div");
+  newInputGroup.className = "additional-input-group";
+
+  newInputGroup.innerHTML = `
+    <label for="additionalValue${additionalInputCount}">Additional Value:</label>
+    <input type="text" id="additionalValue${additionalInputCount}" oninput="updateEquation()">
+    <span class="modifier-indicator" id="modifierType${additionalInputCount}">+</span>
+    <button class="modifier-toggle-button" onclick="toggleModifier('${additionalInputCount}')">+/-</button>
+    <button class="remove-button" onclick="removeAdditionalInput('${additionalInputCount}')">-</button>
+    <label for="isPercent${additionalInputCount}">Is Percent:</label>
+    <input type="checkbox" id="isPercent${additionalInputCount}" onchange="updateEquation()">
+    <br>
+  `;
+
+  additionalInputsDiv.appendChild(newInputGroup);
+  updateEquation();
+}
+
+function toggleModifier(index) {
+  let modifier = document.getElementById("modifierType" + index);
+  modifier.textContent = modifier.textContent === "+" ? "*" : "+";
+  updateEquation();
+}
+
+function removeAdditionalInput(index) {
+  let inputGroup = document.querySelector(`#additionalInputs div:nth-child(${index})`);
+  inputGroup.remove();
+  updateEquation();
 }
 </script>
 </head>
@@ -329,6 +509,7 @@ function removeAdditionalInput(index) {
 
     <button onclick="calculateDamage()">Calculate</button>
 
+    <div id="equationResult"></div>
     <div id="damageResult"></div>
     <div id="scientificResult"></div>
     <div id="wordResult"></div>
