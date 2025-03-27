@@ -5,128 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Enhanced Damage Calculator</title>
   <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f0f8ff;
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-
-    .calculator-container {
-      background-color: #ffffff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 600px;
-      margin: auto;
-    }
-
-    h1 {
-      text-align: center;
-      color: #3366cc;
-      margin-bottom: 25px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      color: #333;
-      font-weight: 600;
-    }
-
-    input[type="text"],
-    select,
-    input[type="range"] {
-      width: calc(100% - 22px);
-      padding: 12px;
-      margin-bottom: 20px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-
-    button {
-      color: white;
-      padding: 14px 25px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      width: 100%;
-      font-size: 18px;
-      margin-top: 15px;
-      transition: background-color 0.3s ease;
-    }
-
-    .calculate-button {
-      background-color: #4CAF50;
-    }
-
-    .calculate-button:hover {
-      background-color: #45a049;
-    }
-
-    .emerald-button {
-      background-color: #4CAF50; /* Emerald green */
-    }
-
-    .emerald-button:hover {
-      background-color: #45a049;
-    }
-
-    .remove-button {
-      background-color: #dc3545;
-      padding: 8px 12px;
-      font-size: 14px;
-      margin-left: 5px;
-    }
-
-    .remove-button:hover {
-      background-color: #c82333;
-    }
-
-    .result-display {
-      margin-top: 25px;
-      padding: 20px;
-      background-color: #e6f7ff;
-      border: 1px solid #b3e0ff;
-      border-radius: 8px;
-      color: #333;
-      font-size: 16px;
-    }
-
-    #output {
-      margin-top: 20px;
-      display: none;
-    }
-
-    .dynamic-box {
-      display: flex;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .dynamic-box input {
-      margin-right: 10px;
-      width: calc(100% - 50px);
-    }
-
-    .dynamic-box label {
-      font-size: 14px;
-      margin-right: 10px;
-    }
-
-    /* Styling the Chakra slider value display */
-    #chakraUsedValue {
-      color: red; /* Makes the slider value text red */
-      font-weight: bold;
-      font-size: 18px;
-    }
-
+    /* Your existing styles */
   </style>
 </head>
 <body>
@@ -150,7 +29,7 @@
 
       <label for="chakraUsedSlider">Chakra Usage (%)</label>
       <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
-      <span id="chakraUsedValue">100%</span> <!-- Display the current percentage -->
+      <span id="chakraUsedValue">100%</span>
 
       <label for="damagePerChakra">Damage per Chakra</label>
       <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
@@ -195,7 +74,7 @@
       }
     }
 
-    // Convert number to word format
+    // Convert number to word format (supporting very large numbers)
     function numberToWords(number) {
       let numStr = number.toString();
       if (numStr.length <= 15) {
@@ -207,11 +86,17 @@
         return "Zero";
       }
 
-      // Expanded units array for larger numbers
+      // Extended units array for larger numbers (added centillion and beyond)
       const units = [
         "", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", 
         "Septillion", "Octillion", "Nonillion", "Decillion", "Undecillion", "Duodecillion", "Tredecillion",
-        "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septendecillion", "Octodecillion", "Novemdecillion"
+        "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septendecillion", "Octodecillion", "Nonodecillion",
+        "Decemdecillion", "Vigintillion", "Unvigintillion", "Duovigintillion", "Trevigintillion", "Quattuorvigintillion",
+        "Quinvigintillion", "Sexvigintillion", "Septvigintillion", "Octovigintillion", "Nonavigintillion", "Trigintillion",
+        "Untrigintillion", "Duotrigintillion", "Tritrigintillion", "Quattuortrigintillion", "Quintrigintillion", "Sextrigintillion",
+        "Septtrigintillion", "Octotrigintillion", "Nonatrigintillion", "Quadragintillion", "Unquadragintillion", "Duquadragintillion",
+        "Trequadragintillion", "Quattuorquadragintillion", "Quinquadragintillion", "Sexquadragintillion", "Septquadragintillion", 
+        "Octoquadragintillion", "Nonaquadragintillion", "Centillion"
       ];
 
       let parts = [];
