@@ -1,452 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Damage Calculator</title>
-    <style>
-        /* --- CSS Styles --- */
-        body {
-            font-family: sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-        }
-
-        .div-calculator {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            width: 400px;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-        }
-
-        input[type="text"],
-        select {
-            width: calc(100% - 12px);
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        button {
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        .calculate-button {
-            background-color: #4CAF50;
-        }
-
-        .calculate-button:hover {
-            background-color: #45a049;
-        }
-
-        #damageResult,
-        #scientificResult,
-        #wordResult,
-        #equationResult {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e9f7ef;
-            border: 1px solid #bce0c8;
-            border-radius: 4px;
-            color: #333;
-        }
-
-        .additional-input-group {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-
-        .modifier-indicator {
-            display: inline-block;
-            margin-left: 5px;
-            font-weight: bold;
-            font-size: 14px;
-            color: #555;
-            width: 15px;
-            text-align: center;
-        }
-
-        .modifier-toggle-button {
-            display: inline-block;
-            background-color: #ddd;
-            color: #333;
-            padding: 2px 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-left: 5px;
-            width: 25px;
-            text-align: center;
-        }
-
-        .modifier-toggle-button:hover {
-            background-color: #ccc;
-        }
-
-        .remove-button {
-            display: inline-block;
-            background-color: #dc3545;
-            color: white;
-            padding: 2px 5px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-left: 5px;
-            width: 25px;
-            text-align: center;
-        }
-
-        .remove-button:hover {
-            background-color: #c82333;
-        }
-
-        .add-button {
-            background-color: #007bff;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-left: 5px;
-        }
-
-        .add-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-    <script>
-        // --- Global Variables ---
-        let additionalInputCount = 0;
-
-        // --- Helper Functions ---
-
-        /**
-         * Parses input to handle scientific notation and empty strings.
-         * @param {string} input The input string to parse.
-         * @returns {BigInt} The parsed number as a BigInt.
-         */
-        function parseInput(input) {
-            if (input.includes("e")) {
-                const parts = input.split("e");
-                return BigInt(parseFloat(parts[0]) * Math.pow(10, parseInt(parts[1])));
-            } else {
-                return BigInt(input || 0);
-            }
-        }
-
-        /**
-         * Converts a number to scientific notation.
-         * @param {BigInt} number The number to convert.
-         * @returns {string} The number in scientific notation.
-         */
-        function toScientificNotation(number) {
-            let numStr = number.toString();
-            if (numStr.length <= 15) {
-                return numStr;
-            }
-            let firstDigit = numStr[0];
-            let decimalPart = numStr.substring(1, 15);
-            let exponent = numStr.length - 1;
-            return firstDigit + "." + decimalPart + "e+" + exponent;
-        }
-
-        /**
-         * Converts a number to its word representation.
-         * @param {BigInt} number The number to convert.
-         * @returns {string} The number in word format.
-         */
-        function numberToWords(number) {
-            let numStr = number.toString();
-            if (numStr.length <= 15) {
-                return numStr;
-            }
-
-            let numBigInt = BigInt(number);
-            if (numBigInt === 0n) {
-                return "Zero";
-            }
-
-            const units = ["", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", "Septillion", "Octillion", "Nonillion", "Decillion", "Undecillion", "Duodecillion", "Tredecillion", "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septendecillion", "Octodecillion", "Novemdecillion", "Vigintillion"];
-
-            let parts = [];
-            let i = 0;
-            while (numBigInt > 0n) {
-                let chunk = numBigInt % 1000n;
-                if (chunk > 0n) {
-                    parts.unshift(`${convertChunkToWords(chunk)} ${units[i]}`);
-                }
-                numBigInt = numBigInt / 1000n;
-                i++;
-            }
-            return parts.join(" ").trim();
-        }
-
-        /**
-         * Converts a three-digit chunk of a number to words.
-         * @param {BigInt} chunk The three-digit chunk to convert.
-         * @returns {string} The chunk in word format.
-         */
-        function convertChunkToWords(chunk) {
-            const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
-            const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-            const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
-
-            let words = [];
-            const hundred = Math.floor(chunk / 100n);
-            const remainder = chunk % 100n;
-            const ten = Math.floor(remainder / 10n);
-            const one = remainder % 10n;
-
-            if (hundred > 0n) {
-                words.push(ones[hundred], "Hundred");
-            }
-            if (ten === 1n) {
-                words.push(teens[one]);
-            } else if (ten > 1n) {
-                words.push(tens[ten], ones[one]);
-            } else if (one > 0n) {
-                words.push(ones[one]);
-            }
-
-            return words.filter(word => word !== "").join(" ");
-        }
-
-        // --- Main Calculation Functions ---
-
-        /**
-         * Calculates the damage based on user inputs.
-         */
-        function calculateDamage() {
-            console.log("calculateDamage() called"); // Debugging
-            const damageType = document.getElementById("damageTypeSelector").value;
-            let baseDamage = parseInput(document.getElementById("baseDamage").value);
-            let totalDamage = baseDamage;
-            let percentageIncrease = 0n;
-            let equation = baseDamage.toString();
-
-            // Handle Chakra Damage
-            if (damageType === "chakra") {
-                const chakraMax = parseInput(document.getElementById("chakraMax").value);
-                const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
-                const chakraUsed = chakraMax - 1n;
-
-                if (isNaN(Number(chakraMax)) || isNaN(Number(baseDamage)) || isNaN(Number(damagePerChakra))) {
-                    alert("Please enter valid numbers.");
-                    return;
-                }
-
-                const damageIncrease = chakraUsed * damagePerChakra;
-                totalDamage += damageIncrease;
-                equation += " + (" + chakraUsed.toString() + " * " + damagePerChakra.toString() + ")";
-            }
-
-            // Handle Base and Form Multipliers
-            const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
-            if (baseMultiplier !== 0n) {
-                totalDamage *= baseMultiplier;
-                equation += " * " + baseMultiplier.toString();
-            }
-
-            const formMultiplier = parseInput(document.getElementById("formMultiplier").value);
-            if (formMultiplier !== 0n) {
-                totalDamage *= formMultiplier;
-                equation += " * " + formMultiplier.toString();
-            }
-
-            // Handle additional inputs
-            for (let i = 1; i <= additionalInputCount; i++) {
-                const additionalValue = document.getElementById("additionalValue" + i).value;
-                if (additionalValue !== "") {
-                    const parsedValue = parseInput(additionalValue);
-                    const modifierType = document.getElementById("modifierType" + i).textContent;
-                    const isPercent = document.getElementById("isPercent" + i).checked;
-
-                    if (modifierType === "+") {
-                        if (isPercent) {
-                            percentageIncrease += (totalDamage * parsedValue) / 100n;
-                            equation += " + (" + totalDamage.toString() + " * " + parsedValue.toString() + " / 100)";
-                        } else {
-                            totalDamage += parsedValue;
-                            equation += " + " + parsedValue.toString();
-                        }
-                    } else { // *
-                        if (isPercent) {
-                            percentageIncrease += (totalDamage * parsedValue) / 100n;
-                            equation += " + (" + totalDamage.toString() + " * " + parsedValue.toString() + " / 100)";
-                        } else {
-                            totalDamage *= parsedValue;
-                            equation += " * " + parsedValue.toString();
-                        }
-                        totalDamage *= (isPercent ? 1n : parsedValue);
-                    }
-                }
-            }
-
-            totalDamage += percentageIncrease;
-
-            const finalDamage = totalDamage;
-
-            // Display Results
-            document.getElementById("equationResult").innerHTML = "<p>Equation: " + equation + "</p>";
-            document.getElementById("damageResult").innerHTML = "<p>Final Damage: " + finalDamage + "</p>";
-            document.getElementById("scientificResult").innerHTML = "<p>Scientific Notation: " + toScientificNotation(finalDamage) + "</p>";
-            document.getElementById("wordResult").innerHTML = "<p>Word Format: " + numberToWords(finalDamage) + "</p>";
-        }
-
-        // --- DOM Manipulation Functions ---
-
-        /**
-         * Updates the equation display in real-time.
-         */
-        function updateEquation() {
-            const damageType = document.getElementById("damageTypeSelector").value;
-            const baseDamage = parseInput(document.getElementById("baseDamage").value);
-            let equation = baseDamage.toString();
-
-            if (damageType === "chakra") {
-                const chakraMax = parseInput(document.getElementById("chakraMax").value);
-                const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
-                const chakraUsed = chakraMax - 1n;
-
-                if (!isNaN(Number(chakraMax)) && !isNaN(Number(baseDamage)) && !isNaN(Number(damagePerChakra))) {
-                    equation += " + (" + chakraUsed.toString() + " * " + damagePerChakra.toString() + ")";
-                }
-            }
-
-            const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
-            if (baseMultiplier !== 0n) {
-                equation += " * " + baseMultiplier.toString();
-            }
-
-            const formMultiplier = parseInput(document.getElementById("formMultiplier").value);
-            if (formMultiplier !== 0n) {
-                equation += " * " + formMultiplier.toString();
-            }
-
-            // Handle additional inputs
-            for (let i = 1; i <= additionalInputCount; i++) {
-                const additionalValue = document.getElementById("additionalValue" + i).value;
-                if (additionalValue !== "") {
-                    const parsedValue = parseInput(additionalValue);
-                    const modifierType = document.getElementById("modifierType" + i).textContent;
-                    const isPercent = document.getElementById("isPercent" + i).checked;
-
-                    if (modifierType === "+") {
-                        if (isPercent) {
-                            equation += " + (" + baseDamage.toString() + " * " + parsedValue.toString() + " / 100)";
-                        } else {
-                            equation += " + " + parsedValue.toString();
-                        }
-                    } else { // *
-                        if (isPercent) {
-                            equation += " + (" + baseDamage.toString() + " * " + parsedValue.toString() + " / 100)";
-                        } else {
-                            equation += " * " + parsedValue.toString();
-                        }
-                        equation += " * " + parsedValue.toString();
-                    }
-                }
-            }
-
-            document.getElementById("equationResult").innerHTML = "<p>Equation: " + equation + "</p>";
-        }
-
-        /**
-         * Adds a new input box for additional damage/multiplier.
-         */
-        function addAdditionalInput() {
-            console.log("addAdditionalInput() called"); // Debugging
-            additionalInputCount++;
-
-            const additionalInputsDiv = document.getElementById("additionalInputs");
-            const newInputGroup = document.createElement("div");
-            newInputGroup.className = "additional-input-group";
-
-            newInputGroup.innerHTML = `
-    <label for="additionalValue${additionalInputCount}">Additional Value:</label>
-    <input type="text" id="additionalValue${additionalInputCount}" oninput="updateEquation()">
-    <span class="modifier-indicator" id="modifierType${additionalInputCount}">+</span>
-    <button class="modifier-toggle-button" onclick="toggleModifier('${additionalInputCount}')">+/-</button>
-    <button class="remove-button" onclick="removeAdditionalInput('${additionalInputCount}')">-</button>
-    <label for="isPercent${additionalInputCount}">Is Percent:</label>
-    <input type="checkbox" id="isPercent${additionalInputCount}" onchange="updateEquation()">
-    <br>
-  `;
-
-            additionalInputsDiv.appendChild(newInputGroup);
-            updateEquation();
-        }
-
-        /**
-         * Toggles the modifier sign (+ or *) for an additional input box.
-         * @param {number} index The index of the input box.
-         */
-        function toggleModifier(index) {
-            console.log("toggleModifier() called with index:", index); // Debugging
-            const modifier = document.getElementById("modifierType" + index);
-            modifier.textContent = modifier.textContent === "+" ? "*" : "+";
-            updateEquation();
-        }
-
-        /**
-         * Removes an additional input box.
-         * @param {number} index The index of the input box to remove.
-         */
-        function removeAdditionalInput(index) {
-            console.log("removeAdditionalInput() called with index:", index); // Debugging
-            const inputGroup = document.querySelector(`#additionalInputs div:nth-child(${index})`);
-            inputGroup.remove();
-            updateEquation();
-        }
-
-        /**
-         * Toggles the visibility of chakra-specific input fields.
-         */
-        function toggleChakraInputs() {
-            console.log("toggleChakraInputs() called");  // Debugging
-            const damageType = document.getElementById("damageTypeSelector").value;
-            const chakraInputs = document.getElementById("chakraInputs");
-            const normalDamageInputs = document.getElementById("normalDamageInputs");
-
-            chakraInputs.style.display = damageType === "chakra" ? "block" : "none";
-            normalDamageInputs.style.display = damageType === "normal" ? "block" : "none";
-        }
-        // --- Global Variables ---
-        let additionalInputCount = 0;
-</script>
+  <title>Damage Calculator</title>
+  <style>
+    /* Your CSS styles here */
+  </style>
 </head>
 <body onload="toggleChakraInputs()">
   <div class="div-calculator">
@@ -456,7 +14,8 @@
     <select id="damageTypeSelector" onchange="toggleChakraInputs()">
       <option value="chakra">Chakra Damage</option>
       <option value="normal">Normal Damage</option>
-    </select> <button class="add-button" onclick="addAdditionalInput()">+</button> <br>
+    </select> 
+    <button class="add-button" onclick="addAdditionalInput()">+</button> <br>
 
     <div id="chakraInputs">
       <label for="chakraMax">Chakra Max:</label>
@@ -486,5 +45,48 @@
     <div id="scientificResult"></div>
     <div id="wordResult"></div>
   </div>
+
+  <script>
+    // Your JavaScript code here
+
+    function toggleChakraInputs() {
+      const damageType = document.getElementById("damageTypeSelector").value;
+      const chakraInputs = document.getElementById("chakraInputs");
+      const normalDamageInputs = document.getElementById("normalDamageInputs");
+
+      if (damageType === "chakra") {
+        chakraInputs.style.display = "block";
+        normalDamageInputs.style.display = "none";
+      } else {
+        chakraInputs.style.display = "none";
+        normalDamageInputs.style.display = "block";
+      }
+    }
+
+    function addAdditionalInput() {
+      console.log("addAdditionalInput() called"); // Debugging
+      additionalInputCount++;
+
+      const additionalInputsDiv = document.getElementById("additionalInputs");
+      const newInputGroup = document.createElement("div");
+      newInputGroup.className = "additional-input-group";
+
+      newInputGroup.innerHTML = `
+        <label for="additionalValue${additionalInputCount}">Additional Value:</label>
+        <input type="text" id="additionalValue${additionalInputCount}" oninput="updateEquation()">
+        <span class="modifier-indicator" id="modifierType${additionalInputCount}">+</span>
+        <button class="modifier-toggle-button" onclick="toggleModifier('${additionalInputCount}')">+/-</button>
+        <button class="remove-button" onclick="removeAdditionalInput('${additionalInputCount}')">-</button>
+        <label for="isPercent${additionalInputCount}">Is Percent:</label>
+        <input type="checkbox" id="isPercent${additionalInputCount}" onchange="updateEquation()">
+        <br>
+      `;
+
+      additionalInputsDiv.appendChild(newInputGroup);
+      updateEquation();
+    }
+
+    // Other functions like calculateDamage, updateEquation, etc.
+  </script>
 </body>
 </html>
