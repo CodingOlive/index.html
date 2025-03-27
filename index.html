@@ -67,12 +67,19 @@ button:hover {
   border-radius: 4px;
   color: #333;
 }
+
+.additional-input-group {
+  margin-bottom: 10px;
+}
 </style>
 <script>
+let additionalInputCount = 0;
+
 function calculateDamage() {
   let damageType = document.getElementById("damageTypeSelector").value;
   let baseDamage = parseInput(document.getElementById("baseDamage").value);
   let totalDamage = baseDamage;
+  let percentageIncrease = 0n;
 
   if (damageType === "chakra") {
     let chakraMax = parseInput(document.getElementById("chakraMax").value);
@@ -93,14 +100,36 @@ function calculateDamage() {
     totalDamage *= baseMultiplier;
   }
 
-  let additionalDamage = parseInput(document.getElementById("additionalDamage").value);
-  if (additionalDamage !== 0n) {
-    if (document.getElementById("damageModifier").value === "add") {
-      totalDamage += additionalDamage;
-    } else {
-      totalDamage *= additionalDamage;
+  let formMultiplier = parseInput(document.getElementById("formMultiplier").value);
+  if (formMultiplier !== 0n) {
+    totalDamage *= formMultiplier;
+  }
+
+  // Handle additional inputs
+  for (let i = 1; i <= additionalInputCount; i++) {
+    let additionalValue = parseInput(document.getElementById("additionalValue" + i).value);
+    if (additionalValue !== 0n) {
+      let modifierType = document.getElementById("modifierType" + i).value;
+      let isPercent = document.getElementById("isPercent" + i).checked;
+
+      if (modifierType === "add") {
+        if (isPercent) {
+          percentageIncrease += (totalDamage * additionalValue) / 100n;
+        } else {
+          totalDamage += additionalValue;
+        }
+      } else { // multiply
+        if (isPercent) {
+          percentageIncrease += (totalDamage * additionalValue) / 100n;
+        } else {
+          totalDamage *= additionalValue;
+        }
+        totalDamage *= (isPercent ? 1n : additionalValue); // If percent, multiply by 1
+      }
     }
   }
+
+  totalDamage += percentageIncrease; // Add percentage increase last
 
   document.getElementById("damageResult").innerHTML = "<p>Total Damage: " + totalDamage + "</p>";
   document.getElementById("scientificResult").innerHTML = "<p>Scientific Notation: " + toScientificNotation(totalDamage) + "</p>";
@@ -112,76 +141,101 @@ function parseInput(input) {
     let parts = input.split("e");
     return BigInt(parseFloat(parts[0]) * Math.pow(10, parseInt(parts[1])));
   } else {
-    return BigInt(input || 0); // Return 0 if input is empty
+    return BigInt(input || 0);
   }
 }
 
 function toScientificNotation(number) {
-    let numStr = number.toString();
-    if(numStr.length <= 15){
-        return number.toString();
-    }
-    let firstDigit = numStr[0];
-    let decimalPart = numStr.substring(1, 15);
-    let exponent = numStr.length - 1;
-    return firstDigit + "." + decimalPart + "e+" + exponent;
+  let numStr = number.toString();
+  if (numStr.length <= 15) {
+    return number.toString();
+  }
+  let firstDigit = numStr[0];
+  let decimalPart = numStr.substring(1, 15);
+  let exponent = numStr.length - 1;
+  return firstDigit + "." + decimalPart + "e+" + exponent;
 }
 
 function numberToWords(number) {
-    let numStr = number.toString();
-    if(numStr.length <= 15){
-        return number.toString();
-    }
+  let numStr = number.toString();
+  if (numStr.length <= 15) {
+    return number.toString();
+  }
 
-    let num = BigInt(number);
-    if(num == 0n){
-        return "Zero";
-    }
+  let num = BigInt(number);
+  if (num == 0n) {
+    return "Zero";
+  }
 
-    const units = ["", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", "Septillion", "Octillion", "Nonillion", "Decillion", "Undecillion", "Duodecillion", "Tredecillion", "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septendecillion", "Octodecillion", "Novemdecillion", "Vigintillion"];
+  const units = ["", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", "Septillion", "Octillion", "Nonillion", "Decillion", "Undecillion", "Duodecillion", "Tredecillion", "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septendecillion", "Octodecillion", "Novemdecillion", "Vigintillion"];
 
-    let parts = [];
-    let i = 0;
-    while (num > 0n) {
-        let chunk = num % 1000n;
-        if (chunk > 0n) {
-            parts.unshift(`${convertChunkToWords(chunk)} ${units[i]}`);
-        }
-        num = num / 1000n;
-        i++;
+  let parts = [];
+  let i = 0;
+  while (num > 0n) {
+    let chunk = num % 1000n;
+    if (chunk > 0n) {
+      parts.unshift(`${convertChunkToWords(chunk)} ${units[i]}`);
     }
-    return parts.join(" ").trim();
+    num = num / 1000n;
+    i++;
+  }
+  return parts.join(" ").trim();
 }
 
 function convertChunkToWords(chunk) {
-    const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
-    const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-    const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+  const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+  const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+  const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
 
-    let words = [];
-    let hundred = Math.floor(chunk / 100n);
-    let remainder = chunk % 100n;
-    let ten = Math.floor(remainder / 10n);
-    let one = remainder % 10n;
+  let words = [];
+  let hundred = Math.floor(chunk / 100n);
+  let remainder = chunk % 100n;
+  let ten = Math.floor(remainder / 10n);
+  let one = remainder % 10n;
 
-    if (hundred > 0n) {
-        words.push(ones[hundred], "Hundred");
-    }
-    if (ten === 1n) {
-        words.push(teens[one]);
-    } else if (ten > 1n) {
-        words.push(tens[ten], ones[one]);
-    } else if (one > 0n) {
-        words.push(ones[one]);
-    }
+  if (hundred > 0n) {
+    words.push(ones[hundred], "Hundred");
+  }
+  if (ten === 1n) {
+    words.push(teens[one]);
+  } else if (ten > 1n) {
+    words.push(tens[ten], ones[one]);
+  } else if (one > 0n) {
+    words.push(ones[one]);
+  }
 
-    return words.filter(word => word !== "").join(" ");
+  return words.filter(word => word !== "").join(" ");
 }
 
 function toggleChakraInputs() {
   let damageType = document.getElementById("damageTypeSelector").value;
   let chakraInputs = document.getElementById("chakraInputs");
+  let normalDamageInputs = document.getElementById("normalDamageInputs");
+
   chakraInputs.style.display = damageType === "chakra" ? "block" : "none";
+  normalDamageInputs.style.display = damageType === "normal" ? "block" : "none";
+}
+
+function addAdditionalInput() {
+  additionalInputCount++;
+
+  let additionalInputsDiv = document.getElementById("additionalInputs");
+  let newInputGroup = document.createElement("div");
+  newInputGroup.className = "additional-input-group";
+
+  newInputGroup.innerHTML = `
+    <label for="additionalValue${additionalInputCount}">Additional Value/Multiplier ${additionalInputCount}:</label>
+    <input type="text" id="additionalValue${additionalInputCount}">
+    <select id="modifierType${additionalInputCount}">
+      <option value="add">Add</option>
+      <option value="multiply">Multiply</option>
+    </select>
+    <label for="isPercent${additionalInputCount}">Is Percent:</label>
+    <input type="checkbox" id="isPercent${additionalInputCount}">
+    <br>
+  `;
+
+  additionalInputsDiv.appendChild(newInputGroup);
 }
 </script>
 </head>
@@ -192,7 +246,7 @@ function toggleChakraInputs() {
     <label for="damageTypeSelector">Damage Type:</label>
     <select id="damageTypeSelector" onchange="toggleChakraInputs()">
       <option value="chakra">Chakra Damage</option>
-      <option value="ki">Ki Damage</option>
+      <option value="normal">Normal Damage</option>
     </select> <br>
 
     <div id="chakraInputs">
@@ -203,14 +257,25 @@ function toggleChakraInputs() {
       <input type="text" id="damagePerChakra"> <br>
     </div>
 
+    <div id="normalDamageInputs">
+      <label for="baseMultiplier">Base Multiplier:</label>
+      <input type="text" id="baseMultiplier"> <br>
+
+      <label for="formMultiplier">Form Multiplier:</label>
+      <input type="text" id="formMultiplier"> <br>
+    </div>
+
     <label for="baseDamage">Base Damage:</label>
     <input type="text" id="baseDamage"> <br>
 
-    <label for="baseMultiplier">Base Multiplier:</label>
-    <input type="text" id="baseMultiplier"> <br>
+    <button onclick="calculateDamage()">Calculate Damage</button>
 
-    <label for="additionalDamage">Additional Damage/Multiplier:</label>
-    <input type="text" id="additionalDamage"> <br>
+    <div id="additionalInputs"></div>
+    <button onclick="addAdditionalInput()">Add More Values</button>
 
-    <label for="damageModifier">Modifier Type:</label>
-    <select id="damageModifier">
+    <div id="damageResult"></div>
+    <div id="scientificResult"></div>
+    <div id="wordResult"></div>
+  </div>
+</body>
+</html>
