@@ -1,216 +1,230 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Damage Calculator</title>
+<title>Enhanced Damage Calculator</title>
 <style>
-/* --- CSS Styles --- */
-body {
-  font-family: sans-serif;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-}
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f8ff;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+  }
 
-.div-calculator {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 400px;
-}
+  .calculator-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 500px;
+  }
 
-h1 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 20px;
-}
+  h1 {
+    text-align: center;
+    color: #3366cc;
+    margin-bottom: 25px;
+  }
 
-label {
-  display: block;
-  margin-bottom: 5px;
-  color: #555;
-}
+  label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 600;
+  }
 
-input[type="text"],
-select {
-  width: calc(100% - 12px);
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
+  input[type="text"],
+  select {
+    width: calc(100% - 22px);
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
 
-button {
-  color: white;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 100%;
-  font-size: 16px;
-  margin-top: 10px;
-}
+  button {
+    color: white;
+    padding: 14px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 18px;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+  }
 
-button:hover {
-  background-color: #45a049;
-}
+  .calculate-button {
+    background-color: #4CAF50;
+  }
 
-.calculate-button {
-  background-color: #4CAF50;
-}
+  .calculate-button:hover {
+    background-color: #45a049;
+  }
 
-.calculate-button:hover {
-  background-color: #45a049;
-}
+  .add-button {
+    background-color: #007bff;
+    margin-left: 10px;
+  }
 
-#damageResult,
-#scientificResult,
-#wordResult,
-#equationResult {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: #e9f7ef;
-  border: 1px solid #bce0c8;
-  border-radius: 4px;
-  color: #333;
-}
+  .add-button:hover {
+    background-color: #0056b3;
+  }
 
-.additional-input-group {
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-}
+  .remove-button {
+    background-color: #dc3545;
+    padding: 8px 12px;
+    font-size: 14px;
+    margin-left: 5px;
+  }
 
-.modifier-indicator {
-  display: inline-block;
-  margin-left: 5px;
-  font-weight: bold;
-  font-size: 14px;
-  color: #555;
-  width: 15px;
-  text-align: center;
-}
+  .remove-button:hover {
+    background-color: #c82333;
+  }
 
-.modifier-toggle-button {
-  display: inline-block;
-  background-color: #ddd;
-  color: #333;
-  padding: 2px 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  margin-left: 5px;
-  width: 25px;
-  text-align: center;
-}
+  .additional-input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
 
-.modifier-toggle-button:hover {
-  background-color: #ccc;
-}
+  .modifier-indicator {
+    margin: 0 10px;
+    font-weight: bold;
+    font-size: 16px;
+    color: #555;
+    width: 20px;
+    text-align: center;
+  }
 
-.remove-button {
-  display: inline-block;
-  background-color: #dc3545;
-  color: white;
-  padding: 2px 5px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  margin-left: 5px;
-  width: 25px;
-  text-align: center;
-}
+  .modifier-toggle-button {
+    background-color: #ddd;
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
 
-.remove-button:hover {
-  background-color: #c82333;
-}
+  .modifier-toggle-button:hover {
+    background-color: #ccc;
+  }
 
-.add-button {
-  background-color: #007bff;
-  color: white;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  margin-left: 5px;
-}
-
-.add-button:hover {
-  background-color: #0056b3;
-}
+  .result-display {
+    margin-top: 25px;
+    padding: 20px;
+    background-color: #e6f7ff;
+    border: 1px solid #b3e0ff;
+    border-radius: 8px;
+    color: #333;
+    font-size: 16px;
+  }
 </style>
 <script>
-// --- Helper Functions ---
+  let additionalInputCount = 0;
 
-/**
- * Parses input to handle scientific notation and empty strings.
- * @param {string} input The input string to parse.
- * @returns {BigInt} The parsed number as a BigInt.
- */
-function parseInput(input) {
-  if (input.includes("e")) {
-    let parts = input.split("e");
-    return BigInt(parseFloat(parts[0]) * Math.pow(10, parseInt(parts[1])));
-  } else {
-    const parsed = BigInt(input || 0);
-    if (isNaN(Number(parsed))){
+  function parseInput(input) {
+    if (input.includes("e")) {
+      let parts = input.split("e");
+      return BigInt(parseFloat(parts[0]) * Math.pow(10, parseInt(parts[1])));
+    } else {
+      const parsed = BigInt(input || 0);
+      if (isNaN(Number(parsed))) {
         return 0n;
+      }
+      return parsed;
     }
-    return parsed;
-  }
-}
-
-/**
- * Converts a number to scientific notation.
- * @param {BigInt} number The number to convert.
- * @returns {string} The number in scientific notation.
- */
-function toScientificNotation(number) {
-  let numStr = number.toString();
-  if (numStr.length <= 15) {
-    return numStr;
-  }
-  let firstDigit = numStr[0];
-  let decimalPart = numStr.substring(1, 15);
-  let exponent = numStr.length - 1;
-  return firstDigit + "." + decimalPart + "e+" + exponent;
-}
-
-/**
- * Converts a number to its word representation.
- * @param {BigInt} number The number to convert.
- * @returns {string} The number in word format.
- */
-function numberToWords(number) {
-  let numStr = number.toString();
-  if (numStr.length <= 15) {
-    return numStr;
   }
 
-  let numBigInt = BigInt(number);
-  if (numBigInt === 0n) {
-    return "Zero";
-  }
-
-  const units = ["", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", "Septillion", "Octillion", "Nonillion", "Decillion", "Undecillion", "Duodecillion", "Tredecillion", "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septendecillion", "Octodecillion", "Novemdecillion", "Vigintillion"];
-
-  let parts = [];
-  let i = 0;
-  while (numBigInt > 0n) {
-    let chunk = numBigInt % 1000n;
-    if (chunk > 0n) {
-      parts.unshift(`${convertChunkToWords(chunk)} ${units[i]}`);
+  function toScientificNotation(number) {
+    let numStr = number.toString();
+    if (numStr.length <= 15) {
+      return numStr;
     }
-    numBigInt = numBigInt / 1000n;
-    i++;
+    let firstDigit = numStr[0];
+    let decimalPart = numStr.substring(1, 15);
+    let exponent = numStr.length - 1;
+    return firstDigit + "." + decimalPart + "e+" + exponent;
   }
-  return parts.join(" ").trim();
-}
+
+  function numberToWords(number) {
+    let numStr = number.toString();
+    if (numStr.length <= 15) {
+      return numStr;
+    }
+
+    let numBigInt = BigInt(number);
+    if (numBigInt === 0n) {
+      return "Zero";
+    }
+
+    const units = ["", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", "Septillion", "Octillion", "Nonillion", "Decillion", "Undecillion", "Duodecillion", "Tredecillion", "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septendecillion", "Octodecillion", "Novemdecillion", "Vigintillion"];
+
+    let parts = [];
+    let i = 0;
+    while (numBigInt > 0n) {
+      let chunk = numBigInt % 1000n;
+      if (chunk > 0n) {
+        parts.unshift(`${convertChunkToWords(chunk)} ${units[i]}`);
+      }
+      numBigInt = numBigInt / 1000n;
+      i++;
+    }
+    return parts.join(" ").trim();
+  }
+
+  function convertChunkToWords(chunk) {
+    const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+    const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+    const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+
+    let words = [];
+    const hundred = Math.floor(chunk / 100n);
+    const remainder = chunk % 100n;
+    const ten = Math.floor(remainder / 10n);
+    const one = remainder % 10n;
+
+    if (hundred > 0n) {
+      words.push(ones[hundred], "Hundred");
+    }
+    if (ten === 1n) {
+      words.push(teens[one]);
+    } else if (ten > 1n) {
+      words.push(tens[ten], ones[one]);
+    } else if (one > 0n) {
+      words.push(ones[one]);
+    }
+
+    return words.filter(word => word !== "").join(" ");
+  }
+
+  function calculateDamage() {
+    let damageType = document.getElementById("damageTypeSelector").value;
+    let baseDamage = parseInput(document.getElementById("baseDamage").value);
+    let totalDamage = baseDamage;
+    let percentageIncrease = 0n;
+    let equation = baseDamage.toString();
+
+    if (damageType === "chakra") {
+      const chakraMax = parseInput(document.getElementById("chakraMax").value);
+      const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
+      const chakraUsed = chakraMax - 1n;
+
+      if (isNaN(Number(chakraMax)) || isNaN(Number(baseDamage)) || isNaN(Number(damagePerChakra))) {
+        alert("Please enter valid numbers.");
+        return;
+      }
+
+      const damageIncrease = chakraUsed * damagePerChakra;
+      totalDamage += damageIncrease;
+      equation += " + (" + chakraUsed.toString() + " * " + damagePerChakra.toString() + ")";
+    }
+
+    const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
+    if (baseMultiplier !== 0n) {
+      totalDamage *= baseMultiplier;
+      equation += " * " + baseMultiplier
