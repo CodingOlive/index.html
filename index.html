@@ -48,6 +48,10 @@
             font-size: 16px;
         }
 
+        input[type="range"] {
+            width: 100%;
+        }
+
         button {
             color: white;
             padding: 14px 25px;
@@ -68,17 +72,6 @@
             background-color: #45a049;
         }
 
-        .remove-button {
-            background-color: #dc3545;
-            padding: 8px 12px;
-            font-size: 14px;
-            margin-left: 5px;
-        }
-
-        .remove-button:hover {
-            background-color: #c82333;
-        }
-
         .result-display {
             margin-top: 25px;
             padding: 20px;
@@ -88,6 +81,23 @@
             color: #333;
             font-size: 16px;
         }
+
+        .output-box {
+            background-color: #e6f7ff;
+            border: 1px solid #b3e0ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .chakra-slider-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chakra-slider-container label {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -95,7 +105,7 @@
         <h1>Enhanced Damage Calculator</h1>
 
         <label for="damageTypeSelector">Damage Type</label>
-        <select id="damageTypeSelector">
+        <select id="damageTypeSelector" onchange="toggleDamageType()">
             <option value="standard">Standard</option>
             <option value="chakra">Chakra</option>
         </select>
@@ -103,76 +113,177 @@
         <label for="baseDamage">Base Damage</label>
         <input type="text" id="baseDamage" value="1000">
 
+        <!-- Chakra Damage Inputs -->
         <div id="chakraInputs" style="display:none;">
             <label for="chakraMax">Max Chakra</label>
-            <input type="text" id="chakraMax" value="10">
+            <input type="text" id="chakraMax" value="100">
+
+            <div class="chakra-slider-container">
+                <label for="chakraUsedSlider">Percentage of Chakra to Use (0% - 100%)</label>
+                <input type="range" id="chakraUsedSlider" min="0" max="100" value="75">
+                <span id="chakraUsedPercentage">75%</span>
+            </div>
 
             <label for="damagePerChakra">Damage Per Chakra</label>
             <input type="text" id="damagePerChakra" value="100">
         </div>
 
+        <!-- Common Inputs for Both Standard and Chakra -->
+        <label for="formMultiplier">Form Multiplier</label>
+        <input type="text" id="formMultiplier" value="1">
+
         <label for="baseMultiplier">Base Multiplier</label>
         <input type="text" id="baseMultiplier" value="1.2">
 
+        <label for="damageReduction">Damage Reduction (%)</label>
+        <input type="text" id="damageReduction" value="10">
+
         <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
 
-        <div class="result-display" id="resultDisplay" style="display:none;"></div>
+        <div class="output-box" id="numberOutput" style="display:none;">
+            <strong>Number Format:</strong> <span id="numberResult"></span>
+        </div>
+
+        <div class="output-box" id="wordOutput" style="display:none;">
+            <strong>Word Format:</strong> <span id="wordResult"></span>
+        </div>
+
+        <div class="output-box" id="scientificOutput" style="display:none;">
+            <strong>Scientific Notation Format:</strong> <span id="scientificResult"></span>
+        </div>
+
+        <div class="result-display" id="equationDisplay" style="display:none;">
+            <strong>Equation:</strong> <span id="equationResult"></span>
+        </div>
     </div>
 
     <script>
-        // Show/hide chakra input fields based on selected damage type
-        document.getElementById('damageTypeSelector').addEventListener('change', function() {
-            const chakraInputs = document.getElementById('chakraInputs');
-            if (this.value === 'chakra') {
-                chakraInputs.style.display = 'block';
-            } else {
-                chakraInputs.style.display = 'none';
-            }
+        // Update the displayed value of the slider
+        const chakraSlider = document.getElementById('chakraUsedSlider');
+        const chakraPercentageDisplay = document.getElementById('chakraUsedPercentage');
+        chakraSlider.addEventListener('input', function() {
+            chakraPercentageDisplay.textContent = `${chakraSlider.value}%`;
         });
 
-        // Function to parse input and handle scientific notation
+        // Function to parse input and handle invalid inputs, including scientific notation
         function parseInput(input) {
-            const parsed = parseFloat(input);
+            let parsed;
+            if (input.includes('e') || input.includes('E')) {
+                parsed = parseFloat(input); // Handle scientific notation input
+            } else {
+                parsed = parseFloat(input);
+            }
+
             if (isNaN(parsed)) {
                 return 0;
             }
             return parsed;
         }
 
-        // Function to calculate damage
+        // Function to convert number to word format
+        function numberToWords(number) {
+            const units = ["", "Thousand", "Million", "Billion", "Trillion"];
+            const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+            const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+            const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+            
+            let words = [];
+            let numStr = number.toString();
+            if (numStr === "0") return "Zero";
+
+            let i = 0;
+            while (number > 0) {
+                let chunk = number % 1000;
+                if (chunk > 0) {
+                    words.unshift(convertChunkToWords(chunk) + " " + units[i]);
+                }
+                number = Math.floor(number / 1000);
+                i++;
+            }
+
+            return words.join(" ").trim();
+        }
+
+        function convertChunkToWords(chunk) {
+            const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+            const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+            const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+
+            let words = [];
+            const hundred = Math.floor(chunk / 100);
+            const remainder = chunk % 100;
+            const ten = Math.floor(remainder / 10);
+            const one = remainder % 10;
+
+            if (hundred > 0) words.push(ones[hundred] + " Hundred");
+            if (ten === 1) words.push(teens[one]);
+            else if (ten > 1) {
+                words.push(tens[ten]);
+                if (one > 0) words.push(ones[one]);
+            } else if (one > 0) words.push(ones[one]);
+
+            return words.join(" ");
+        }
+
+        // Function to calculate the total damage
         function calculateDamage() {
             let damageType = document.getElementById("damageTypeSelector").value;
             let baseDamage = parseInput(document.getElementById("baseDamage").value);
             let totalDamage = baseDamage;
             let equation = baseDamage.toString();
 
+            // Handle chakra input if applicable
             if (damageType === "chakra") {
                 const chakraMax = parseInput(document.getElementById("chakraMax").value);
+                const chakraUsedPercentage = parseInt(document.getElementById('chakraUsedSlider').value);
                 const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
-                const chakraUsed = chakraMax - 1; // Assume chakraUsed is max - 1
 
-                // Validate input
-                if (isNaN(chakraMax) || isNaN(damagePerChakra)) {
-                    alert("Please enter valid numbers for Chakra.");
-                    return;
-                }
-
+                const chakraUsed = Math.floor((chakraUsedPercentage / 100) * chakraMax); // Calculate the actual chakra used based on the percentage slider
                 const damageIncrease = chakraUsed * damagePerChakra;
+
                 totalDamage += damageIncrease;
                 equation += ` + (${chakraUsed} * ${damagePerChakra})`;
             }
 
+            const formMultiplier = parseInput(document.getElementById("formMultiplier").value);
+            totalDamage *= formMultiplier; // Apply form multiplier
+            equation += ` * ${formMultiplier} (Form Multiplier)`;
+
             const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
-            if (baseMultiplier !== 0) {
-                totalDamage *= baseMultiplier;
-                equation += ` * ${baseMultiplier}`;
+            totalDamage *= baseMultiplier; // Apply base multiplier
+            equation += ` * ${baseMultiplier} (Base Multiplier)`;
+
+            // Handle damage reduction
+            const damageReduction = parseInput(document.getElementById("damageReduction").value);
+            if (damageReduction > 0) {
+                totalDamage *= (1 - damageReduction / 100);
+                equation += ` * (1 - ${damageReduction / 100}) (Damage Reduction)`;
             }
 
-            // Display results
-            const resultText = `Total Damage: ${totalDamage}\nEquation: ${equation}`;
-            const resultDisplay = document.getElementById("resultDisplay");
-            resultDisplay.style.display = 'block';
-            resultDisplay.textContent = resultText;
+            // Update the result display
+            document.getElementById("equationDisplay").style.display = "block";
+            document.getElementById("equationResult").textContent = equation;
+
+            // Update the output boxes
+            document.getElementById("numberOutput").style.display = "block";
+            document.getElementById("numberResult").textContent = totalDamage.toFixed(2);
+
+            document.getElementById("wordOutput").style.display = "block";
+            document.getElementById("wordResult").textContent = numberToWords(totalDamage);
+
+            document.getElementById("scientificOutput").style.display = "block";
+            document.getElementById("scientificResult").textContent = totalDamage.toExponential();
+        }
+
+        // Toggle inputs based on damage type selection
+        function toggleDamageType() {
+            const damageType = document.getElementById("damageTypeSelector").value;
+            const chakraInputs = document.getElementById("chakraInputs");
+            if (damageType === "chakra") {
+                chakraInputs.style.display = "block";
+            } else {
+                chakraInputs.style.display = "none";
+            }
         }
     </script>
 </body>
