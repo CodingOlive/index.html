@@ -70,6 +70,14 @@
       background-color: #45a049;
     }
 
+    .emerald-button {
+      background-color: #4CAF50; /* Emerald green */
+    }
+
+    .emerald-button:hover {
+      background-color: #45a049;
+    }
+
     .remove-button {
       background-color: #dc3545;
       padding: 8px 12px;
@@ -134,7 +142,8 @@
       <input type="text" id="chakraMax" placeholder="Max Chakra">
 
       <label for="chakraUsedSlider">Chakra Usage (%)</label>
-      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100">
+      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
+      <span id="chakraUsedValue">100%</span> <!-- Display the current percentage -->
 
       <label for="damagePerChakra">Damage per Chakra</label>
       <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
@@ -147,7 +156,8 @@
     <label for="baseMultiplier">Base Multiplier</label>
     <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
 
-    <button type="button" onclick="addDynamicBox()">Add Custom Box</button>
+    <!-- Add Box Button -->
+    <button class="emerald-button" type="button" onclick="addDynamicBox()">Add Custom Box</button>
 
     <!-- Container for dynamically added boxes -->
     <div id="dynamicBoxesContainer"></div>
@@ -236,6 +246,12 @@
       }
 
       return words.filter(word => word !== "").join(" ");
+    }
+
+    // Update the Chakra slider value display
+    function updateChakraSliderValue() {
+      let sliderValue = document.getElementById("chakraUsedSlider").value;
+      document.getElementById("chakraUsedValue").textContent = sliderValue + "%";
     }
 
     // Add dynamic input boxes to the form
