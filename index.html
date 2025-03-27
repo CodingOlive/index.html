@@ -1,290 +1,263 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Damage Calculator</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f0f8ff;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Damage Calculator</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
 
-        .calculator-container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 500px;
-        }
+    .calculator-container {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 500px;
+    }
 
-        h1 {
-            text-align: center;
-            color: #3366cc;
-            margin-bottom: 25px;
-        }
+    h1 {
+      text-align: center;
+      color: #3366cc;
+      margin-bottom: 25px;
+    }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 600;
-        }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+    }
 
-        input[type="text"],
-        select {
-            width: calc(100% - 22px);
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
+    input[type="text"],
+    select,
+    input[type="range"] {
+      width: calc(100% - 22px);
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
 
-        input[type="range"] {
-            width: 100%;
-        }
+    button {
+      color: white;
+      padding: 14px 25px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 18px;
+      margin-top: 15px;
+      transition: background-color 0.3s ease;
+    }
 
-        button {
-            color: white;
-            padding: 14px 25px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 18px;
-            margin-top: 15px;
-            transition: background-color 0.3s ease;
-        }
+    .calculate-button {
+      background-color: #4CAF50;
+    }
 
-        .calculate-button {
-            background-color: #4CAF50;
-        }
+    .calculate-button:hover {
+      background-color: #45a049;
+    }
 
-        .calculate-button:hover {
-            background-color: #45a049;
-        }
+    .remove-button {
+      background-color: #dc3545;
+      padding: 8px 12px;
+      font-size: 14px;
+      margin-left: 5px;
+    }
 
-        .result-display {
-            margin-top: 25px;
-            padding: 20px;
-            background-color: #e6f7ff;
-            border: 1px solid #b3e0ff;
-            border-radius: 8px;
-            color: #333;
-            font-size: 16px;
-        }
+    .remove-button:hover {
+      background-color: #c82333;
+    }
 
-        .output-box {
-            background-color: #e6f7ff;
-            border: 1px solid #b3e0ff;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-        }
+    .result-display {
+      margin-top: 25px;
+      padding: 20px;
+      background-color: #e6f7ff;
+      border: 1px solid #b3e0ff;
+      border-radius: 8px;
+      color: #333;
+      font-size: 16px;
+    }
 
-        .chakra-slider-container {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chakra-slider-container label {
-            margin-bottom: 5px;
-        }
-    </style>
+    #output {
+      margin-top: 20px;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <div class="calculator-container">
-        <h1>Enhanced Damage Calculator</h1>
 
-        <label for="damageTypeSelector">Damage Type</label>
-        <select id="damageTypeSelector" onchange="toggleDamageType()">
-            <option value="standard">Standard</option>
-            <option value="chakra">Chakra</option>
-        </select>
+  <div class="calculator-container">
+    <h1>Enhanced Damage Calculator</h1>
 
-        <label for="baseDamage">Base Damage</label>
-        <input type="text" id="baseDamage" value="1000">
+    <label for="baseDamage">Base Damage</label>
+    <input type="text" id="baseDamage" placeholder="Enter Base Damage">
 
-        <!-- Chakra Damage Inputs -->
-        <div id="chakraInputs" style="display:none;">
-            <label for="chakraMax">Max Chakra</label>
-            <input type="text" id="chakraMax" value="100">
+    <label for="damageTypeSelector">Damage Type</label>
+    <select id="damageTypeSelector">
+      <option value="chakra">Chakra</option>
+      <option value="standard">Standard</option>
+    </select>
 
-            <div class="chakra-slider-container">
-                <label for="chakraUsedSlider">Percentage of Chakra to Use (0% - 100%)</label>
-                <input type="range" id="chakraUsedSlider" min="0" max="100" value="75">
-                <span id="chakraUsedPercentage">75%</span>
-            </div>
+    <!-- Chakra Options -->
+    <div id="chakraOptions">
+      <label for="chakraMax">Chakra Max</label>
+      <input type="text" id="chakraMax" placeholder="Max Chakra">
 
-            <label for="damagePerChakra">Damage Per Chakra</label>
-            <input type="text" id="damagePerChakra" value="100">
-        </div>
+      <label for="chakraUsedSlider">Chakra Usage (%)</label>
+      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100">
 
-        <!-- Common Inputs for Both Standard and Chakra -->
-        <label for="formMultiplier">Form Multiplier</label>
-        <input type="text" id="formMultiplier" value="1">
-
-        <label for="baseMultiplier">Base Multiplier</label>
-        <input type="text" id="baseMultiplier" value="1.2">
-
-        <label for="damageReduction">Damage Reduction (%)</label>
-        <input type="text" id="damageReduction" value="10">
-
-        <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
-
-        <div class="output-box" id="numberOutput" style="display:none;">
-            <strong>Number Format:</strong> <span id="numberResult"></span>
-        </div>
-
-        <div class="output-box" id="wordOutput" style="display:none;">
-            <strong>Word Format:</strong> <span id="wordResult"></span>
-        </div>
-
-        <div class="output-box" id="scientificOutput" style="display:none;">
-            <strong>Scientific Notation Format:</strong> <span id="scientificResult"></span>
-        </div>
-
-        <div class="result-display" id="equationDisplay" style="display:none;">
-            <strong>Equation:</strong> <span id="equationResult"></span>
-        </div>
+      <label for="damagePerChakra">Damage per Chakra</label>
+      <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
     </div>
 
-    <script>
-        // Update the displayed value of the slider
-        const chakraSlider = document.getElementById('chakraUsedSlider');
-        const chakraPercentageDisplay = document.getElementById('chakraUsedPercentage');
-        chakraSlider.addEventListener('input', function() {
-            chakraPercentageDisplay.textContent = `${chakraSlider.value}%`;
-        });
+    <!-- Form Multiplier and Base Multiplier -->
+    <label for="formMultiplier">Form Multiplier</label>
+    <input type="text" id="formMultiplier" placeholder="Enter Form Multiplier">
 
-        // Function to parse input and handle invalid inputs, including scientific notation
-        function parseInput(input) {
-            let parsed;
-            if (input.includes('e') || input.includes('E')) {
-                parsed = parseFloat(input); // Handle scientific notation input
-            } else {
-                parsed = parseFloat(input);
-            }
+    <label for="baseMultiplier">Base Multiplier</label>
+    <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
 
-            if (isNaN(parsed)) {
-                return 0;
-            }
-            return parsed;
+    <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
+
+    <div id="output">
+      <h2>Results</h2>
+      <p><strong>Equation:</strong> <span id="equationResult"></span></p>
+      <p><strong>Number Format:</strong> <span id="numberResult"></span></p>
+      <p><strong>Word Format:</strong> <span id="wordResult"></span></p>
+      <p><strong>Scientific Notation:</strong> <span id="scientificResult"></span></p>
+    </div>
+  </div>
+
+  <script>
+    // Parse input values to BigInt
+    function parseInput(input) {
+      if (input.includes("e")) {
+        let parts = input.split("e");
+        return BigInt(parseFloat(parts[0]) * Math.pow(10, parseInt(parts[1])));
+      } else {
+        const parsed = BigInt(input || 0);
+        if (isNaN(Number(parsed))) {
+          return 0n;
         }
+        return parsed;
+      }
+    }
 
-        // Function to convert number to word format
-        function numberToWords(number) {
-            const units = ["", "Thousand", "Million", "Billion", "Trillion"];
-            const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
-            const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-            const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
-            
-            let words = [];
-            let numStr = number.toString();
-            if (numStr === "0") return "Zero";
+    // Convert number to word format
+    function numberToWords(number) {
+      let numStr = number.toString();
+      if (numStr.length <= 15) {
+        return numStr;
+      }
 
-            let i = 0;
-            while (number > 0) {
-                let chunk = number % 1000;
-                if (chunk > 0) {
-                    words.unshift(convertChunkToWords(chunk) + " " + units[i]);
-                }
-                number = Math.floor(number / 1000);
-                i++;
-            }
+      let numBigInt = BigInt(number);
+      if (numBigInt === 0n) {
+        return "Zero";
+      }
 
-            return words.join(" ").trim();
+      // Expanded units array for larger numbers
+      const units = [
+        "", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", 
+        "Septillion", "Octillion", "Nonillion", "Decillion", "Undecillion", "Duodecillion", "Tredecillion",
+        "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septendecillion", "Octodecillion", "Novemdecillion"
+      ];
+
+      let parts = [];
+      let i = 0;
+
+      while (numBigInt > 0n) {
+        let chunk = numBigInt % 1000n;
+        if (chunk > 0n) {
+          parts.unshift(`${convertChunkToWords(chunk)} ${units[i]}`);
         }
+        numBigInt = numBigInt / 1000n;
+        i++;
+      }
 
-        function convertChunkToWords(chunk) {
-            const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
-            const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-            const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+      return parts.join(" ").trim();
+    }
 
-            let words = [];
-            const hundred = Math.floor(chunk / 100);
-            const remainder = chunk % 100;
-            const ten = Math.floor(remainder / 10);
-            const one = remainder % 10;
+    // Convert chunk of number to words
+    function convertChunkToWords(chunk) {
+      const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+      const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+      const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
 
-            if (hundred > 0) words.push(ones[hundred] + " Hundred");
-            if (ten === 1) words.push(teens[one]);
-            else if (ten > 1) {
-                words.push(tens[ten]);
-                if (one > 0) words.push(ones[one]);
-            } else if (one > 0) words.push(ones[one]);
+      let words = [];
+      const hundred = Math.floor(chunk / 100n);
+      const remainder = chunk % 100n;
+      const ten = Math.floor(remainder / 10n);
+      const one = remainder % 10n;
 
-            return words.join(" ");
-        }
+      if (hundred > 0n) {
+        words.push(ones[hundred], "Hundred");
+      }
+      if (ten === 1n) {
+        words.push(teens[one]);
+      } else if (ten > 1n) {
+        words.push(tens[ten], ones[one]);
+      } else if (one > 0n) {
+        words.push(ones[one]);
+      }
 
-        // Function to calculate the total damage
-        function calculateDamage() {
-            let damageType = document.getElementById("damageTypeSelector").value;
-            let baseDamage = parseInput(document.getElementById("baseDamage").value);
-            let totalDamage = baseDamage;
-            let equation = baseDamage.toString();
+      return words.filter(word => word !== "").join(" ");
+    }
 
-            // Handle chakra input if applicable
-            if (damageType === "chakra") {
-                const chakraMax = parseInput(document.getElementById("chakraMax").value);
-                const chakraUsedPercentage = parseInt(document.getElementById('chakraUsedSlider').value);
-                const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
+    // Calculate damage and display results
+    function calculateDamage() {
+      let damageType = document.getElementById("damageTypeSelector").value;
+      let baseDamage = parseInput(document.getElementById("baseDamage").value);
+      let totalDamage = baseDamage;
+      let equation = baseDamage.toString();
 
-                const chakraUsed = Math.floor((chakraUsedPercentage / 100) * chakraMax); // Calculate the actual chakra used based on the percentage slider
-                const damageIncrease = chakraUsed * damagePerChakra;
+      // Chakra calculation
+      if (damageType === "chakra") {
+        const chakraMax = parseInput(document.getElementById("chakraMax").value);
+        const chakraUsedPercentage = parseInt(document.getElementById('chakraUsedSlider').value);
+        const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
 
-                totalDamage += damageIncrease;
-                equation += ` + (${chakraUsed} * ${damagePerChakra})`;
-            }
+        const chakraUsed = Math.floor((chakraUsedPercentage / 100) * chakraMax);
+        const damageIncrease = chakraUsed * damagePerChakra;
 
-            const formMultiplier = parseInput(document.getElementById("formMultiplier").value);
-            totalDamage *= formMultiplier; // Apply form multiplier
-            equation += ` * ${formMultiplier} (Form Multiplier)`;
+        totalDamage += damageIncrease;
+        equation += ` + (${chakraUsed} * ${damagePerChakra})`;
+      }
 
-            const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
-            totalDamage *= baseMultiplier; // Apply base multiplier
-            equation += ` * ${baseMultiplier} (Base Multiplier)`;
+      // Apply multipliers
+      const formMultiplier = parseInput(document.getElementById("formMultiplier").value);
+      totalDamage *= formMultiplier;
+      equation += ` * ${formMultiplier} (Form Multiplier)`;
 
-            // Handle damage reduction
-            const damageReduction = parseInput(document.getElementById("damageReduction").value);
-            if (damageReduction > 0) {
-                totalDamage *= (1 - damageReduction / 100);
-                equation += ` * (1 - ${damageReduction / 100}) (Damage Reduction)`;
-            }
+      const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
+      totalDamage *= baseMultiplier;
+      equation += ` * ${baseMultiplier} (Base Multiplier)`;
 
-            // Update the result display
-            document.getElementById("equationDisplay").style.display = "block";
-            document.getElementById("equationResult").textContent = equation;
+      // Display results
+      const formattedNumber = totalDamage.toLocaleString('en-US');
+      const wordFormat = numberToWords(totalDamage);
+      const scientificFormat = totalDamage.toExponential(3); // Limit to 3 decimal places
 
-            // Update the output boxes
-            document.getElementById("numberOutput").style.display = "block";
-            document.getElementById("numberResult").textContent = totalDamage.toFixed(2);
+      document.getElementById("numberResult").textContent = formattedNumber;
+      document.getElementById("wordResult").textContent = wordFormat;
+      document.getElementById("scientificResult").textContent = scientificFormat;
+      document.getElementById("equationResult").textContent = equation;
 
-            document.getElementById("wordOutput").style.display = "block";
-            document.getElementById("wordResult").textContent = numberToWords(totalDamage);
+      // Show the output section
+      document.getElementById("output").style.display = "block";
+    }
+  </script>
 
-            document.getElementById("scientificOutput").style.display = "block";
-            document.getElementById("scientificResult").textContent = totalDamage.toExponential();
-        }
-
-        // Toggle inputs based on damage type selection
-        function toggleDamageType() {
-            const damageType = document.getElementById("damageTypeSelector").value;
-            const chakraInputs = document.getElementById("chakraInputs");
-            if (damageType === "chakra") {
-                chakraInputs.style.display = "block";
-            } else {
-                chakraInputs.style.display = "none";
-            }
-        }
-    </script>
 </body>
 </html>
