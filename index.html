@@ -5,19 +5,110 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Enhanced Damage Calculator</title>
   <style>
-    /* Your existing styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .calculator-container {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 500px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #3366cc;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    input[type="text"],
+    select,
+    input[type="range"] {
+      width: calc(100% - 22px);
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    button {
+      color: white;
+      padding: 14px 25px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 18px;
+      margin-top: 15px;
+      transition: background-color 0.3s ease;
+    }
+
+    .calculate-button {
+      background-color: #4CAF50;
+    }
+
+    .calculate-button:hover {
+      background-color: #45a049;
+    }
+
     .emerald-button {
       background-color: #2ecc71;
       color: white;
     }
 
+    .emerald-button:hover {
+      background-color: #27ae60;
+    }
+
     .remove-button {
       background-color: #dc3545;
       color: white;
+      font-size: 14px;
+      padding: 8px 12px;
+      margin-top: 10px;
+    }
+
+    .remove-button:hover {
+      background-color: #c82333;
     }
 
     .dynamic-box {
       margin-bottom: 15px;
+    }
+
+    .dynamic-box input {
+      width: calc(100% - 80px);
+    }
+
+    .dynamic-box button {
+      margin-left: 10px;
+      padding: 8px 12px;
+    }
+
+    #chakraUsedValue {
+      color: red;
+    }
+
+    .slider-container {
+      margin-bottom: 20px;
     }
   </style>
 </head>
@@ -45,8 +136,10 @@
       <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraMultiplier()">
 
       <label for="chakraUsedSlider">Chakra Usage (%)</label>
-      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
-      <span id="chakraUsedValue">100%</span>
+      <div class="slider-container">
+        <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
+        <span id="chakraUsedValue">100%</span>
+      </div>
 
       <label for="damagePerChakra">Damage per Chakra</label>
       <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
@@ -166,19 +259,18 @@
       // Update the Chakra Max display
       document.getElementById("chakraMax").value = newChakraMax;
 
-      // Update the slider max value based on the new Chakra Max
+      // Adjust the slider max value based on the new Chakra Max
       document.getElementById("chakraUsedSlider").max = newChakraMax;
-      updateChakraSliderValue();  // Update the slider display to reflect the new max
     }
 
-    // Update Chakra Slider value display
+    // Update the Chakra slider percentage value
     function updateChakraSliderValue() {
-      let chakraUsedSlider = document.getElementById("chakraUsedSlider");
-      let sliderValue = (parseFloat(chakraUsedSlider.value) / parseFloat(chakraUsedSlider.max)) * 100;
-      document.getElementById("chakraUsedValue").textContent = Math.round(sliderValue) + "%";
+      const slider = document.getElementById("chakraUsedSlider");
+      const value = slider.value;
+      document.getElementById("chakraUsedValue").textContent = value + "%";
     }
 
-    // Toggle Chakra-related fields based on the selected damage type
+    // Toggle the Chakra Fields based on the selected damage type
     function toggleChakraFields() {
       const damageType = document.getElementById("damageTypeSelector").value;
       const chakraOptions = document.getElementById("chakraOptions");
@@ -213,7 +305,29 @@
 
     // Calculate the damage based on inputs
     function calculateDamage() {
-      // Calculate damage based on your logic
+      let damageType = document.getElementById("damageTypeSelector").value;
+      let baseDamage = parseInput(document.getElementById("baseDamage").value);
+      let totalDamage = baseDamage;
+      let equation = baseDamage.toString();
+
+      if (damageType === "chakra") {
+        const chakraMax = parseInput(document.getElementById("chakraMax").value);
+        const chakraMultiplier = parseFloat(document.getElementById("chakraMaxMultiplier").value) || 1;
+        const chakraUsed = parseFloat(document.getElementById("chakraUsedSlider").value);
+        const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
+
+        const adjustedChakraMax = chakraMax * chakraMultiplier;
+        const chakraUsedValue = Math.floor((adjustedChakraMax * chakraUsed) / 100);
+
+        totalDamage += chakraUsedValue * damagePerChakra;
+        equation += ` + (${chakraUsedValue} * ${damagePerChakra})`;
+      }
+
+      // Display results
+      document.getElementById("equationResult").textContent = equation;
+      document.getElementById("numberResult").textContent = totalDamage.toString();
+      document.getElementById("wordResult").textContent = numberToWords(totalDamage);
+      document.getElementById("scientificResult").textContent = totalDamage.toExponential();
     }
   </script>
 </body>
