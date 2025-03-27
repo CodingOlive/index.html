@@ -94,6 +94,15 @@
       margin-top: 20px;
       display: none;
     }
+
+    .dynamic-box {
+      display: flex;
+      margin-bottom: 15px;
+    }
+
+    .dynamic-box input {
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -128,6 +137,18 @@
 
     <label for="baseMultiplier">Base Multiplier</label>
     <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
+
+    <label for="addMultiplySelector">Select Add or Multiply</label>
+    <select id="addMultiplySelector">
+      <option value="add">Add</option>
+      <option value="multiply">Multiply</option>
+    </select>
+
+    <!-- Button to dynamically add more boxes -->
+    <button type="button" onclick="addDynamicBox()">Add Custom Box</button>
+
+    <!-- Container for dynamically added boxes -->
+    <div id="dynamicBoxesContainer"></div>
 
     <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
 
@@ -215,6 +236,32 @@
       return words.filter(word => word !== "").join(" ");
     }
 
+    // Add dynamic input boxes to the form
+    let dynamicBoxCount = 0;
+    function addDynamicBox() {
+      dynamicBoxCount++;
+      const container = document.getElementById('dynamicBoxesContainer');
+      const newBox = document.createElement('div');
+      newBox.classList.add('dynamic-box');
+      newBox.setAttribute('id', `dynamicBox${dynamicBoxCount}`);
+
+      newBox.innerHTML = `
+        <input type="text" id="dynamicBoxValue${dynamicBoxCount}" placeholder="Enter Value for Box ${dynamicBoxCount}">
+        <select id="dynamicBoxOperation${dynamicBoxCount}">
+          <option value="add">Add</option>
+          <option value="multiply">Multiply</option>
+        </select>
+        <button class="remove-button" onclick="removeDynamicBox(${dynamicBoxCount})">Remove</button>
+      `;
+      container.appendChild(newBox);
+    }
+
+    // Remove dynamic input boxes
+    function removeDynamicBox(boxId) {
+      const box = document.getElementById(`dynamicBox${boxId}`);
+      box.remove();
+    }
+
     // Calculate damage and display results
     function calculateDamage() {
       let damageType = document.getElementById("damageTypeSelector").value;
@@ -235,14 +282,28 @@
         equation += ` + (${chakraUsed} * ${damagePerChakra})`;
       }
 
-      // Apply multipliers
+      // Apply form multiplier
       const formMultiplier = parseInput(document.getElementById("formMultiplier").value);
       totalDamage *= formMultiplier;
       equation += ` * ${formMultiplier} (Form Multiplier)`;
 
+      // Apply base multiplier
       const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
       totalDamage *= baseMultiplier;
       equation += ` * ${baseMultiplier} (Base Multiplier)`;
+
+      // Handle dynamically added boxes
+      for (let i = 1; i <= dynamicBoxCount; i++) {
+        const boxValue = parseInput(document.getElementById(`dynamicBoxValue${i}`).value);
+        const operation = document.getElementById(`dynamicBoxOperation${i}`).value;
+        if (operation === 'add') {
+          totalDamage += boxValue;
+          equation += ` + ${boxValue}`;
+        } else if (operation === 'multiply') {
+          totalDamage *= boxValue;
+          equation += ` * ${boxValue}`;
+        }
+      }
 
       // Display results
       const formattedNumber = totalDamage.toLocaleString('en-US');
