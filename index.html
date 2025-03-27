@@ -70,31 +70,50 @@ button:hover {
 </style>
 <script>
 function calculateDamage() {
-  let chakraMax = document.getElementById("chakraMax").value;
-  let baseDamage = document.getElementById("baseDamage").value;
-  let damagePerChakra = document.getElementById("damagePerChakra").value;
-  let chakraUsed = chakraMax - 1;
+  let damageType = document.getElementById("damageTypeSelector").value;
+  let baseDamage = parseInput(document.getElementById("baseDamage").value);
+  let totalDamage = baseDamage;
 
-  if (isNaN(chakraMax) || isNaN(baseDamage) || isNaN(damagePerChakra)) {
-    alert("Please enter valid numbers.");
-    return;
+  if (damageType === "chakra") {
+    let chakraMax = parseInput(document.getElementById("chakraMax").value);
+    let damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
+    let chakraUsed = chakraMax - 1n;
+
+    if (isNaN(Number(chakraMax)) || isNaN(Number(baseDamage)) || isNaN(Number(damagePerChakra))) {
+      alert("Please enter valid numbers.");
+      return;
+    }
+
+    let damageIncrease = chakraUsed * damagePerChakra;
+    totalDamage += damageIncrease;
   }
 
-  let damageIncrease = BigInt(chakraUsed) * BigInt(damagePerChakra);
-  let totalDamage = BigInt(baseDamage) + damageIncrease;
+  let baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
+  if (baseMultiplier !== 0n) {
+    totalDamage *= baseMultiplier;
+  }
 
-  let additionalDamage = document.getElementById("additionalDamage").value;
-  if(additionalDamage != ""){
-      if(document.getElementById("damageType").value === "add"){
-          totalDamage += BigInt(additionalDamage);
-      } else {
-          totalDamage *= BigInt(additionalDamage);
-      }
+  let additionalDamage = parseInput(document.getElementById("additionalDamage").value);
+  if (additionalDamage !== 0n) {
+    if (document.getElementById("damageModifier").value === "add") {
+      totalDamage += additionalDamage;
+    } else {
+      totalDamage *= additionalDamage;
+    }
   }
 
   document.getElementById("damageResult").innerHTML = "<p>Total Damage: " + totalDamage + "</p>";
   document.getElementById("scientificResult").innerHTML = "<p>Scientific Notation: " + toScientificNotation(totalDamage) + "</p>";
   document.getElementById("wordResult").innerHTML = "<p>Word Format: " + numberToWords(totalDamage) + "</p>";
+}
+
+function parseInput(input) {
+  if (input.includes("e")) {
+    let parts = input.split("e");
+    return BigInt(parseFloat(parts[0]) * Math.pow(10, parseInt(parts[1])));
+  } else {
+    return BigInt(input || 0); // Return 0 if input is empty
+  }
 }
 
 function toScientificNotation(number) {
@@ -158,34 +177,40 @@ function convertChunkToWords(chunk) {
 
     return words.filter(word => word !== "").join(" ");
 }
+
+function toggleChakraInputs() {
+  let damageType = document.getElementById("damageTypeSelector").value;
+  let chakraInputs = document.getElementById("chakraInputs");
+  chakraInputs.style.display = damageType === "chakra" ? "block" : "none";
+}
 </script>
 </head>
-<body>
+<body onload="toggleChakraInputs()">
   <div class="div-calculator">
     <h1>Damage Calculator</h1>
-    <label for="chakraMax">Chakra Max:</label>
-    <input type="text" id="chakraMax"> <br>
+
+    <label for="damageTypeSelector">Damage Type:</label>
+    <select id="damageTypeSelector" onchange="toggleChakraInputs()">
+      <option value="chakra">Chakra Damage</option>
+      <option value="ki">Ki Damage</option>
+    </select> <br>
+
+    <div id="chakraInputs">
+      <label for="chakraMax">Chakra Max:</label>
+      <input type="text" id="chakraMax"> <br>
+
+      <label for="damagePerChakra">Damage Per Chakra:</label>
+      <input type="text" id="damagePerChakra"> <br>
+    </div>
 
     <label for="baseDamage">Base Damage:</label>
     <input type="text" id="baseDamage"> <br>
 
-    <label for="damagePerChakra">Damage Per Chakra:</label>
-    <input type="text" id="damagePerChakra"> <br>
+    <label for="baseMultiplier">Base Multiplier:</label>
+    <input type="text" id="baseMultiplier"> <br>
 
     <label for="additionalDamage">Additional Damage/Multiplier:</label>
     <input type="text" id="additionalDamage"> <br>
 
-    <label for="damageType">Type:</label>
-    <select id="damageType">
-      <option value="add">Add</option>
-      <option value="multiply">Multiply</option>
-    </select> <br>
-
-    <button onclick="calculateDamage()">Calculate Damage</button>
-
-    <div id="damageResult"></div>
-    <div id="scientificResult"></div>
-    <div id="wordResult"></div>
-  </div>
-</body>
-</html>
+    <label for="damageModifier">Modifier Type:</label>
+    <select id="damageModifier">
