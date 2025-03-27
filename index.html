@@ -3,7 +3,7 @@
 <head>
 <title>Damage Calculator</title>
 <style>
-/* CSS Styles */
+/* CSS Styles (with changes for calculate button) */
 body {
   font-family: sans-serif;
   background-color: #f4f4f4;
@@ -35,8 +35,7 @@ label {
   color: #555;
 }
 
-input[type="text"],
-select {
+input[type="text"], select {
   width: calc(100% - 12px);
   padding: 10px;
   margin-bottom: 15px;
@@ -46,6 +45,7 @@ select {
 }
 
 button {
+  /* Default button styles */
   color: white;
   padding: 12px 20px;
   border: none;
@@ -57,21 +57,19 @@ button {
 }
 
 button:hover {
-  background-color: #45a049;
+  /* Default button hover style */
 }
 
+/* Calculate button specific styles */
 .calculate-button {
-  background-color: #4CAF50;
+  background-color: #4CAF50; /* Green */
 }
 
 .calculate-button:hover {
-  background-color: #45a049;
+  background-color: #45a049; /* Darker Green */
 }
 
-#damageResult,
-#scientificResult,
-#wordResult,
-#equationResult {
+#damageResult, #scientificResult, #wordResult, #equationResult {
   margin-top: 20px;
   padding: 15px;
   background-color: #e9f7ef;
@@ -133,7 +131,7 @@ button:hover {
 }
 
 .add-button {
-  background-color: #007bff;
+  background-color: #007bff; /* Blue */
   color: white;
   padding: 5px 10px;
   border: none;
@@ -144,7 +142,7 @@ button:hover {
 }
 
 .add-button:hover {
-  background-color: #0056b3;
+  background-color: #0056b3; /* Darker Blue */
 }
 </style>
 <script>
@@ -270,7 +268,7 @@ function calculateDamage() {
   }
 
   // Handle Base and Form Multipliers
-  const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
+  const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value;
   if (baseMultiplier !== 0n) {
     totalDamage *= baseMultiplier;
     equation += " * " + baseMultiplier.toString();
@@ -327,7 +325,7 @@ function calculateDamage() {
  */
 function updateEquation() {
   const damageType = document.getElementById("damageTypeSelector").value;
-  const baseDamage = parseInput(document.getElementById("baseDamage").value);
+  const baseDamage = parseInput(document.getElementById("baseDamage").value;
   let equation = baseDamage.toString();
 
   if (damageType === "chakra") {
