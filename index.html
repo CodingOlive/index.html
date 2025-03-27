@@ -21,7 +21,8 @@
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 500px;
+      width: 600px;
+      margin: auto;
     }
 
     h1 {
@@ -97,12 +98,20 @@
 
     .dynamic-box {
       display: flex;
+      align-items: center;
       margin-bottom: 15px;
     }
 
     .dynamic-box input {
       margin-right: 10px;
+      width: calc(100% - 50px);
     }
+
+    .dynamic-box label {
+      font-size: 14px;
+      margin-right: 10px;
+    }
+
   </style>
 </head>
 <body>
@@ -138,13 +147,6 @@
     <label for="baseMultiplier">Base Multiplier</label>
     <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
 
-    <label for="addMultiplySelector">Select Add or Multiply</label>
-    <select id="addMultiplySelector">
-      <option value="add">Add</option>
-      <option value="multiply">Multiply</option>
-    </select>
-
-    <!-- Button to dynamically add more boxes -->
     <button type="button" onclick="addDynamicBox()">Add Custom Box</button>
 
     <!-- Container for dynamically added boxes -->
@@ -246,11 +248,9 @@
       newBox.setAttribute('id', `dynamicBox${dynamicBoxCount}`);
 
       newBox.innerHTML = `
+        <label for="dynamicBoxValue${dynamicBoxCount}">Additional Value ${dynamicBoxCount}</label>
         <input type="text" id="dynamicBoxValue${dynamicBoxCount}" placeholder="Enter Value for Box ${dynamicBoxCount}">
-        <select id="dynamicBoxOperation${dynamicBoxCount}">
-          <option value="add">Add</option>
-          <option value="multiply">Multiply</option>
-        </select>
+        <input type="text" id="dynamicBoxDescription${dynamicBoxCount}" placeholder="Description of value">
         <button class="remove-button" onclick="removeDynamicBox(${dynamicBoxCount})">Remove</button>
       `;
       container.appendChild(newBox);
@@ -269,25 +269,22 @@
       let totalDamage = baseDamage;
       let equation = baseDamage.toString();
 
-      // Chakra calculation
       if (damageType === "chakra") {
         const chakraMax = parseInput(document.getElementById("chakraMax").value);
-        const chakraUsedPercentage = parseInt(document.getElementById('chakraUsedSlider').value);
+        const chakraUsedPercent = parseFloat(document.getElementById("chakraUsedSlider").value) / 100;
+        const chakraUsed = BigInt(chakraMax * chakraUsedPercent);
         const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
 
-        const chakraUsed = Math.floor((chakraUsedPercentage / 100) * chakraMax);
-        const damageIncrease = chakraUsed * damagePerChakra;
-
-        totalDamage += damageIncrease;
+        const chakraDamage = chakraUsed * damagePerChakra;
+        totalDamage += chakraDamage;
         equation += ` + (${chakraUsed} * ${damagePerChakra})`;
       }
 
-      // Apply form multiplier
+      // Apply form and base multipliers
       const formMultiplier = parseInput(document.getElementById("formMultiplier").value);
       totalDamage *= formMultiplier;
       equation += ` * ${formMultiplier} (Form Multiplier)`;
 
-      // Apply base multiplier
       const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
       totalDamage *= baseMultiplier;
       equation += ` * ${baseMultiplier} (Base Multiplier)`;
@@ -295,14 +292,9 @@
       // Handle dynamically added boxes
       for (let i = 1; i <= dynamicBoxCount; i++) {
         const boxValue = parseInput(document.getElementById(`dynamicBoxValue${i}`).value);
-        const operation = document.getElementById(`dynamicBoxOperation${i}`).value;
-        if (operation === 'add') {
-          totalDamage += boxValue;
-          equation += ` + ${boxValue}`;
-        } else if (operation === 'multiply') {
-          totalDamage *= boxValue;
-          equation += ` * ${boxValue}`;
-        }
+        const boxDescription = document.getElementById(`dynamicBoxDescription${i}`).value;
+        totalDamage += boxValue;
+        equation += ` + ${boxValue} (${boxDescription || 'Custom'})`;
       }
 
       // Display results
