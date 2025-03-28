@@ -157,28 +157,32 @@
   </div>
 
   <script>
-    function parseInput(input) {
-      return isNaN(parseFloat(input)) ? 0 : parseFloat(input);
+    function addDynamicBox() {
+      const container = document.getElementById("dynamicBoxesContainer");
+      const newBox = document.createElement("div");
+      newBox.className = "dynamic-box";
+      newBox.innerHTML = '<input type="text" placeholder="Enter Value">' +
+                         '<select><option value="add">Add</option><option value="multiply">Multiply</option></select>';
+      container.appendChild(newBox);
     }
 
-    function updateChakraTotal() {
-      const chakraMax = parseInput(document.getElementById("chakraMax").value);
-      const chakraMultiplier = parseInput(document.getElementById("chakraMaxMultiplier").value);
-      const chakraTotal = chakraMax * chakraMultiplier;
+    function calculateDamage() {
+      let totalDamage = parseFloat(document.getElementById("baseDamage").value) || 0;
+      const chakraUsed = parseFloat(document.getElementById("chakraUsedValue").textContent.match(/\d+/g)[1]) || 0;
+      const damagePerChakra = parseFloat(document.getElementById("damagePerChakra").value) || 0;
+      const formMultiplier = parseFloat(document.getElementById("formMultiplier").value) || 1;
+      const baseMultiplier = parseFloat(document.getElementById("baseMultiplier").value) || 1;
 
-      document.getElementById("chakraTotalValue").textContent = chakraTotal.toLocaleString();
-      updateChakraSliderValue();
-    }
+      totalDamage += (chakraUsed * damagePerChakra) * formMultiplier * baseMultiplier;
+      
+      document.getElementById("dynamicBoxesContainer").querySelectorAll(".dynamic-box").forEach(box => {
+        const value = parseFloat(box.querySelector("input").value) || 0;
+        const operation = box.querySelector("select").value;
+        totalDamage = operation === "add" ? totalDamage + value : totalDamage * value;
+      });
 
-    function updateChakraSliderValue() {
-      const chakraTotal = parseInput(document.getElementById("chakraTotalValue").textContent.replace(/,/g, ''));
-      const slider = document.getElementById("chakraUsedSlider");
-      const percentUsed = parseFloat(slider.value) / 100;
-      const chakraUsed = Math.round(chakraTotal * percentUsed);
-
-      document.getElementById("chakraUsedValue").textContent = `${slider.value}% (${chakraUsed.toLocaleString()} Chakra)`;
+      document.getElementById("numberResult").textContent = totalDamage.toLocaleString();
     }
   </script>
-
 </body>
 </html>
