@@ -239,6 +239,20 @@
             display: flex;
             flex-direction: column;
         }
+        .add-dynamic-box-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-dynamic-box-button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -252,52 +266,51 @@
 
         <div class="calculator-container" id="calculatorContainerChakra">
             <h1>Enhanced Damage Calculator (Chakra)</h1>
-            <div id = "chakra">
-                <label for="baseDamage">Base Damage</label>
-                <input type="text" id="baseDamage" placeholder="Enter Base Damage">
 
-                <label for="chakraMax">Chakra Max</label>
-                <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraTotal('chakra')">
+            <label for="baseDamage">Base Damage</label>
+            <input type="text" id="baseDamage" placeholder="Enter Base Damage">
 
-                <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
-                <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal('chakra')">
+            <label for="chakraMax">Chakra Max</label>
+            <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraTotal('chakra')">
 
-                <div class="chakra-total">
-                    <label>Chakra Total:</label>
-                    <span id="chakraTotalValueChakra">0</span>
-                </div>
+            <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
+            <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal('chakra')">
 
-                <label for="chakraUsedSlider">Chakra Usage (%)</label>
-                <input type="range" id="chakraUsedSliderChakra" min="0" max="100" value="100" oninput="updateChakraSliderValue('chakra')">
-                <span id="chakraUsedValueChakra">100%</span>
+            <div class="chakra-total">
+                <label>Chakra Total:</label>
+                <span id="chakraTotalValueChakra">0</span>
+            </div>
 
-                <label for="damagePerChakra">Damage per Chakra</label>
-                <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
+            <label for="chakraUsedSlider">Chakra Usage (%)</label>
+            <input type="range" id="chakraUsedSliderChakra" min="0" max="100" value="100" oninput="updateChakraSliderValue('chakra')">
+            <span id="chakraUsedValueChakra">100%</span>
 
-                <label for="formMultiplier">Form Multiplier</label>
-                <input type="text" id="formMultiplier" placeholder="Enter Form Multiplier">
+            <label for="damagePerChakra">Damage per Chakra</label>
+            <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
 
-                <div class="base-multiplier-container" style="display: flex; align-items: center; gap: 10px;">
-                    <label for="baseMultiplier">Base Multiplier</label>
-                    <input type="checkbox" id="baseMultiplierCheckbox" onchange="calculateDamage('chakra')">
-                    <span>Multiply the base damage?</span>
-                </div>
+            <label for="formMultiplier">Form Multiplier</label>
+            <input type="text" id="formMultiplier" placeholder="Enter Form Multiplier">
 
-                <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
+            <div class="base-multiplier-container" style="display: flex; align-items: center; gap: 10px;">
+                <label for="baseMultiplier">Base Multiplier</label>
+                <input type="checkbox" id="baseMultiplierCheckbox" onchange="calculateDamage('chakra')">
+                <span>Multiply the base damage?</span>
+            </div>
+
+            <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
 
 
-                <button class="add-dynamic-box-button" onclick="addDynamicBox('chakra')">+</button>
-                <div id="dynamicBoxesContainer"></div>
+            <button class="add-dynamic-box-button" onclick="addDynamicBox('chakra')">Add another box</button>
+            <div id="dynamicBoxesContainer"></div>
 
-                <button class="calculate-button" onclick="calculateDamage('chakra')">Calculate</button>
+            <button class="calculate-button" onclick="calculateDamage('chakra')">Calculate</button>
 
-                <div id="outputChakra" class="output-container">
-                    <h2>Results</h2>
-                    <p><strong>Equation:</strong> <span id="equationResultChakra"></span></p>
-                    <p><strong>Number Format:</strong> <span id="numberResultChakra"></span></p>
-                    <p><strong>Word Format:</strong> <span id="wordResultChakra"></span></p>
-                    <p><strong>Scientific Notation:</strong> <span id="scientificResultChakra"></span></p>
-                </div>
+            <div id="outputChakra" class="output-container">
+                <h2>Results</h2>
+                <p><strong>Equation:</strong> <span id="equationResultChakra"></span></p>
+                <p><strong>Number Format:</strong> <span id="numberResultChakra"></span></p>
+                <p><strong>Word Format:</strong> <span id="wordResultChakra"></span></p>
+                <p><strong>Scientific Notation:</strong> <span id="scientificResultChakra"></span></p>
             </div>
         </div>
 
@@ -336,7 +349,7 @@
 
             <input type="text" id="baseMultiplierKi" placeholder="Enter Base Multiplier">
 
-            <button class="add-dynamic-box-button" onclick="addDynamicBox('ki')">+</button>
+            <button class="add-dynamic-box-button" onclick="addDynamicBox('ki')">Add another box</button>
             <div id="dynamicBoxesContainerKi"></div>
 
             <button class="calculate-button" onclick="calculateDamage('ki')">Calculate</button>
@@ -345,7 +358,7 @@
                 <h2>Results</h2>
                 <p><strong>Equation:</strong> <span id="equationResultKi"></span></p>
                 <p><strong>Number Format:</strong> <span id="numberResultKi"></span></p>
-                <p><strong>Word Format:</strong> <span id="wordResultKi"></span></p>
+                <p><strong>Word Format:</strong> <span id="numberResultKi"></span></p>
                 <p><strong>Scientific Notation:</strong> <span id="scientificResultKi"></span></p>
             </div>
         </div>
@@ -435,7 +448,7 @@
                     <option value="add">Add</option>
                     <option value="multiply">Multiply</option>
                 </select>
-                <button class="dynamic-box-type-button dynamic-box-type-add active" onclick="setType(this, 'add', '${energyType}')">+</button>
+                <button class="dynamic-box-type-button dynamic-box-type-add active" onclick="setType(this, 'add', '${energyType}')">Add</button>
                 <button class="dynamic-box-type-button dynamic-box-type-multiply" onclick="setType(this, 'multiply', '${energyType}')">x</button>
                 <label>Value:</label>
                 <input type="text" value="0">
@@ -525,7 +538,7 @@
             let numberResult = totalDamage.toLocaleString('en-US');
             let wordResult = numberToWords(totalDamage);
             let scientificResult = totalDamage.toExponential();
-            
+
             if (energyType === 'chakra') {
                 document.getElementById('equationResultChakra').innerHTML = equation;
                 document.getElementById('numberResultChakra').innerText = numberResult;
