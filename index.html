@@ -14,12 +14,13 @@
       justify-content: center;
       align-items: flex-start;
       min-height: 100vh;
-      gap: 20px;
     }
 
     .container {
       display: flex;
+      justify-content: center;
       gap: 20px;
+      width: 100%;
     }
 
     .box {
@@ -27,14 +28,19 @@
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 300px;
+      width: 320px;
+      text-align: center;
     }
 
     .calculator-container {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       width: 480px;
     }
 
-    h1 {
+    h1, h2 {
       text-align: center;
       color: #3366cc;
       font-size: 20px;
@@ -47,6 +53,7 @@
       color: #333;
       font-weight: 600;
       font-size: 13px;
+      text-align: left;
     }
 
     input[type="text"],
@@ -85,7 +92,7 @@
       background-color: #2ecc71;
       font-size: 16px;
       padding: 5px 10px;
-      margin-left: 5px;
+      margin-top: 8px;
       border-radius: 50%;
       cursor: pointer;
     }
@@ -94,59 +101,56 @@
       background-color: #27ae60;
     }
 
-    .red-remove {
-      background-color: red;
-      color: white;
-      padding: 4px 8px;
-      font-size: 12px;
-      border-radius: 4px;
-      margin-left: 6px;
-      cursor: pointer;
+    .chakra-total {
+      font-size: 14px;
+      font-weight: bold;
+      color: #3366cc;
+      margin-bottom: 10px;
     }
 
-    .red-remove:hover {
-      background-color: darkred;
+    .dynamic-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="box"> <h1>Energy Pools</h1> </div>
 
-    <div class="box calculator-container">
+  <div class="container">
+    <div class="box">
+      <h2>Energy Pools</h2>
+    </div>
+
+    <div class="calculator-container">
       <h1>Enhanced Damage Calculator</h1>
+
       <label for="baseDamage">Base Damage</label>
       <input type="text" id="baseDamage" placeholder="Enter Base Damage">
-      
-      <label for="formMultiplier">Form Multiplier</label>
-      <input type="text" id="formMultiplier" placeholder="Enter Form Multiplier">
-      
-      <label for="baseMultiplier">Base Multiplier</label>
-      <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
 
       <label for="chakraMax">Chakra Max</label>
       <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraTotal()">
-      
+
       <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
       <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal()">
-      
+
       <div class="chakra-total">
         <label>Chakra Total:</label>
         <span id="chakraTotalValue">0</span>
       </div>
-      
-      <label for="chakraUsedSlider">Chakra Usage (%)</label>
-      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
-      <span id="chakraUsedValue">100% (0 Chakra)</span>
-      
-      <label for="damagePerChakra">Damage per Chakra</label>
-      <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
-      
+
+      <label for="formMultiplier">Form Multiplier</label>
+      <input type="text" id="formMultiplier" placeholder="Enter Form Multiplier">
+
+      <label for="baseMultiplier">Base Multiplier</label>
+      <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
+
       <button class="plus-button" onclick="addDynamicBox()">+</button>
       <div id="dynamicBoxesContainer"></div>
 
       <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
-      
+
       <div id="output" class="output-container">
         <h2>Results</h2>
         <p><strong>Equation:</strong> <span id="equationResult"></span></p>
@@ -156,7 +160,46 @@
       </div>
     </div>
 
-    <div class="box"> <h1>Dynamic Stats</h1> </div>
+    <div class="box">
+      <h2>Dynamic Stats</h2>
+    </div>
   </div>
+
+  <script>
+    function parseInput(input) {
+      return isNaN(parseFloat(input)) ? 0 : parseFloat(input);
+    }
+
+    function updateChakraTotal() {
+      const chakraMax = parseInput(document.getElementById("chakraMax").value);
+      const chakraMultiplier = parseInput(document.getElementById("chakraMaxMultiplier").value);
+      const chakraTotal = chakraMax * chakraMultiplier;
+      document.getElementById("chakraTotalValue").textContent = chakraTotal.toLocaleString();
+    }
+
+    function addDynamicBox() {
+      const type = prompt("Enter 'Multiply' or 'Add'");
+      if (!type || (type.toLowerCase() !== "multiply" && type.toLowerCase() !== "add")) return;
+
+      const name = prompt("Enter a name for this value:");
+      if (!name) return;
+
+      const container = document.getElementById("dynamicBoxesContainer");
+      const box = document.createElement("div");
+      box.classList.add("dynamic-box");
+
+      box.innerHTML = `
+        <label>${name}</label>
+        <input type="text" placeholder="Enter Value">
+        <select>
+          <option value="multiply" ${type.toLowerCase() === "multiply" ? "selected" : ""}>Multiply</option>
+          <option value="add" ${type.toLowerCase() === "add" ? "selected" : ""}>Add</option>
+        </select>
+        <button class="plus-button" onclick="this.parentElement.remove()">X</button>
+      `;
+
+      container.appendChild(box);
+    }
+  </script>
 </body>
 </html>
