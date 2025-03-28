@@ -12,102 +12,57 @@
       padding: 20px;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: center;
       min-height: 100vh;
     }
 
-    .container {
+    .main-container {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      flex-wrap: wrap; /* Allow wrapping if needed */
+      gap: 20px;
+      width: 90%;
+      justify-content: center;
     }
 
     .box {
-      flex: 1;
       background-color: #ffffff;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      min-height: 300px; /* Ensure it doesn't collapse */
+      width: 300px;
+      height: 500px;  /* Ensure visibility */
+      text-align: center;
+      border: 1px solid #ddd; /* Add a border to confirm visibility */
     }
 
     .calculator-container {
-      flex: 1.2; /* Make it slightly larger */
-    }
-
-    h1 {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 480px;
       text-align: center;
+      border: 1px solid #ddd; /* Add border for visibility */
+    }
+
+    h2 {
       color: #3366cc;
-      font-size: 20px;
+      font-size: 18px;
       margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      color: #333;
-      font-weight: 600;
-      font-size: 13px;
-    }
-
-    input[type="text"],
-    select,
-    input[type="range"] {
-      width: calc(100% - 22px);
-      padding: 8px;
-      margin-bottom: 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      box-sizing: border-box;
-      font-size: 13px;
-    }
-
-    button {
-      color: white;
-      padding: 10px 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background-color 0.3s ease;
-    }
-
-    .calculate-button {
-      background-color: #4CAF50;
-      width: 100%;
-      margin-top: 8px;
-    }
-
-    .calculate-button:hover {
-      background-color: #45a049;
-    }
-
-    .plus-button {
-      background-color: #2ecc71;
-      font-size: 16px;
-      padding: 5px 10px;
-      margin-left: 5px;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-
-    .plus-button:hover {
-      background-color: #27ae60;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+
+  <div class="main-container">
+    <!-- Left Box -->
     <div class="box">
-      <h1>Energy Pools</h1>
+      <h2>Energy Pools</h2>
     </div>
 
-    <div class="box calculator-container">
-      <h1>Enhanced Damage Calculator</h1>
+    <!-- Main Calculator -->
+    <div class="calculator-container">
+      <h2>Enhanced Damage Calculator</h2>
+
       <label for="baseDamage">Base Damage</label>
       <input type="text" id="baseDamage" placeholder="Enter Base Damage">
 
@@ -117,18 +72,39 @@
       <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
       <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal()">
 
-      <div class="chakra-total">
-        <label>Chakra Total:</label>
-        <span id="chakraTotalValue">0</span>
+      <div>
+        <strong>Chakra Total:</strong> <span id="chakraTotalValue">0</span>
       </div>
 
-      <button class="plus-button" onclick="addDynamicBox()">+</button>
-      <div id="dynamicBoxesContainer"></div>
+      <label for="chakraUsedSlider">Chakra Usage (%)</label>
+      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
+      <span id="chakraUsedValue">100% (0 Chakra)</span>
+
+      <label for="damagePerChakra">Damage per Chakra</label>
+      <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
+
+      <label for="formMultiplier">Form Multiplier</label>
+      <input type="text" id="formMultiplier" placeholder="Enter Form Multiplier">
+
+      <label for="baseMultiplier">Base Multiplier</label>
+      <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
+
+      <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
+
+      <div id="output">
+        <h2>Results</h2>
+        <p><strong>Equation:</strong> <span id="equationResult"></span></p>
+        <p><strong>Number Format:</strong> <span id="numberResult"></span></p>
+        <p><strong>Word Format:</strong> <span id="wordResult"></span></p>
+        <p><strong>Scientific Notation:</strong> <span id="scientificResult"></span></p>
+      </div>
     </div>
 
+    <!-- Right Box -->
     <div class="box">
-      <h1>Dynamic Stats</h1>
+      <h2>Dynamic Stats</h2>
     </div>
   </div>
+
 </body>
 </html>
