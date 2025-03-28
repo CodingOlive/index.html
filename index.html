@@ -167,5 +167,53 @@
     </div>
   </div>
 
+  <script>
+    function parseInput(input) {
+      return isNaN(parseFloat(input)) ? 0 : parseFloat(input);
+    }
+
+    function updateChakraTotal() {
+      const chakraMax = parseInput(document.getElementById("chakraMax").value);
+      const chakraMultiplier = parseInput(document.getElementById("chakraMaxMultiplier").value);
+      const chakraTotal = chakraMax * chakraMultiplier;
+
+      document.getElementById("chakraTotalValue").textContent = chakraTotal.toLocaleString();
+      updateChakraSliderValue();
+    }
+
+    function updateChakraSliderValue() {
+      const chakraTotal = parseInput(document.getElementById("chakraTotalValue").textContent.replace(/,/g, ''));
+      const slider = document.getElementById("chakraUsedSlider");
+      const percentUsed = parseFloat(slider.value) / 100;
+      const chakraUsed = Math.round(chakraTotal * percentUsed);
+
+      document.getElementById("chakraUsedValue").textContent = `${slider.value}% (${chakraUsed.toLocaleString()} Chakra)`;
+    }
+
+    function addDynamicBox() {
+      const type = prompt("Enter 'Multiply' or 'Add'");
+      if (!type || (type.toLowerCase() !== "multiply" && type.toLowerCase() !== "add")) return;
+
+      const name = prompt("Enter a name for this value:");
+      if (!name) return;
+
+      const container = document.getElementById("dynamicBoxesContainer");
+      const box = document.createElement("div");
+      box.classList.add("dynamic-box");
+
+      box.innerHTML = `
+        <label>${name}</label>
+        <input type="text" placeholder="Enter Value">
+        <select>
+          <option value="multiply" ${type.toLowerCase() === "multiply" ? "selected" : ""}>Multiply</option>
+          <option value="add" ${type.toLowerCase() === "add" ? "selected" : ""}>Add</option>
+        </select>
+        <button class="red-remove" onclick="this.parentElement.remove()">X</button>
+      `;
+
+      container.appendChild(box);
+    }
+  </script>
+
 </body>
 </html>
