@@ -8,78 +8,115 @@
     body {
       font-family: 'Arial', sans-serif;
       background-color: #f0f8ff;
+      margin: 0;
+      padding: 20px;
       display: flex;
       justify-content: center;
-      padding: 20px;
+      align-items: flex-start;
+      min-height: 100vh;
     }
+
     .calculator-container {
-      background-color: white;
+      background-color: #ffffff;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 500px;
+      width: 480px;
     }
-    .flex-container {
-      display: flex;
-      gap: 10px;
+
+    h1 {
+      text-align: center;
+      color: #3366cc;
+      font-size: 20px;
+      margin-bottom: 20px;
     }
-    .flex-container div {
-      flex: 1;
-    }
+
     label {
       display: block;
-      font-weight: bold;
-      margin-top: 10px;
+      margin-bottom: 6px;
+      color: #333;
+      font-weight: 600;
+      font-size: 13px;
     }
-    input, select {
-      width: 100%;
+
+    input[type="text"] {
+      width: calc(100% - 22px);
       padding: 8px;
-      margin-top: 5px;
+      margin-bottom: 12px;
       border: 1px solid #ddd;
       border-radius: 6px;
-      font-size: 14px;
+      box-sizing: border-box;
+      font-size: 13px;
     }
+
     button {
-      margin-top: 10px;
-      padding: 10px;
+      color: white;
+      padding: 10px 16px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      width: 100%;
+      font-size: 14px;
+      margin-top: 8px;
+      transition: background-color 0.3s ease;
     }
-    .calculate-button { background-color: #4CAF50; color: white; width: 100%; }
-    .red-remove { background-color: red; color: white; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer; }
+
+    .calculate-button {
+      background-color: #4CAF50;
+    }
+
+    .calculate-button:hover {
+      background-color: #45a049;
+    }
+
+    .chakra-total {
+      font-size: 14px;
+      font-weight: bold;
+      color: #3366cc;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
+
   <div class="calculator-container">
     <h1>Enhanced Damage Calculator</h1>
-    <div class="flex-container">
-      <div>
-        <label for="baseDamage">Base Damage</label>
-        <input type="text" id="baseDamage" placeholder="Enter Base Damage">
-      </div>
-      <div>
-        <label for="baseMultiplier">Base Multiplier</label>
-        <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
-      </div>
-    </div>
+
+    <label for="baseDamage">Base Damage</label>
+    <input type="text" id="baseDamage" placeholder="Enter Base Damage">
+
+    <label for="baseMultiplier">Base Multiplier</label>
+    <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
+
     <label for="chakraMax">Chakra Max</label>
     <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraTotal()">
+
     <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
     <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal()">
-    <div><strong>Chakra Total:</strong> <span id="chakraTotalValue">0</span></div>
+
+    <!-- Chakra Total Box -->
+    <div class="chakra-total">
+      <label>Chakra Total:</label>
+      <span id="chakraTotalValue">0</span>
+    </div>
+
     <label for="chakraUsedSlider">Chakra Usage (%)</label>
     <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
     <span id="chakraUsedValue">100% (0 Chakra)</span>
+
     <label for="damagePerChakra">Damage per Chakra</label>
     <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
+
     <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
+
     <div id="output"></div>
   </div>
+
   <script>
     function parseInput(value) {
       return isNaN(parseFloat(value)) ? 0 : parseFloat(value);
     }
+
     function updateChakraTotal() {
       const max = parseInput(document.getElementById("chakraMax").value);
       const multiplier = parseInput(document.getElementById("chakraMaxMultiplier").value);
@@ -87,12 +124,14 @@
       document.getElementById("chakraTotalValue").textContent = total.toLocaleString();
       updateChakraSliderValue();
     }
+
     function updateChakraSliderValue() {
       const total = parseInput(document.getElementById("chakraTotalValue").textContent.replace(/,/g, ''));
       const slider = document.getElementById("chakraUsedSlider");
       const used = Math.round(total * (slider.value / 100));
       document.getElementById("chakraUsedValue").textContent = `${slider.value}% (${used.toLocaleString()} Chakra)`;
     }
+
     function calculateDamage() {
       const baseDamage = parseInput(document.getElementById("baseDamage").value);
       const baseMultiplier = parseInput(document.getElementById("baseMultiplier").value);
@@ -103,5 +142,6 @@
       document.getElementById("output").innerHTML = `<p><strong>Total Damage:</strong> ${totalDamage.toLocaleString()}</p><p><strong>Scientific Notation:</strong> ${scientific}</p>`;
     }
   </script>
+
 </body>
 </html>
