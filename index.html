@@ -121,29 +121,37 @@
     <label for="baseDamage">Base Damage</label>
     <input type="text" id="baseDamage" placeholder="Enter Base Damage">
 
-    <label for="baseMultiplier">Base Multiplier</label>
-    <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
+    <label for="damageTypeSelector">Damage Type</label>
+    <select id="damageTypeSelector" onchange="toggleChakraFields()">
+      <option value="chakra">Chakra</option>
+      <option value="standard">Standard</option>
+    </select>
 
-    <label for="chakraMax">Chakra Max</label>
-    <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraTotal()">
+    <div id="chakraOptions">
+      <label for="chakraMax">Chakra Max</label>
+      <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraTotal()">
 
-    <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
-    <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal()">
+      <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
+      <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal()">
 
-    <div class="chakra-total">
-      <label>Chakra Total:</label>
-      <span id="chakraTotalValue">0</span>
+      <div class="chakra-total">
+        <label>Chakra Total:</label>
+        <span id="chakraTotalValue">0</span>
+      </div>
+
+      <label for="chakraUsedSlider">Chakra Usage (%)</label>
+      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
+      <span id="chakraUsedValue">100% (0 Chakra)</span>
+
+      <label for="damagePerChakra">Damage per Chakra</label>
+      <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
     </div>
-
-    <label for="chakraUsedSlider">Chakra Usage (%)</label>
-    <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
-    <span id="chakraUsedValue">100% (0 Chakra)</span>
-
-    <label for="damagePerChakra">Damage per Chakra</label>
-    <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
 
     <label for="formMultiplier">Form Multiplier</label>
     <input type="text" id="formMultiplier" placeholder="Enter Form Multiplier">
+
+    <label for="baseMultiplier">Base Multiplier</label>
+    <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
 
     <button class="plus-button" onclick="addDynamicBox()">+</button>
     <div id="dynamicBoxesContainer"></div>
@@ -158,21 +166,6 @@
       <p><strong>Scientific Notation:</strong> <span id="scientificResult"></span></p>
     </div>
   </div>
-
-  <script>
-    function parseInput(input) {
-      return isNaN(parseFloat(input)) ? 0 : parseFloat(input);
-    }
-
-    function updateChakraTotal() {
-      const chakraMax = parseInput(document.getElementById("chakraMax").value);
-      const chakraMultiplier = parseInput(document.getElementById("chakraMaxMultiplier").value);
-      const chakraTotal = chakraMax * chakraMultiplier;
-
-      document.getElementById("chakraTotalValue").textContent = chakraTotal.toLocaleString();
-      updateChakraSliderValue();
-    }
-  </script>
 
 </body>
 </html>
