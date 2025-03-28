@@ -16,26 +16,20 @@
       min-height: 100vh;
     }
 
-    .main-container {
+    .container {
       display: flex;
-      gap: 20px;
-      justify-content: center;
-      align-items: flex-start;
+      justify-content: space-between;
       width: 100%;
       max-width: 1200px;
     }
 
-    .box-container {
+    .box {
       background-color: #ffffff;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 300px;
-      min-height: 400px;
+      width: 30%;
       text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
 
     .calculator-container {
@@ -43,7 +37,7 @@
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 480px;
+      width: 35%;
     }
 
     h1 {
@@ -53,37 +47,89 @@
       margin-bottom: 20px;
     }
 
-    @media (max-width: 1000px) {
-      .main-container {
-        flex-direction: column;
-        align-items: center;
-      }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #333;
+      font-weight: 600;
+      font-size: 13px;
+    }
 
-      .box-container {
-        width: 90%;
-      }
+    input[type="text"],
+    input[type="range"] {
+      width: calc(100% - 22px);
+      padding: 8px;
+      margin-bottom: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 13px;
+    }
+
+    button {
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
+
+    .calculate-button {
+      background-color: #4CAF50;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .calculate-button:hover {
+      background-color: #45a049;
+    }
+
+    .chakra-total {
+      font-size: 14px;
+      font-weight: bold;
+      color: #3366cc;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
 
-  <div class="main-container">
-    <!-- Left Box: Energy Pools -->
-    <div class="box-container">
+  <div class="container">
+    <div class="box" id="energyPools">
       <h1>Energy Pools</h1>
-      <p>Future content goes here.</p>
     </div>
-
-    <!-- Main Calculator Box -->
+    
     <div class="calculator-container">
       <h1>Enhanced Damage Calculator</h1>
-      <p>Main calculator content goes here.</p>
+
+      <label for="baseDamage">Base Damage</label>
+      <input type="text" id="baseDamage" placeholder="Enter Base Damage">
+
+      <label for="chakraMax">Chakra Max</label>
+      <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraTotal()">
+
+      <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
+      <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal()">
+
+      <div class="chakra-total">
+        <label>Chakra Total:</label>
+        <span id="chakraTotalValue">0</span>
+      </div>
+
+      <label for="chakraUsedSlider">Chakra Usage (%)</label>
+      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
+      <span id="chakraUsedValue">100% (0 Chakra)</span>
+
+      <label for="damagePerChakra">Damage per Chakra</label>
+      <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
+
+      <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
     </div>
 
-    <!-- Right Box: Dynamic Stats -->
-    <div class="box-container">
+    <div class="box" id="dynamicStats">
       <h1>Dynamic Stats</h1>
-      <p>Future content goes here.</p>
     </div>
   </div>
 
