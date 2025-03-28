@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,7 +40,6 @@
     }
 
     input[type="text"],
-    select,
     input[type="range"] {
       width: calc(100% - 22px);
       padding: 8px;
@@ -58,76 +56,59 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      width: 100%;
       font-size: 14px;
-      margin-top: 8px;
       transition: background-color 0.3s ease;
     }
 
     .calculate-button {
       background-color: #4CAF50;
+      width: 100%;
+      margin-top: 8px;
     }
 
     .calculate-button:hover {
       background-color: #45a049;
     }
 
-    .emerald-button {
+    .plus-button {
       background-color: #2ecc71;
-      color: white;
+      font-size: 16px;
+      padding: 5px 10px;
+      margin-left: 5px;
+      border-radius: 50%;
+      cursor: pointer;
     }
 
-    .emerald-button:hover {
+    .plus-button:hover {
       background-color: #27ae60;
     }
 
-    .remove-button {
-      background-color: #dc3545;
+    .red-remove {
+      background-color: red;
       color: white;
+      padding: 4px 8px;
       font-size: 12px;
-      padding: 6px 10px;
-      margin-top: 8px;
+      border-radius: 4px;
+      margin-left: 6px;
+      cursor: pointer;
     }
 
-    .remove-button:hover {
-      background-color: #c82333;
+    .red-remove:hover {
+      background-color: darkred;
+    }
+
+    .chakra-total {
+      font-size: 14px;
+      font-weight: bold;
+      color: #3366cc;
+      margin-bottom: 10px;
     }
 
     .dynamic-box {
-      margin-bottom: 10px;
-    }
-
-    .dynamic-box input {
-      width: calc(100% - 70px);
-    }
-
-    .dynamic-box button {
-      margin-left: 10px;
-      padding: 6px 10px;
-    }
-
-    #chakraUsedValue {
-      color: red;
-      font-size: 13px;
-    }
-
-    .slider-container {
-      margin-bottom: 12px;
-    }
-
-    .scientific-display {
-      font-size: 13px;
-      color: #ff6347;
-    }
-
-    .output-container p {
-      font-size: 13px;
-      margin: 5px 0;
-    }
-
-    .output-container h2 {
-      font-size: 16px;
-      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
     }
   </style>
 </head>
@@ -139,45 +120,33 @@
     <label for="baseDamage">Base Damage</label>
     <input type="text" id="baseDamage" placeholder="Enter Base Damage">
 
-    <label for="damageTypeSelector">Damage Type</label>
-    <select id="damageTypeSelector" onchange="toggleChakraFields()">
-      <option value="chakra">Chakra</option>
-      <option value="standard">Standard</option>
-    </select>
-
-    <!-- Chakra Options -->
     <div id="chakraOptions">
       <label for="chakraMax">Chakra Max</label>
-      <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraMultiplier()">
+      <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraTotal()">
 
-      <!-- Chakra Max Multiplier with Real-Time Scientific Notation -->
       <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
-      <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraMultiplier()">
+      <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal()">
 
-      <!-- Display Chakra Max in Scientific Notation if above 1 million -->
-      <div id="scientificDisplay" class="scientific-display"></div>
+      <div class="chakra-total">
+        <label>Chakra Total:</label>
+        <span id="chakraTotalValue">0</span>
+      </div>
 
       <label for="chakraUsedSlider">Chakra Usage (%)</label>
-      <div class="slider-container">
-        <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
-        <span id="chakraUsedValue">100%</span>
-      </div>
+      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
+      <span id="chakraUsedValue">100% (0 Chakra)</span>
 
       <label for="damagePerChakra">Damage per Chakra</label>
       <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
     </div>
 
-    <!-- Form Multiplier and Base Multiplier -->
     <label for="formMultiplier">Form Multiplier</label>
     <input type="text" id="formMultiplier" placeholder="Enter Form Multiplier">
 
     <label for="baseMultiplier">Base Multiplier</label>
     <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
 
-    <!-- Add Box Button -->
-    <button class="emerald-button" type="button" onclick="addDynamicBox()">Add Custom Box</button>
-
-    <!-- Container for dynamically added boxes -->
+    <button class="plus-button" onclick="addDynamicBox()">+</button>
     <div id="dynamicBoxesContainer"></div>
 
     <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
@@ -192,171 +161,52 @@
   </div>
 
   <script>
-    // Parse input values to BigInt
     function parseInput(input) {
-      if (input.includes("e")) {
-        let parts = input.split("e");
-        return BigInt(parseFloat(parts[0]) * Math.pow(10, parseInt(parts[1])));
-      } else {
-        const parsed = BigInt(input || 0);
-        if (isNaN(Number(parsed))) {
-          return 0n;
-        }
-        return parsed;
-      }
+      return isNaN(parseFloat(input)) ? 0 : parseFloat(input);
     }
 
-    // Convert number to word format (supporting very large numbers)
-    function numberToWords(number) {
-      let numStr = number.toString();
-      if (numStr.length <= 15) {
-        return numStr;
-      }
-
-      let numBigInt = BigInt(number);
-      if (numBigInt === 0n) {
-        return "Zero";
-      }
-
-      const units = [
-        "", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", 
-        "Septillion", "Octillion", "Nonillion", "Decillion", "Undecillion", "Duodecillion", "Tredecillion",
-        "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septendecillion", "Octodecillion", "Nonodecillion",
-        "Decemdecillion", "Vigintillion", "Unvigintillion", "Duovigintillion", "Trevigintillion", "Quattuorvigintillion",
-        "Quinvigintillion", "Sexvigintillion", "Septvigintillion", "Octovigintillion", "Nonavigintillion", "Trigintillion",
-        "Untrigintillion", "Duotrigintillion", "Tritrigintillion", "Quattuortrigintillion", "Quintrigintillion", "Sextrigintillion",
-        "Septtrigintillion", "Octotrigintillion", "Nonatrigintillion", "Quadragintillion", "Unquadragintillion", "Duquadragintillion",
-        "Trequadragintillion", "Quattuorquadragintillion", "Quinquadragintillion", "Sexquadragintillion", "Septquadragintillion", 
-        "Octoquadragintillion", "Nonaquadragintillion", "Centillion"
-      ];
-
-      let parts = [];
-      let i = 0;
-
-      while (numBigInt > 0n) {
-        let chunk = numBigInt % 1000n;
-        if (chunk > 0n) {
-          parts.unshift(`${convertChunkToWords(chunk)} ${units[i]}`);
-        }
-        numBigInt = numBigInt / 1000n;
-        i++;
-      }
-
-      return parts.join(" ").trim();
-    }
-
-    // Convert chunk of number to words
-    function convertChunkToWords(chunk) {
-      const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
-      const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-      const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
-
-      let words = [];
-      const hundred = Math.floor(chunk / 100n);
-      const remainder = chunk % 100n;
-      const ten = Math.floor(remainder / 10n);
-      const one = remainder % 10n;
-
-      if (hundred > 0n) {
-        words.push(ones[hundred], "Hundred");
-      }
-      if (ten === 1n) {
-        words.push(teens[one]);
-      } else if (ten > 1n) {
-        words.push(tens[ten], ones[one]);
-      } else if (one > 0n) {
-        words.push(ones[one]);
-      }
-
-      return words.filter(word => word !== "").join(" ");
-    }
-
-    // Update the Chakra multiplier and display the new Chakra Max
-    function updateChakraMultiplier() {
+    function updateChakraTotal() {
       const chakraMax = parseInput(document.getElementById("chakraMax").value);
-      const chakraMultiplier = parseFloat(document.getElementById("chakraMaxMultiplier").value) || 1;
-      const newChakraMax = chakraMax * chakraMultiplier;
+      const chakraMultiplier = parseInput(document.getElementById("chakraMaxMultiplier").value);
+      const chakraTotal = chakraMax * chakraMultiplier;
 
-      // Update Chakra Max value
-      document.getElementById("chakraMax").value = newChakraMax;
-
-      // Display Chakra Max in scientific notation if above 1 million
-      if (newChakraMax > 1e6) {
-        document.getElementById("scientificDisplay").textContent = `Chakra Max: ${newChakraMax.toExponential(2)}`;
-      } else {
-        document.getElementById("scientificDisplay").textContent = '';
-      }
-
-      // Adjust the slider max value based on the new Chakra Max
-      document.getElementById("chakraUsedSlider").max = newChakraMax;
+      document.getElementById("chakraTotalValue").textContent = chakraTotal.toLocaleString();
+      updateChakraSliderValue();
     }
 
-    // Update the Chakra slider percentage value
     function updateChakraSliderValue() {
+      const chakraTotal = parseInput(document.getElementById("chakraTotalValue").textContent.replace(/,/g, ''));
       const slider = document.getElementById("chakraUsedSlider");
-      const value = slider.value;
-      document.getElementById("chakraUsedValue").textContent = value + "%";
+      const percentUsed = parseFloat(slider.value) / 100;
+      const chakraUsed = Math.round(chakraTotal * percentUsed);
+
+      document.getElementById("chakraUsedValue").textContent = `${slider.value}% (${chakraUsed.toLocaleString()} Chakra)`;
     }
 
-    // Toggle the Chakra Fields based on the selected damage type
-    function toggleChakraFields() {
-      const damageType = document.getElementById("damageTypeSelector").value;
-      const chakraOptions = document.getElementById("chakraOptions");
-      if (damageType === "standard") {
-        chakraOptions.style.display = "none";
-      } else {
-        chakraOptions.style.display = "block";
-      }
-    }
-
-    // Add dynamic custom boxes to the UI
     function addDynamicBox() {
-      const dynamicBoxContainer = document.getElementById("dynamicBoxesContainer");
-      const dynamicBox = document.createElement("div");
-      dynamicBox.classList.add("dynamic-box");
+      const type = prompt("Enter 'Multiply' or 'Add'");
+      if (!type || (type.toLowerCase() !== "multiply" && type.toLowerCase() !== "add")) return;
 
-      const input = document.createElement("input");
-      input.type = "text";
-      input.placeholder = "Enter Custom Value";
-      dynamicBox.appendChild(input);
+      const name = prompt("Enter a name for this value:");
+      if (!name) return;
 
-      const removeButton = document.createElement("button");
-      removeButton.textContent = "Remove";
-      removeButton.classList.add("remove-button");
-      removeButton.onclick = function () {
-        dynamicBoxContainer.removeChild(dynamicBox);
-      };
-      dynamicBox.appendChild(removeButton);
+      const container = document.getElementById("dynamicBoxesContainer");
+      const box = document.createElement("div");
+      box.classList.add("dynamic-box");
 
-      dynamicBoxContainer.appendChild(dynamicBox);
-    }
+      box.innerHTML = `
+        <label>${name}</label>
+        <input type="text" placeholder="Enter Value">
+        <select>
+          <option value="multiply" ${type.toLowerCase() === "multiply" ? "selected" : ""}>Multiply</option>
+          <option value="add" ${type.toLowerCase() === "add" ? "selected" : ""}>Add</option>
+        </select>
+        <button class="red-remove" onclick="this.parentElement.remove()">X</button>
+      `;
 
-    // Calculate the damage based on inputs
-    function calculateDamage() {
-      let damageType = document.getElementById("damageTypeSelector").value;
-      let baseDamage = parseInput(document.getElementById("baseDamage").value);
-      let totalDamage = baseDamage;
-      let equation = baseDamage.toString();
-
-      if (damageType === "chakra") {
-        const chakraMax = parseInput(document.getElementById("chakraMax").value);
-        const chakraMultiplier = parseFloat(document.getElementById("chakraMaxMultiplier").value) || 1;
-        const chakraUsed = parseFloat(document.getElementById("chakraUsedSlider").value);
-        const damagePerChakra = parseInput(document.getElementById("damagePerChakra").value);
-
-        const adjustedChakraMax = chakraMax * chakraMultiplier;
-        const chakraUsedValue = Math.floor((adjustedChakraMax * chakraUsed) / 100);
-
-        totalDamage += chakraUsedValue * damagePerChakra;
-        equation += ` + (${chakraUsedValue} * ${damagePerChakra})`;
-      }
-
-      // Display results
-      document.getElementById("equationResult").textContent = equation;
-      document.getElementById("numberResult").textContent = totalDamage.toString();
-      document.getElementById("wordResult").textContent = numberToWords(totalDamage);
-      document.getElementById("scientificResult").textContent = totalDamage.toExponential();
+      container.appendChild(box);
     }
   </script>
+
 </body>
 </html>
