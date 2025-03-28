@@ -18,8 +18,7 @@
 
     .container {
       display: flex;
-      justify-content: center;
-      gap: 20px;
+      justify-content: space-around;
       width: 100%;
     }
 
@@ -28,8 +27,14 @@
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 320px;
+      width: 30%;
+      min-height: 400px;
       text-align: center;
+    }
+
+    h2 {
+      color: #3366cc;
+      font-size: 18px;
     }
 
     .calculator-container {
@@ -40,20 +45,12 @@
       width: 480px;
     }
 
-    h1, h2 {
-      text-align: center;
-      color: #3366cc;
-      font-size: 20px;
-      margin-bottom: 20px;
-    }
-
     label {
       display: block;
       margin-bottom: 6px;
       color: #333;
       font-weight: 600;
       font-size: 13px;
-      text-align: left;
     }
 
     input[type="text"],
@@ -84,48 +81,28 @@
       margin-top: 8px;
     }
 
-    .calculate-button:hover {
-      background-color: #45a049;
-    }
-
     .plus-button {
       background-color: #2ecc71;
       font-size: 16px;
       padding: 5px 10px;
-      margin-top: 8px;
+      margin-left: 5px;
       border-radius: 50%;
-      cursor: pointer;
     }
 
-    .plus-button:hover {
-      background-color: #27ae60;
-    }
-
-    .chakra-total {
-      font-size: 14px;
-      font-weight: bold;
-      color: #3366cc;
-      margin-bottom: 10px;
-    }
-
-    .dynamic-box {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
+    .output-container {
+      margin-top: 20px;
+      text-align: left;
     }
   </style>
 </head>
 <body>
-
   <div class="container">
     <div class="box">
       <h2>Energy Pools</h2>
     </div>
 
     <div class="calculator-container">
-      <h1>Enhanced Damage Calculator</h1>
-
+      <h2>Enhanced Damage Calculator</h2>
       <label for="baseDamage">Base Damage</label>
       <input type="text" id="baseDamage" placeholder="Enter Base Damage">
 
@@ -140,6 +117,13 @@
         <span id="chakraTotalValue">0</span>
       </div>
 
+      <label for="chakraUsedSlider">Chakra Usage (%)</label>
+      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
+      <span id="chakraUsedValue">100% (0 Chakra)</span>
+
+      <label for="damagePerChakra">Damage per Chakra</label>
+      <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
+
       <label for="formMultiplier">Form Multiplier</label>
       <input type="text" id="formMultiplier" placeholder="Enter Form Multiplier">
 
@@ -152,7 +136,7 @@
       <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
 
       <div id="output" class="output-container">
-        <h2>Results</h2>
+        <h3>Results</h3>
         <p><strong>Equation:</strong> <span id="equationResult"></span></p>
         <p><strong>Number Format:</strong> <span id="numberResult"></span></p>
         <p><strong>Word Format:</strong> <span id="wordResult"></span></p>
@@ -164,42 +148,5 @@
       <h2>Dynamic Stats</h2>
     </div>
   </div>
-
-  <script>
-    function parseInput(input) {
-      return isNaN(parseFloat(input)) ? 0 : parseFloat(input);
-    }
-
-    function updateChakraTotal() {
-      const chakraMax = parseInput(document.getElementById("chakraMax").value);
-      const chakraMultiplier = parseInput(document.getElementById("chakraMaxMultiplier").value);
-      const chakraTotal = chakraMax * chakraMultiplier;
-      document.getElementById("chakraTotalValue").textContent = chakraTotal.toLocaleString();
-    }
-
-    function addDynamicBox() {
-      const type = prompt("Enter 'Multiply' or 'Add'");
-      if (!type || (type.toLowerCase() !== "multiply" && type.toLowerCase() !== "add")) return;
-
-      const name = prompt("Enter a name for this value:");
-      if (!name) return;
-
-      const container = document.getElementById("dynamicBoxesContainer");
-      const box = document.createElement("div");
-      box.classList.add("dynamic-box");
-
-      box.innerHTML = `
-        <label>${name}</label>
-        <input type="text" placeholder="Enter Value">
-        <select>
-          <option value="multiply" ${type.toLowerCase() === "multiply" ? "selected" : ""}>Multiply</option>
-          <option value="add" ${type.toLowerCase() === "add" ? "selected" : ""}>Add</option>
-        </select>
-        <button class="plus-button" onclick="this.parentElement.remove()">X</button>
-      `;
-
-      container.appendChild(box);
-    }
-  </script>
 </body>
 </html>
