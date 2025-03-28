@@ -8,85 +8,59 @@
     body {
       font-family: 'Arial', sans-serif;
       background-color: #f0f8ff;
-      margin: 0;
-      padding: 20px;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
+      padding: 20px;
     }
-
     .calculator-container {
-      background-color: #ffffff;
+      background-color: white;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 480px;
+      width: 500px;
     }
-
-    h1 {
-      text-align: center;
-      color: #3366cc;
-      font-size: 20px;
-      margin-bottom: 20px;
+    .flex-container {
+      display: flex;
+      gap: 10px;
     }
-
     label {
       display: block;
-      margin-bottom: 6px;
-      color: #333;
-      font-weight: 600;
-      font-size: 13px;
+      font-weight: bold;
+      margin-top: 10px;
     }
-
-    input[type="text"] {
-      width: calc(100% - 22px);
+    input, select {
+      width: 100%;
       padding: 8px;
-      margin-bottom: 12px;
+      margin-top: 5px;
       border: 1px solid #ddd;
       border-radius: 6px;
-      box-sizing: border-box;
-      font-size: 13px;
+      font-size: 14px;
     }
-
     button {
-      color: white;
-      padding: 10px 16px;
+      margin-top: 10px;
+      padding: 10px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      width: 100%;
-      font-size: 14px;
-      margin-top: 8px;
-      transition: background-color 0.3s ease;
     }
-
-    .calculate-button {
-      background-color: #4CAF50;
-    }
-
-    .calculate-button:hover {
-      background-color: #45a049;
-    }
-
-    .chakra-total {
-      font-size: 14px;
-      font-weight: bold;
-      color: #3366cc;
-      margin-bottom: 10px;
-    }
+    .calculate-button { background-color: #4CAF50; color: white; width: 100%; }
+    .red-remove { background-color: red; color: white; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer; }
   </style>
 </head>
 <body>
-
   <div class="calculator-container">
     <h1>Enhanced Damage Calculator</h1>
-
-    <label for="baseDamage">Base Damage</label>
-    <input type="text" id="baseDamage" placeholder="Enter Base Damage">
-
-    <label for="baseMultiplier">Base Multiplier</label>
-    <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
+    
+    <div class="flex-container">
+      <div>
+        <label for="baseDamage">Base Damage</label>
+        <input type="text" id="baseDamage" placeholder="Enter Base Damage">
+      </div>
+      <div>
+        <label for="baseMultiplier">Base Multiplier</label>
+        <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
+      </div>
+    </div>
 
     <label for="chakraMax">Chakra Max</label>
     <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraTotal()">
@@ -94,11 +68,7 @@
     <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
     <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal()">
 
-    <!-- Chakra Total Box -->
-    <div class="chakra-total">
-      <label>Chakra Total:</label>
-      <span id="chakraTotalValue">0</span>
-    </div>
+    <div><strong>Chakra Total:</strong> <span id="chakraTotalValue">0</span></div>
 
     <label for="chakraUsedSlider">Chakra Usage (%)</label>
     <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
