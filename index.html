@@ -18,31 +18,32 @@
 
     .container {
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
+      align-items: flex-start;
       width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      flex-wrap: wrap; /* Allow wrapping if needed */
     }
 
     .box {
+      flex: 1;
       background-color: #ffffff;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 30%;
-      min-height: 400px;
-      text-align: center;
-    }
-
-    h2 {
-      color: #3366cc;
-      font-size: 18px;
+      min-height: 300px; /* Ensure it doesn't collapse */
     }
 
     .calculator-container {
-      background-color: #ffffff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 480px;
+      flex: 1.2; /* Make it slightly larger */
+    }
+
+    h1 {
+      text-align: center;
+      color: #3366cc;
+      font-size: 20px;
+      margin-bottom: 20px;
     }
 
     label {
@@ -81,28 +82,32 @@
       margin-top: 8px;
     }
 
+    .calculate-button:hover {
+      background-color: #45a049;
+    }
+
     .plus-button {
       background-color: #2ecc71;
       font-size: 16px;
       padding: 5px 10px;
       margin-left: 5px;
       border-radius: 50%;
+      cursor: pointer;
     }
 
-    .output-container {
-      margin-top: 20px;
-      text-align: left;
+    .plus-button:hover {
+      background-color: #27ae60;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="box">
-      <h2>Energy Pools</h2>
+      <h1>Energy Pools</h1>
     </div>
 
-    <div class="calculator-container">
-      <h2>Enhanced Damage Calculator</h2>
+    <div class="box calculator-container">
+      <h1>Enhanced Damage Calculator</h1>
       <label for="baseDamage">Base Damage</label>
       <input type="text" id="baseDamage" placeholder="Enter Base Damage">
 
@@ -117,35 +122,12 @@
         <span id="chakraTotalValue">0</span>
       </div>
 
-      <label for="chakraUsedSlider">Chakra Usage (%)</label>
-      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
-      <span id="chakraUsedValue">100% (0 Chakra)</span>
-
-      <label for="damagePerChakra">Damage per Chakra</label>
-      <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
-
-      <label for="formMultiplier">Form Multiplier</label>
-      <input type="text" id="formMultiplier" placeholder="Enter Form Multiplier">
-
-      <label for="baseMultiplier">Base Multiplier</label>
-      <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
-
       <button class="plus-button" onclick="addDynamicBox()">+</button>
       <div id="dynamicBoxesContainer"></div>
-
-      <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
-
-      <div id="output" class="output-container">
-        <h3>Results</h3>
-        <p><strong>Equation:</strong> <span id="equationResult"></span></p>
-        <p><strong>Number Format:</strong> <span id="numberResult"></span></p>
-        <p><strong>Word Format:</strong> <span id="wordResult"></span></p>
-        <p><strong>Scientific Notation:</strong> <span id="scientificResult"></span></p>
-      </div>
     </div>
 
     <div class="box">
-      <h2>Dynamic Stats</h2>
+      <h1>Dynamic Stats</h1>
     </div>
   </div>
 </body>
