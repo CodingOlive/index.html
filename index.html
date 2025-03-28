@@ -40,7 +40,6 @@
     }
 
     input[type="text"],
-    select,
     input[type="range"] {
       width: calc(100% - 22px);
       padding: 8px;
@@ -120,12 +119,6 @@
 
     <label for="baseDamage">Base Damage</label>
     <input type="text" id="baseDamage" placeholder="Enter Base Damage">
-
-    <label for="damageTypeSelector">Damage Type</label>
-    <select id="damageTypeSelector" onchange="toggleChakraFields()">
-      <option value="chakra">Chakra</option>
-      <option value="standard">Standard</option>
-    </select>
 
     <div id="chakraOptions">
       <label for="chakraMax">Chakra Max</label>
