@@ -167,6 +167,7 @@
         }
         .dynamic-box-type-multiply {
             background-color: #f9a825;
+            color: white;
         }
         .dynamic-box-type-button:not(.active) {
              background-color: #ccc;
@@ -195,6 +196,20 @@
 
         #myTurnButton:hover {
             background-color: #00869e;
+        }
+        #calculatorContainerChakra {
+           
+        }
+        #calculatorContainerChakra h1,
+        #calculatorContainerChakra label,
+        #calculatorContainerChakra span,
+        #calculatorContainerChakra p{
+            color: #000;
+        }
+        .clickable-number {
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -237,7 +252,7 @@
             <label for="baseMultiplier">Base Multiplier</label>
             <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
 
-            <button class="add-dynamic-box-button" onclick="addDynamicBox()">+</button>
+            <button class="add-dynamic-box-button" onclick="addDynamicBox('chakra')">+</button>
             <div id="dynamicBoxesContainer"></div>
 
             <button class="calculate-button" onclick="calculateDamage('chakra')">Calculate</button>
@@ -281,7 +296,7 @@
             <label for="baseMultiplierKi">Base Multiplier</label>
             <input type="text" id="baseMultiplierKi" placeholder="Enter Base Multiplier">
 
-            <button class="add-dynamic-box-button" onclick="addDynamicBox()">+</button>
+            <button class="add-dynamic-box-button" onclick="addDynamicBox('ki')">+</button>
             <div id="dynamicBoxesContainerKi"></div>
 
             <button class="calculate-button" onclick="calculateDamage('ki')">Calculate</button>
@@ -315,8 +330,8 @@
             let multiplierId = energyType === 'chakra' ? 'chakraMaxMultiplier' : 'kiMaxMultiplier';
             let totalValueId = energyType === 'chakra' ? 'chakraTotalValueChakra' : 'chakraTotalValueKi';
 
-            let max = parseFloat(document.getElementById(maxId).value) || 0;
-            let multiplier = parseFloat(document.getElementById(multiplierId).value) || 1;
+            let max = parseFloat(document.getElementById(maxId).value.replace(/,/g, '')) || 0;
+            let multiplier = parseFloat(document.getElementById(multiplierId).value.replace(/,/g, '')) || 1;
             document.getElementById(totalValueId).innerText = max * multiplier;
             updateChakraSliderValue(energyType);
              if (energyType === 'ki') {
@@ -334,14 +349,15 @@
             let totalEnergy = parseFloat(document.getElementById(totalValueId).innerText) || 0;
             let usedPercentage = slider.value;
             let usedEnergyValue = Math.round((usedPercentage / 100) * totalEnergy);
-            document.getElementById(displayValueId).innerText = usedPercentage + "% (" + usedEnergyValue + " " + energyName + ")";
+            document.getElementById(displayValueId).innerText = usedPercentage + "% (" + usedEnergyValue.toLocaleString('en-US') + " " + energyName + ")";
              if (energyType === 'ki') {
                 updateDynamicStatsKi();
              }
         }
 
-        function addDynamicBox() {
-            let container = document.getElementById("dynamicBoxesContainer");
+        function addDynamicBox(energyType) {
+            let containerId = energyType === 'chakra' ? 'dynamicBoxesContainer' : 'dynamicBoxesContainerKi';
+            let container = document.getElementById(containerId);
 
             let div = document.createElement("div");
             div.className = "dynamic-box";
@@ -399,36 +415,45 @@
             let energyName = energyType === 'chakra' ? 'Chakra' : 'Ki';
 
 
-            let baseDamage = parseFloat(document.getElementById(baseDamageId).value) || 0;
+            let baseDamage = parseFloat(document.getElementById(baseDamageId).value.replace(/,/g, '')) || 0;
             let totalEnergy = parseFloat(document.getElementById(totalValueId).innerText) || 0;
             let energyUsedPercentage = parseFloat(document.getElementById(sliderId).value) || 0;
-            let damagePerEnergy = parseFloat(document.getElementById(damagePerEnergyId).value) || 0;
-            let formMultiplier = parseFloat(document.getElementById(formMultiplierId).value) || 1;
-            let baseMultiplier = parseFloat(document.getElementById(baseMultiplierId).value) || 1;
+            let damagePerEnergy = parseFloat(document.getElementById(damagePerEnergyId).value.replace(/,/g, '')) || 0;
+            let formMultiplier = parseFloat(document.getElementById(formMultiplierId).value.replace(/,/g, '')) || 1;
+            let baseMultiplier = parseFloat(document.getElementById(baseMultiplierId).value.replace(/,/g, '')) || 1;
+            let totalDamage = 0;
 
             let energyUsed = Math.round((energyUsedPercentage / 100) * totalEnergy);
             let energyDamage = energyUsed * damagePerEnergy;
 
-            let dynamicBoxes = document.querySelectorAll("#dynamicBoxesContainer .dynamic-box");  // This should work for both
-            dynamicBoxes.forEach(box => {
+            let dynamicBoxes = document.querySelectorAll(`#${energyType === 'chakra' ? 'dynamicBoxesContainer' : 'dynamicBoxesContainerKi'} .dynamic-box`);  //  Use energyType
+            let dynamicEquation = '';
+            dynamicBoxes.forEach((box, index) => {
                 let name = box.querySelector("input:nth-of-type(1)").value;
                 let type = box.querySelector("select").value;
-                let value = parseFloat(box.querySelector("input:nth-of-type(2)").value) || 0;
+                let value = parseFloat(box.querySelector("input:nth-of-type(2)").value.replace(/,/g, '')) || 0;
+                let boxId = `${energyType === 'chakra' ? 'chakraDynamicBoxValue' : 'kiDynamicBoxValue'}${index}`; // Unique ID
+                box.querySelector("input:nth-of-type(2)").id = boxId;
 
                 if (type === "add") {
                     baseDamage += value;
+                    dynamicEquation += ` + <span class="clickable-number" onclick="highlightInput('${boxId}')">${value.toLocaleString('en-US')}</span>`;
                 } else {
                     baseDamage *= value;
+                    dynamicEquation += ` * <span class="clickable-number" onclick="highlightInput('${boxId}')">${value.toLocaleString('en-US')}</span>`;
                 }
             });
-            let totalDamage = (baseDamage + energyDamage) * formMultiplier * baseMultiplier;
 
-            let equation = `(${baseDamage.toFixed(2)} + (${energyUsed.toFixed(0)} * ${damagePerEnergy})) * ${formMultiplier} * ${baseMultiplier}`;
-            let numberResult = totalDamage.toFixed(2);
+            let equation = `<span class="clickable-number" onclick="highlightInput('${baseDamageId}')">${baseDamage.toLocaleString('en-US')}</span> + (<span class="clickable-number" onclick="highlightInput('${sliderId}')">${energyUsed.toLocaleString('en-US')}</span> * <span class="clickable-number" onclick="highlightInput('${damagePerEnergyId}')">${damagePerEnergy.toLocaleString('en-US')}</span>) * <span class="clickable-number" onclick="highlightInput('${formMultiplierId}')">${formMultiplier.toLocaleString('en-US')}</span> * <span class="clickable-number" onclick="highlightInput('${baseMultiplierId}')">${baseMultiplier.toLocaleString('en-US')}</span>`;
+            if (dynamicEquation){
+                 equation =  `(<span class="clickable-number" onclick="highlightInput('${baseDamageId}')">${baseDamage.toLocaleString('en-US')}</span> ${dynamicEquation}) + (<span class="clickable-number" onclick="highlightInput('${sliderId}')">${energyUsed.toLocaleString('en-US')}</span> * <span class="clickable-number" onclick="highlightInput('${damagePerEnergyId}')">${damagePerEnergy.toLocaleString('en-US')}</span>) * <span class="clickable-number" onclick="highlightInput('${formMultiplierId}')">${formMultiplier.toLocaleString('en-US')}</span> * <span class="clickable-number" onclick="highlightInput('${baseMultiplierId}')">${baseMultiplier.toLocaleString('en-US')}</span>`;
+            }
+            totalDamage = (baseDamage + energyDamage) * formMultiplier * baseMultiplier;
+            let numberResult = totalDamage.toLocaleString('en-US');
             let wordResult = numberToWords(totalDamage);
-            let scientificResult = totalDamage.toExponential(2);
+            let scientificResult = totalDamage.toExponential();
 
-            document.getElementById(equationResultId).innerText = equation;
+            document.getElementById(equationResultId).innerHTML = equation;
             document.getElementById(numberResultId).innerText = numberResult;
             document.getElementById(wordResultId).innerText = wordResult;
             document.getElementById(scientificResultId).innerText = scientificResult;
@@ -494,14 +519,24 @@
             let usedKi = Math.round((kiUsedPercentage / 100) * kiTotal);
 
             let remainingHealth = maxHealth - (usedKi * kaiokenDrain);
-            document.getElementById("remainingHealth").innerText = remainingHealth.toFixed(2);
+            document.getElementById("remainingHealth").innerText = remainingHealth.toLocaleString('en-US');
         }
         function updateRemainingHealth() {
-            let maxHealth = parseFloat(document.getElementById("maxHealth").value) || 0;
-            let kaiokenDrain = parseFloat(document.getElementById("kaiokenDrain").value) || 0;
+            let maxHealth = parseFloat(document.getElementById("maxHealth").value.replace(/,/g, '')) || 0;
+            let kaiokenDrain = parseFloat(document.getElementById("kaiokenDrain").value.replace(/,/g, '')) || 0;
 
             let remainingHealth = maxHealth - kaiokenDrain;
-            document.getElementById("remainingHealth").innerText = remainingHealth.toFixed(2);
+            document.getElementById("remainingHealth").innerText = remainingHealth.toLocaleString('en-US');
+        }
+
+        function highlightInput(inputId) {
+            const inputElement = document.getElementById(inputId);
+            if (inputElement) {
+                inputElement.style.backgroundColor = 'yellow';
+                setTimeout(() => {
+                    inputElement.style.backgroundColor = '';
+                }, 1000);
+            }
         }
     </script>
 </body>
