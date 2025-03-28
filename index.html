@@ -18,9 +18,7 @@
 
     .container {
       display: flex;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 1200px;
+      gap: 20px;
     }
 
     .box {
@@ -28,7 +26,7 @@
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 30%;
+      width: 300px;
       text-align: center;
     }
 
@@ -37,7 +35,7 @@
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 35%;
+      width: 480px;
     }
 
     h1 {
@@ -76,14 +74,31 @@
       transition: background-color 0.3s ease;
     }
 
-    .calculate-button {
-      background-color: #4CAF50;
-      width: 100%;
-      margin-top: 8px;
+    .plus-button {
+      background-color: #2ecc71;
+      font-size: 16px;
+      padding: 5px 10px;
+      margin-top: 10px;
+      border-radius: 50%;
+      cursor: pointer;
     }
 
-    .calculate-button:hover {
-      background-color: #45a049;
+    .plus-button:hover {
+      background-color: #27ae60;
+    }
+
+    .red-remove {
+      background-color: red;
+      color: white;
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+      margin-left: 6px;
+      cursor: pointer;
+    }
+
+    .red-remove:hover {
+      background-color: darkred;
     }
 
     .chakra-total {
@@ -92,15 +107,20 @@
       color: #3366cc;
       margin-bottom: 10px;
     }
+
+    .dynamic-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <div class="box" id="energyPools">
-      <h1>Energy Pools</h1>
-    </div>
-    
+    <div class="box"> <h1>Energy Pools</h1> </div>
+
     <div class="calculator-container">
       <h1>Enhanced Damage Calculator</h1>
 
@@ -118,20 +138,30 @@
         <span id="chakraTotalValue">0</span>
       </div>
 
-      <label for="chakraUsedSlider">Chakra Usage (%)</label>
-      <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
-      <span id="chakraUsedValue">100% (0 Chakra)</span>
-
-      <label for="damagePerChakra">Damage per Chakra</label>
-      <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
-
-      <button class="calculate-button" onclick="calculateDamage()">Calculate</button>
+      <button class="plus-button" onclick="addDynamicBox()">+</button>
+      <div id="dynamicBoxesContainer"></div>
     </div>
 
-    <div class="box" id="dynamicStats">
-      <h1>Dynamic Stats</h1>
-    </div>
+    <div class="box"> <h1>Dynamic Stats</h1> </div>
   </div>
 
+  <script>
+    function addDynamicBox() {
+      const container = document.getElementById("dynamicBoxesContainer");
+      const box = document.createElement("div");
+      box.classList.add("dynamic-box");
+      
+      box.innerHTML = `
+        <input type="text" placeholder="Enter Value">
+        <select>
+          <option value="multiply">Multiply</option>
+          <option value="add">Add</option>
+        </select>
+        <button class="red-remove" onclick="this.parentElement.remove()">X</button>
+      `;
+
+      container.appendChild(box);
+    }
+  </script>
 </body>
 </html>
