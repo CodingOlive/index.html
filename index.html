@@ -19,6 +19,10 @@
     .main-container {
       display: flex;
       gap: 20px;
+      justify-content: center;
+      align-items: flex-start;
+      width: 100%;
+      max-width: 1200px;
     }
 
     .box-container {
@@ -125,6 +129,14 @@
       gap: 8px;
       margin-bottom: 8px;
     }
+
+    /* Responsive */
+    @media (max-width: 1000px) {
+      .main-container {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -211,30 +223,6 @@
       const chakraUsed = Math.round(chakraTotal * percentUsed);
 
       document.getElementById("chakraUsedValue").textContent = `${slider.value}% (${chakraUsed.toLocaleString()} Chakra)`;
-    }
-
-    function addDynamicBox() {
-      const type = prompt("Enter 'Multiply' or 'Add'");
-      if (!type || (type.toLowerCase() !== "multiply" && type.toLowerCase() !== "add")) return;
-
-      const name = prompt("Enter a name for this value:");
-      if (!name) return;
-
-      const container = document.getElementById("dynamicBoxesContainer");
-      const box = document.createElement("div");
-      box.classList.add("dynamic-box");
-
-      box.innerHTML = `
-        <label>${name}</label>
-        <input type="text" placeholder="Enter Value">
-        <select>
-          <option value="multiply" ${type.toLowerCase() === "multiply" ? "selected" : ""}>Multiply</option>
-          <option value="add" ${type.toLowerCase() === "add" ? "selected" : ""}>Add</option>
-        </select>
-        <button class="red-remove" onclick="this.parentElement.remove()">X</button>
-      `;
-
-      container.appendChild(box);
     }
   </script>
 
