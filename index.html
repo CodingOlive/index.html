@@ -141,7 +141,7 @@
 
       <label for="chakraUsedSlider">Chakra Usage (%)</label>
       <input type="range" id="chakraUsedSlider" min="0" max="100" value="100" oninput="updateChakraSliderValue()">
-      <span id="chakraUsedValue">100%</span>
+      <span id="chakraUsedValue">100% (0 Chakra)</span>
 
       <label for="damagePerChakra">Damage per Chakra</label>
       <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
@@ -178,17 +178,16 @@
       const chakraTotal = chakraMax * chakraMultiplier;
 
       document.getElementById("chakraTotalValue").textContent = chakraTotal.toLocaleString();
-      document.getElementById("chakraUsedSlider").max = chakraTotal || 1;
+      updateChakraSliderValue();
     }
 
     function updateChakraSliderValue() {
+      const chakraTotal = parseInput(document.getElementById("chakraTotalValue").textContent.replace(/,/g, ''));
       const slider = document.getElementById("chakraUsedSlider");
-      document.getElementById("chakraUsedValue").textContent = slider.value + "%";
-    }
+      const percentUsed = parseFloat(slider.value) / 100;
+      const chakraUsed = Math.round(chakraTotal * percentUsed);
 
-    function toggleChakraFields() {
-      document.getElementById("chakraOptions").style.display = 
-        document.getElementById("damageTypeSelector").value === "chakra" ? "block" : "none";
+      document.getElementById("chakraUsedValue").textContent = `${slider.value}% (${chakraUsed.toLocaleString()} Chakra)`;
     }
 
     function addDynamicBox() {
