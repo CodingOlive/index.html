@@ -95,6 +95,9 @@
             font-weight: bold;
             color: #3366cc;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .dynamic-box {
@@ -109,7 +112,7 @@
             text-align: left;
         }
 
-        #dynamicBoxesContainer {
+        #dynamicBoxesContainer, #dynamicBoxesContainerKi {
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -170,7 +173,7 @@
             color: white;
         }
         .dynamic-box-type-button:not(.active) {
-             background-color: #ccc;
+                background-color: #ccc;
             color: #666;
         }
 
@@ -192,13 +195,14 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 13px;
+            transition: background-color 0.3s ease;
         }
 
         #myTurnButton:hover {
             background-color: #00869e;
         }
         #calculatorContainerChakra {
-           
+
         }
         #calculatorContainerChakra h1,
         #calculatorContainerChakra label,
@@ -210,6 +214,44 @@
             cursor: pointer;
             color: blue;
             text-decoration: underline;
+        }
+        .turn-button{
+            margin-left: 10px;
+            padding: 8px 12px;
+            background-color: #00B8D4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.3s ease;
+        }
+
+        .turn-button:hover {
+            background-color: #00869e;
+        }
+        .toggle-box{
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
+        .input-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .add-dynamic-box-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-dynamic-box-button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
@@ -241,7 +283,7 @@
 
             <label for="chakraUsedSlider">Chakra Usage (%)</label>
             <input type="range" id="chakraUsedSliderChakra" min="0" max="100" value="100" oninput="updateChakraSliderValue('chakra')">
-            <span id="chakraUsedValueChakra">100% (0 Chakra)</span>
+            <span id="chakraUsedValueChakra">100%</span>
 
             <label for="damagePerChakra">Damage per Chakra</label>
             <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
@@ -249,10 +291,16 @@
             <label for="formMultiplier">Form Multiplier</label>
             <input type="text" id="formMultiplier" placeholder="Enter Form Multiplier">
 
-            <label for="baseMultiplier">Base Multiplier</label>
+            <div class="base-multiplier-container" style="display: flex; align-items: center; gap: 10px;">
+                <label for="baseMultiplier">Base Multiplier</label>
+                <input type="checkbox" id="baseMultiplierCheckbox" onchange="calculateDamage('chakra')">
+                <span>Multiply the base damage?</span>
+            </div>
+
             <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
 
-            <button class="add-dynamic-box-button" onclick="addDynamicBox('chakra')">+</button>
+
+            <button class="add-dynamic-box-button" onclick="addDynamicBox('chakra')">Add another box</button>
             <div id="dynamicBoxesContainer"></div>
 
             <button class="calculate-button" onclick="calculateDamage('chakra')">Calculate</button>
@@ -293,10 +341,15 @@
             <label for="formMultiplierKi">Form Multiplier</label>
             <input type="text" id="formMultiplierKi" placeholder="Enter Form Multiplier">
 
-            <label for="baseMultiplierKi">Base Multiplier</label>
+            <div class="base-multiplier-container" style="display: flex; align-items: center; gap: 10px;">
+                <label for="baseMultiplierKi">Base Multiplier</label>
+                <input type="checkbox" id="baseMultiplierCheckboxKi" onchange="calculateDamage('ki')">
+                <span>Multiply the base damage?</span>
+            </div>
+
             <input type="text" id="baseMultiplierKi" placeholder="Enter Base Multiplier">
 
-            <button class="add-dynamic-box-button" onclick="addDynamicBox('ki')">+</button>
+            <button class="add-dynamic-box-button" onclick="addDynamicBox('ki')">Add another box</button>
             <div id="dynamicBoxesContainerKi"></div>
 
             <button class="calculate-button" onclick="calculateDamage('ki')">Calculate</button>
@@ -305,26 +358,50 @@
                 <h2>Results</h2>
                 <p><strong>Equation:</strong> <span id="equationResultKi"></span></p>
                 <p><strong>Number Format:</strong> <span id="numberResultKi"></span></p>
-                <p><strong>Word Format:</strong> <span id="wordResultKi"></span></p>
+                <p><strong>Word Format:</strong> <span id="numberResultKi"></span></p>
                 <p><strong>Scientific Notation:</strong> <span id="scientificResultKi"></span></p>
             </div>
         </div>
 
-        <div class="box" id="dynamicStatsChakra">
+        <div class="box" id="dynamicStatsChakra" >
             <h2>Dynamic Stats</h2>
+            <div id="chakraSection">
+                <label for="chakraRegen">Chakra Regen</label>
+                <div class = "input-container">
+                    <input type="text" id="chakraRegen" placeholder="Enter Chakra Regen" oninput="updateCurrentChakra('chakra')">
+                    <button id="chakraTurnButton" class = "turn-button" onclick="updateCurrentChakra('chakra')">My Turn</button>
+                </div>
+            </div>
         </div>
         <div class="box" id="dynamicStatsKi">
             <h2>Dynamic Stats</h2>
-            <label for="maxHealth">Max Health</label>
-            <input type="text" id="maxHealth" placeholder="Enter Max Health" oninput="updateDynamicStatsKi()">
+             <div  id="kiSection">
+                 <label  class = "toggle-box" for="kiKaiokenCheckbox">Using Kaioken?</label>
+                 <input type="checkbox" id="kiKaiokenCheckbox" onchange="toggleKaioken()">
+            </div>
+            <label for="kiRegen">Ki Regen Rate</label>
+            <div class = "input-container">
+                <input type="text" id="kiRegen" placeholder="Enter Ki Regen Rate" oninput="updateCurrentKi('ki')">
+                <button id="kiTurnButton"  class = "turn-button" onclick="updateCurrentKi('ki')">My Turn</button>
+            </div>
+            <div id = "kaiokenTogglable" >
+                
 
-            <label for="kaiokenDrain">Kaioken Health Drain Rate</label>
-            <input type="text" id="kaiokenDrain" placeholder="Enter Drain Rate" oninput="updateDynamicStatsKi()">
-            <p><strong>Remaining Health:</strong> <span id="remainingHealth"></span><button id="myTurnButton" onclick="updateRemainingHealth()">My Turn</button></p>
+                <label for="maxHealth">Max Health</label>
+                <input type="text" id="maxHealth" placeholder="Enter Max Health" oninput="updateDynamicStatsKi()">
+
+                <label for="kaiokenDrain">Kaioken Health Drain Rate</label>
+                <input type="text" id="kaiokenDrain" placeholder="Enter Drain Rate" oninput="updateDynamicStatsKi()">
+                <p><strong>Remaining Health:</strong> <span id="remainingHealth"></span><button id="myTurnButton" onclick="updateRemainingHealth()">My Turn</button></p>
+            </div>
         </div>
     </div>
 
     <script>
+        let currentChakra = 0;
+        let currentKi = 0;
+        let maxChakra = 0;
+        let maxKi = 0;
         function updateChakraTotal(energyType) {
             let maxId = energyType === 'chakra' ? 'chakraMax' : 'kiMax';
             let multiplierId = energyType === 'chakra' ? 'chakraMaxMultiplier' : 'kiMaxMultiplier';
@@ -332,27 +409,29 @@
 
             let max = parseFloat(document.getElementById(maxId).value.replace(/,/g, '')) || 0;
             let multiplier = parseFloat(document.getElementById(multiplierId).value.replace(/,/g, '')) || 1;
-            document.getElementById(totalValueId).innerText = max * multiplier;
-            updateChakraSliderValue(energyType);
-             if (energyType === 'ki') {
-                updateDynamicStatsKi();
-             }
+            let totalEnergy = max * multiplier;
+            document.getElementById(totalValueId).innerText = totalEnergy.toLocaleString('en-US');
+            if (energyType === 'chakra') {
+                maxChakra = totalEnergy;
+            } else if (energyType === 'ki') {
+                maxKi = totalEnergy;
+            }
         }
 
         function updateChakraSliderValue(energyType) {
             let sliderId = energyType === 'chakra' ? 'chakraUsedSliderChakra' : 'kiUsedSliderKi';
-            let totalValueId = energyType === 'chakra' ? 'chakraTotalValueChakra' : 'chakraTotalValueKi';
             let displayValueId = energyType === 'chakra' ? 'chakraUsedValueChakra' : 'chakraUsedValueKi';
             let energyName = energyType === 'chakra' ? 'Chakra' : 'Ki';
+            let maxEnergy = energyType === 'chakra' ? maxChakra : maxKi;
 
             let slider = document.getElementById(sliderId);
-            let totalEnergy = parseFloat(document.getElementById(totalValueId).innerText) || 0;
             let usedPercentage = slider.value;
-            let usedEnergyValue = Math.round((usedPercentage / 100) * totalEnergy);
-            document.getElementById(displayValueId).innerText = usedPercentage + "% (" + usedEnergyValue.toLocaleString('en-US') + " " + energyName + ")";
-             if (energyType === 'ki') {
-                updateDynamicStatsKi();
-             }
+            let usedEnergyValue = Math.round((usedPercentage / 100) * maxEnergy);
+
+            // Format the output with commas
+            let formattedValue = usedEnergyValue.toLocaleString('en-US');
+            document.getElementById(displayValueId).innerText = usedPercentage + "% (" + formattedValue + " " + energyName + ")";
+
         }
 
         function addDynamicBox(energyType) {
@@ -369,8 +448,8 @@
                     <option value="add">Add</option>
                     <option value="multiply">Multiply</option>
                 </select>
-                <button class="dynamic-box-type-button dynamic-box-type-add active" onclick="setType(this, 'add')">+</button>
-                <button class="dynamic-box-type-button dynamic-box-type-multiply" onclick="setType(this, 'multiply')">x</button>
+                <button class="dynamic-box-type-button dynamic-box-type-add active" onclick="setType(this, 'add', '${energyType}')">Add</button>
+                <button class="dynamic-box-type-button dynamic-box-type-multiply" onclick="setType(this, 'multiply', '${energyType}')">x</button>
                 <label>Value:</label>
                 <input type="text" value="0">
                 <button onclick="removeDynamicBox(this)">Remove</button>
@@ -382,7 +461,7 @@
                 firstInput.focus();
             }
         }
-        function setType(buttonElement, type) {
+        function setType(buttonElement, type, energyType) {
             let selectElement = buttonElement.parentNode.querySelector("select");
             selectElement.value = type;
             let addBtn = buttonElement.parentNode.querySelector(".dynamic-box-type-add");
@@ -413,18 +492,23 @@
             let wordResultId = energyType === 'chakra' ? 'wordResultChakra' : 'wordResultKi';
             let scientificResultId = energyType === 'chakra' ? 'scientificResultChakra' : 'scientificResultKi';
             let energyName = energyType === 'chakra' ? 'Chakra' : 'Ki';
+            let maxEnergy = energyType === 'chakra' ? maxChakra : maxKi;
 
 
             let baseDamage = parseFloat(document.getElementById(baseDamageId).value.replace(/,/g, '')) || 0;
-            let totalEnergy = parseFloat(document.getElementById(totalValueId).innerText) || 0;
+            let totalEnergyValue = parseFloat(document.getElementById(totalValueId).innerText.replace(/,/g, '')) || 0;
             let energyUsedPercentage = parseFloat(document.getElementById(sliderId).value) || 0;
             let damagePerEnergy = parseFloat(document.getElementById(damagePerEnergyId).value.replace(/,/g, '')) || 0;
             let formMultiplier = parseFloat(document.getElementById(formMultiplierId).value.replace(/,/g, '')) || 1;
-            let baseMultiplier = parseFloat(document.getElementById(baseMultiplierId).value.replace(/,/g, '')) || 1;
-            let totalDamage = 0;
+            let baseMultiplierCheckbox = document.getElementById(baseMultiplierId + 'Checkbox');
+            let baseMultiplierValue = parseFloat(document.getElementById(baseMultiplierId).value.replace(/,/g, '')) || 1;
+            let shouldMultiplyBase = baseMultiplierCheckbox && baseMultiplierCheckbox.checked;
 
-            let energyUsed = Math.round((energyUsedPercentage / 100) * totalEnergy);
+
+            let energyUsed = Math.round((energyUsedPercentage / 100) * totalEnergyValue);
             let energyDamage = energyUsed * damagePerEnergy;
+
+            let finalBaseDamage = shouldMultiplyBase ? baseDamage * baseMultiplierValue : baseDamage;
 
             let dynamicBoxes = document.querySelectorAll(`#${energyType === 'chakra' ? 'dynamicBoxesContainer' : 'dynamicBoxesContainerKi'} .dynamic-box`);  //  Use energyType
             let dynamicEquation = '';
@@ -436,30 +520,40 @@
                 box.querySelector("input:nth-of-type(2)").id = boxId;
 
                 if (type === "add") {
-                    baseDamage += value;
+                    finalBaseDamage += value;
                     dynamicEquation += ` + <span class="clickable-number" onclick="highlightInput('${boxId}')">${value.toLocaleString('en-US')}</span>`;
                 } else {
-                    baseDamage *= value;
+                    finalBaseDamage *= value;
                     dynamicEquation += ` * <span class="clickable-number" onclick="highlightInput('${boxId}')">${value.toLocaleString('en-US')}</span>`;
                 }
             });
 
-            let equation = `<span class="clickable-number" onclick="highlightInput('${baseDamageId}')">${baseDamage.toLocaleString('en-US')}</span> + (<span class="clickable-number" onclick="highlightInput('${sliderId}')">${energyUsed.toLocaleString('en-US')}</span> * <span class="clickable-number" onclick="highlightInput('${damagePerEnergyId}')">${damagePerEnergy.toLocaleString('en-US')}</span>) * <span class="clickable-number" onclick="highlightInput('${formMultiplierId}')">${formMultiplier.toLocaleString('en-US')}</span> * <span class="clickable-number" onclick="highlightInput('${baseMultiplierId}')">${baseMultiplier.toLocaleString('en-US')}</span>`;
-            if (dynamicEquation){
-                 equation =  `(<span class="clickable-number" onclick="highlightInput('${baseDamageId}')">${baseDamage.toLocaleString('en-US')}</span> ${dynamicEquation}) + (<span class="clickable-number" onclick="highlightInput('${sliderId}')">${energyUsed.toLocaleString('en-US')}</span> * <span class="clickable-number" onclick="highlightInput('${damagePerEnergyId}')">${damagePerEnergy.toLocaleString('en-US')}</span>) * <span class="clickable-number" onclick="highlightInput('${formMultiplierId}')">${formMultiplier.toLocaleString('en-US')}</span> * <span class="clickable-number" onclick="highlightInput('${baseMultiplierId}')">${baseMultiplier.toLocaleString('en-US')}</span>`;
-            }
-            totalDamage = (baseDamage + energyDamage) * formMultiplier * baseMultiplier;
+            let equation = shouldMultiplyBase ? 
+                `((${baseDamage.toLocaleString('en-US')} * ${baseMultiplierValue.toLocaleString('en-US')} ${dynamicEquation}) + (${energyUsed.toLocaleString('en-US')} * ${damagePerEnergy.toLocaleString('en-US')}))) * ${formMultiplier.toLocaleString('en-US')}` :
+                `(${baseDamage.toLocaleString('en-US')} ${dynamicEquation}) + (${energyUsed.toLocaleString('en-US')} * ${damagePerEnergy.toLocaleString('en-US')}))) * ${formMultiplier.toLocaleString('en-US')}`;
+
+            totalDamage = (finalBaseDamage + energyDamage) * formMultiplier;
+
+
             let numberResult = totalDamage.toLocaleString('en-US');
             let wordResult = numberToWords(totalDamage);
             let scientificResult = totalDamage.toExponential();
 
-            document.getElementById(equationResultId).innerHTML = equation;
-            document.getElementById(numberResultId).innerText = numberResult;
-            document.getElementById(wordResultId).innerText = wordResult;
-            document.getElementById(scientificResultId).innerText = scientificResult;
+            if (energyType === 'chakra') {
+                document.getElementById('equationResultChakra').innerHTML = equation;
+                document.getElementById('numberResultChakra').innerText = numberResult;
+                document.getElementById('wordResultChakra').innerText = wordResult;
+                document.getElementById('scientificResultChakra').innerText = scientificResult;
+            } else {
+                document.getElementById('equationResultKi').innerHTML = equation;
+                document.getElementById('numberResultKi').innerText = numberResult;
+                document.getElementById('wordResultKi').innerText = wordResult;
+                document.getElementById('scientificResultKi').innerText = scientificResult;
+            }
              if (energyType === 'ki') {
                 updateDynamicStatsKi();
-             }
+                updateKiDisplay();
+            }
         }
 
         function numberToWords(number) {
@@ -514,7 +608,6 @@
             let maxHealth = parseFloat(document.getElementById("maxHealth").value) || 0;
             let kaiokenDrain = parseFloat(document.getElementById("kaiokenDrain").value) || 0;
             let kiUsedSlider = document.getElementById("kiUsedSliderKi");
-            let kiUsedPercentage = kiUsedSlider.value;
             let kiTotal = parseFloat(document.getElementById("chakraTotalValueKi").innerText) || 0;
             let usedKi = Math.round((kiUsedPercentage / 100) * kiTotal);
 
@@ -537,6 +630,45 @@
                     inputElement.style.backgroundColor = '';
                 }, 1000);
             }
+        }
+        function updateCurrentChakra(energyType) {
+            if(energyType === 'chakra'){
+                let regenRate = parseFloat(document.getElementById("chakraRegen").value.replace(/,/g, '')) || 0;
+                let chakraTotal = parseFloat(document.getElementById("chakraTotalValueChakra").innerText) || 0;
+                let regenAmount = regenRate.toString().includes("%") ? (regenRate/100) * chakraTotal : regenRate;
+                currentChakra += regenAmount;
+                 if (currentChakra > chakraTotal) {
+                    currentChakra = chakraTotal;
+                }
+                
+            }
+            else if(energyType === 'ki'){
+                 let regenRate = parseFloat(document.getElementById("kiRegen").value.replace(/,/g, '')) || 0;
+                let kiTotal = parseFloat(document.getElementById("chakraTotalValueKi").innerText) || 0;
+                let regenAmount = regenRate.toString().includes("%") ? (regenRate/100) * kiTotal : regenRate;
+                currentKi += regenAmount;
+                 if (currentKi > kiTotal) {
+                    currentKi = kiTotal;
+                }
+                
+            }
+
+        }
+        function toggleKaioken() {
+            var kaiokenInfo = document.getElementById("kaiokenTogglable");
+            if (kaiokenInfo.style.display === "none") {
+                kaiokenInfo.style.display = "block";
+            } else {
+                kaiokenInfo.style.display = "none";
+            }
+            updateKiDisplay();
+        }
+        function updateKiDisplay() {
+            let kiUsedSlider = document.getElementById("kiUsedSliderKi");
+            let kiTotal = parseFloat(document.getElementById("chakraTotalValueKi").innerText) || 0;
+            let usedPercentage = kiUsedSlider.value;
+            let usedKi = Math.round((usedPercentage / 100) * kiTotal);
+            document.getElementById("currentKiValue").innerText = (kiTotal - usedKi).toLocaleString('en-US') + " Ki";
         }
     </script>
 </body>
