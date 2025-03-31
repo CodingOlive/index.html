@@ -3,673 +3,1003 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Damage Calculator</title>
+    <title>Energy Calculator</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f0f8ff;
-            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
+            background-color: #f9f9f9;
+            color: #333;
+            transition: all 0.3s ease;
         }
-
-        .container {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
         }
-
-        .box {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 320px;
-            text-align: center;
-            flex-shrink: 0;
-            cursor: pointer;
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
         }
-
-        .calculator-container {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 480px;
-            flex-grow: 1;
-            display: none;
-        }
-
-        h1 {
-            text-align: center;
-            color: #3366cc;
-            font-size: 20px;
-            margin-bottom: 20px;
-        }
-
         label {
             display: block;
-            margin-bottom: 6px;
-            color: #333;
-            font-weight: 600;
-            font-size: 13px;
-        }
-
-        input[type="text"],
-        select,
-        input[type="range"] {
-            width: calc(100% - 22px);
-            padding: 8px;
-            margin-bottom: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 13px;
-        }
-
-        button {
-            color: white;
-            padding: 10px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s ease;
-        }
-
-        .calculate-button {
-            background-color: #4CAF50;
-            width: 100%;
-            margin-top: 8px;
-        }
-
-        .calculate-button:hover {
-            background-color: #45a049;
-        }
-
-        .chakra-total {
-            font-size: 14px;
+            margin-bottom: 5px;
             font-weight: bold;
-            color: #3366cc;
-            margin-bottom: 10px;
+            color: #444;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: border 0.3s, box-shadow 0.3s;
+            font-size: 14px;
+        }
+        input:focus, select:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+            outline: none;
+        }
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        .input-with-unit {
+            position: relative;
+        }
+        .input-with-unit input {
+            padding-right: 40px;
+        }
+        .input-unit {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777;
+            pointer-events: none;
+        }
+        .energy-pool {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid #4CAF50;
+            transition: all 0.3s ease;
+        }
+        .energy-pool.active {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .energy-pool h3 {
+            margin-top: 0;
+            color: #2e7d32;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .energy-pool h3::after {
+            content: '';
+            display: block;
+            height: 2px;
+            background: #e0e0e0;
+            flex-grow: 1;
+            margin-left: 10px;
+        }
+        #ki-pool {
+            border-left-color: #FF9800;
+        }
+        #ki-pool h3 {
+            color: #e65100;
+        }
+        #nen-pool {
+            border-left-color: #2196F3;
+        }
+        #nen-pool h3 {
+            color: #0d47a1;
+        }
+        #chakra-pool {
+            border-left-color: #9C27B0;
+        }
+        #chakra-pool h3 {
+            color: #4a148c;
+        }
+        .energy-slider-container {
+            margin-top: 30px;
+            margin-bottom: 30px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .energy-slider {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+            outline: none;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .energy-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background 0.3s;
+        }
+        .energy-slider::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background 0.3s;
+        }
+        .energy-slider::-webkit-slider-thumb:hover {
+            background: #3d8c40;
+        }
+        .energy-slider::-moz-range-thumb:hover {
+            background: #3d8c40;
+        }
+        .slider-markers {
+            display: flex;
+            justify-content: space-between;
+            margin-top: -10px;
+            padding: 0 5px;
+            color: #777;
+            font-size: 12px;
+        }
+        #energy-slider-value {
+            text-align: center;
+            font-weight: bold;
+            color: #4CAF50;
+            background: #f0f8f0;
+            font-size: 18px;
+        }
+        .energy-calculation-display {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-weight: bold;
+            border-left: 4px solid #4CAF50;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
         }
-
+        .calculation-primary {
+            font-size: 18px;
+            color: #2e7d32;
+        }
+        .calculation-secondary {
+            font-size: 14px;
+            color: #689f38;
+        }
+        .resonance-bar {
+            height: 12px;
+            background-color: #e0e0e0;
+            margin: 10px 0 15px;
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .resonance-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #42a5f5, #2196F3);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        .resonance-marker {
+            position: absolute;
+            top: -5px;
+            width: 2px;
+            height: 22px;
+            background: rgba(0,0,0,0.1);
+        }
+        .resonance-marker.threshold {
+            background: #ff5722;
+            width: 3px;
+        }
+        .resonance-label {
+            position: absolute;
+            bottom: -20px;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #777;
+        }
+        .dynamic-box-container {
+            margin-top: 30px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
         .dynamic-box {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            position: relative;
+            transition: all 0.3s ease;
         }
-
-        .output-container {
-            margin-top: 20px;
-            text-align: left;
+        .dynamic-box.additive {
+            border-left: 4px solid #8BC34A;
+            background-color: #f1f8e9;
         }
-
-        #dynamicBoxesContainer, #dynamicBoxesContainerKi {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 10px;
+        .dynamic-box.multiplicative {
+            border-left: 4px solid #FF9800;
+            background-color: #fff8e1;
         }
-
-        .dynamic-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .dynamic-box-control {
+            position: absolute;
+            right: 10px;
+            top: 10px;
         }
-
-        .dynamic-box label {
-            margin-bottom: 0;
-            width: auto;
-        }
-
-        .dynamic-box input {
-            width: 100px;
-        }
-
-        .dynamic-box button {
+        .remove-dynamic-box {
             background-color: #f44336;
             color: white;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
             border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            cursor: pointer;
+            padding: 0;
+            font-size: 14px;
         }
-
-        .dynamic-box button:hover {
+        .remove-dynamic-box:hover {
             background-color: #d32f2f;
         }
-        .dynamic-box select {
-            display: none;
+        .modifier-type-selector {
+            display: flex;
+            gap: 15px;
+            padding: 10px 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
         }
-        .dynamic-box-type-button {
-            border: none;
-            padding: 5px 10px;
+        .modifier-type-option {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
             border-radius: 4px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
             font-size: 12px;
-            min-width: 30px;
-            text-align: center;
-            opacity: 0.5;
-            transition: opacity 0.3s ease;
         }
-        .dynamic-box-type-button.active {
-            opacity: 1;
-            color: white;
+        .modifier-type-option.active {
+            font-weight: bold;
         }
-        .dynamic-box-type-add {
-            background-color: #4CAF50;
+        .modifier-type-option[data-value="additive"] {
+            border: 1px solid #8BC34A;
+            color: #558b2f;
         }
-        .dynamic-box-type-multiply {
-            background-color: #f9a825;
-            color: white;
+        .modifier-type-option[data-value="additive"].active {
+            background-color: #f1f8e9;
+            box-shadow: 0 1px 5px rgba(139, 195, 74, 0.3);
         }
-        .dynamic-box-type-button:not(.active) {
-                background-color: #ccc;
-            color: #666;
+        .modifier-type-option[data-value="multiplicative"] {
+            border: 1px solid #FF9800;
+            color: #e65100;
         }
-
-        #chakraBox, #kiBox {
-            cursor: pointer;
+        .modifier-type-option[data-value="multiplicative"].active {
+            background-color: #fff8e1;
+            box-shadow: 0 1px 5px rgba(255, 152, 0, 0.3);
         }
-        #calculatorContainerKi{
-            display: none;
-        }
-        #dynamicStatsKi {
-            display: none;
-        }
-        #myTurnButton {
-            margin-left: 10px;
-            padding: 8px 12px;
-            background-color: #00B8D4;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: background-color 0.3s ease;
-        }
-
-        #myTurnButton:hover {
-            background-color: #00869e;
-        }
-        #calculatorContainerChakra {
-
-        }
-        #calculatorContainerChakra h1,
-        #calculatorContainerChakra label,
-        #calculatorContainerChakra span,
-        #calculatorContainerChakra p{
-            color: #000;
-        }
-        .clickable-number {
-            cursor: pointer;
-            color: blue;
-            text-decoration: underline;
-        }
-        .turn-button{
-            margin-left: 10px;
-            padding: 8px 12px;
-            background-color: #00B8D4;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: background-color 0.3s ease;
-        }
-
-        .turn-button:hover {
-            background-color: #00869e;
-        }
-        .toggle-box{
-            cursor: pointer;
-            color: blue;
-            text-decoration: underline;
-        }
-        .input-container {
-            display: flex;
-            flex-direction: column;
-        }
-        .add-dynamic-box-button {
+        button {
+            padding: 8px 12px; /* Reduced button padding */
             background-color: #4CAF50;
             color: white;
-            padding: 10px 16px;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
+            margin-right: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            background-color: #3d8c40;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+        #calculate-btn {
+            background-color: #2196F3;
+            padding: 10px 20px; /* Reduced button padding */
+            font-size: 16px;
+            margin-top: 15px;
+            width: 100%;
+        }
+        #calculate-btn:hover {
+            background-color: #1976D2;
+        }
+        #add-dynamic-box {
+            background-color: #9C27B0;
+        }
+        #add-dynamic-box:hover {
+            background-color: #7B1FA2;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* Results and Loading State Styles */
+        .result {
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .result.error {
+            background-color: #ffebee;
+            border-left-color: #f44336;
+        }
+
+        .result-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #2e7d32;
+        }
+
+        .result.error .result-title {
+            color: #c62828;
+        }
+
+        .result-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+
+        .result-details {
             font-size: 14px;
-            transition: background-color 0.3s ease;
+            color: #555;
+            margin-top: 10px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding-top: 10px;
         }
 
-        .add-dynamic-box-button:hover {
-            background-color: #45a049;
+        /* Loading Animation Styles */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(76, 175, 80, 0.2);
+            border-radius: 50%;
+            border-top-color: #4CAF50;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 10px;
+            color: #555;
+        }
+
+        /* Error Message Styles */
+        .error-message {
+            display: none;
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-left: 4px solid #f44336;
+            font-weight: 500;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+
+        .error-icon {
+            display: inline-block;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        /* Transition Animations */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Accessibility Improvements */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        :focus {
+            outline: 3px solid rgba(76, 175, 80, 0.5);
+            outline-offset: 2px;
+        }
+
+        button:focus, input:focus, select:focus {
+            outline: 3px solid rgba(76, 175, 80, 0.5);
+            outline-offset: 2px;
         }
     </style>
 </head>
 <body>
+    <h1>Energy Calculator</h1>
 
-    <div class="container">
-        <div class="box" id="energyPoolsBox">
-            <h2>Energy Pools</h2>
-            <div id="chakraBox" onclick="showCalculator('chakra')">Chakra</div>
-            <div id="kiBox" onclick="showCalculator('ki')">Ki</div>
+    <div class="form-group">
+        <label for="base-damage">Base Damage:</label>
+        <input type="text" id="base-damage" placeholder="Enter base damage value" aria-label="Base damage value" aria-required="true" oninput="updateDamageCalculations()">
+    </div>
+    
+    <div class="form-group">
+        <label for="base-multiplier">Base Multiplier:</label>
+        <input type="text" id="base-multiplier" placeholder="Enter base multiplier" value="1" aria-label="Base multiplier value"  oninput="updateDamageCalculations()">
+    </div>
+
+    <div class="form-group">
+        <label for="form-multiplier">Form Multiplier:</label>
+        <input type="text" id="form-multiplier" placeholder="Enter form multiplier" value="1" aria-label="Form multiplier value"  oninput="updateDamageCalculations()">
+    </div>
+
+    <div id="dynamic-modifiers-container" style="margin-bottom: 15px;">
+        <button id="add-dynamic-box" aria-label="Add modifier">Add Factor</button>
+    </div>
+
+
+    <div class="form-group">
+        <label for="energy-type">Energy Type:</label>
+        <select id="energy-type" aria-label="Select energy type" onchange="showSelectedEnergyPool()">
+            <option value="ki">Ki Energy</option>
+            <option value="nen">Nen Energy</option>
+            <option value="chakra">Chakra Energy</option>
+        </select>
+    </div>
+
+    <div id="ki-pool" class="energy-pool">
+        <h3>Ki Energy Pool</h3>
+        <div class="form-group">
+            <label for="ki-max-energy">Max Energy:</label>
+            <input type="text" id="ki-max-energy" placeholder="Enter maximum energy"  oninput="calculateEnergy('ki'); updateDamageCalculations();">
         </div>
-
-        <div class="calculator-container" id="calculatorContainerChakra">
-            <h1>Enhanced Damage Calculator (Chakra)</h1>
-
-            <label for="baseDamage">Base Damage</label>
-            <input type="text" id="baseDamage" placeholder="Enter Base Damage">
-
-            <label for="chakraMax">Chakra Max</label>
-            <input type="text" id="chakraMax" placeholder="Max Chakra" oninput="updateChakraTotal('chakra')">
-
-            <label for="chakraMaxMultiplier">Chakra Max Multiplier</label>
-            <input type="text" id="chakraMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal('chakra')">
-
-            <div class="chakra-total">
-                <label>Chakra Total:</label>
-                <span id="chakraTotalValueChakra">0</span>
-            </div>
-
-            <label for="chakraUsedSlider">Chakra Usage (%)</label>
-            <input type="range" id="chakraUsedSliderChakra" min="0" max="100" value="100" oninput="updateChakraSliderValue('chakra')">
-            <span id="chakraUsedValueChakra">100%</span>
-
-            <label for="damagePerChakra">Damage per Chakra</label>
-            <input type="text" id="damagePerChakra" placeholder="Enter Damage per Chakra">
-
-            <label for="formMultiplier">Form Multiplier</label>
-            <input type="text" id="formMultiplier" placeholder="Enter Form Multiplier">
-
-            <div class="base-multiplier-container" style="display: flex; align-items: center; gap: 10px;">
-                <label for="baseMultiplier">Base Multiplier</label>
-                <input type="checkbox" id="baseMultiplierCheckbox" onchange="calculateDamage('chakra')">
-                <span>Multiply the base damage?</span>
-            </div>
-
-            <input type="text" id="baseMultiplier" placeholder="Enter Base Multiplier">
-
-
-            <button class="add-dynamic-box-button" onclick="addDynamicBox('chakra')">Add another box</button>
-            <div id="dynamicBoxesContainer"></div>
-
-            <button class="calculate-button" onclick="calculateDamage('chakra')">Calculate</button>
-
-            <div id="outputChakra" class="output-container">
-                <h2>Results</h2>
-                <p><strong>Equation:</strong> <span id="equationResultChakra"></span></p>
-                <p><strong>Number Format:</strong> <span id="numberResultChakra"></span></p>
-                <p><strong>Word Format:</strong> <span id="wordResultChakra"></span></p>
-                <p><strong>Scientific Notation:</strong> <span id="scientificResultChakra"></span></p>
-            </div>
+        <div class="form-group">
+            <label for="ki-max-multiplier">Max Energy Multiplier:</label>
+            <input type="text" id="ki-max-multiplier" placeholder="Enter multiplier value" value="1"  oninput="calculateEnergy('ki'); updateDamageCalculations();">
         </div>
-
-        <div class="calculator-container" id="calculatorContainerKi">
-            <h1>Enhanced Damage Calculator (Ki)</h1>
-
-            <label for="baseDamageKi">Base Damage</label>
-            <input type="text" id="baseDamageKi" placeholder="Enter Base Damage">
-
-            <label for="kiMax">Ki Max</label>
-            <input type="text" id="kiMax" placeholder="Max Ki" oninput="updateChakraTotal('ki')">
-
-            <label for="kiMaxMultiplier">Ki Max Multiplier</label>
-            <input type="text" id="kiMaxMultiplier" placeholder="Enter Multiplier" oninput="updateChakraTotal('ki')">
-
-            <div class="chakra-total">
-                <label>Ki Total:</label>
-                <span id="chakraTotalValueKi">0</span>
-            </div>
-
-            <label for="kiUsedSlider">Ki Usage (%)</label>
-            <input type="range" id="kiUsedSliderKi" min="0" max="100" value="100" oninput="updateChakraSliderValue('ki')">
-            <span id="chakraUsedValueKi">100% (0 Ki)</span>
-
-            <label for="damagePerKi">Damage per Ki</label>
-            <input type="text" id="damagePerKi" placeholder="Enter Damage per Ki">
-
-            <label for="formMultiplierKi">Form Multiplier</label>
-            <input type="text" id="formMultiplierKi" placeholder="Enter Form Multiplier">
-
-            <div class="base-multiplier-container" style="display: flex; align-items: center; gap: 10px;">
-                <label for="baseMultiplierKi">Base Multiplier</label>
-                <input type="checkbox" id="baseMultiplierCheckboxKi" onchange="calculateDamage('ki')">
-                <span>Multiply the base damage?</span>
-            </div>
-
-            <input type="text" id="baseMultiplierKi" placeholder="Enter Base Multiplier">
-
-            <button class="add-dynamic-box-button" onclick="addDynamicBox('ki')">Add another box</button>
-            <div id="dynamicBoxesContainerKi"></div>
-
-            <button class="calculate-button" onclick="calculateDamage('ki')">Calculate</button>
-
-            <div id="outputKi" class="output-container">
-                <h2>Results</h2>
-                <p><strong>Equation:</strong> <span id="equationResultKi"></span></p>
-                <p><strong>Number Format:</strong> <span id="numberResultKi"></span></p>
-                <p><strong>Word Format:</strong> <span id="numberResultKi"></span></p>
-                <p><strong>Scientific Notation:</strong> <span id="scientificResultKi"></span></p>
-            </div>
+        <div class="form-group">
+            <label for="ki-total-energy">Total Energy:</label>
+            <input type="text" id="ki-total-energy" readonly class="auto-calculated">
         </div>
-
-        <div class="box" id="dynamicStatsChakra" >
-            <h2>Dynamic Stats</h2>
-            <div id="chakraSection">
-                <label for="chakraRegen">Chakra Regen</label>
-                <div class = "input-container">
-                    <input type="text" id="chakraRegen" placeholder="Enter Chakra Regen" oninput="updateCurrentChakra('chakra')">
-                    <button id="chakraTurnButton" class = "turn-button" onclick="updateCurrentChakra('chakra')">My Turn</button>
-                </div>
-            </div>
+        <div class="form-group">
+            <label for="ki-current-energy">Current Energy:</label>
+            <input type="text" id="ki-current-energy"  readonly class="auto-calculated">
         </div>
-        <div class="box" id="dynamicStatsKi">
-            <h2>Dynamic Stats</h2>
-             <div  id="kiSection">
-                 <label  class = "toggle-box" for="kiKaiokenCheckbox">Using Kaioken?</label>
-                 <input type="checkbox" id="kiKaiokenCheckbox" onchange="toggleKaioken()">
-            </div>
-            <label for="kiRegen">Ki Regen Rate</label>
-            <div class = "input-container">
-                <input type="text" id="kiRegen" placeholder="Enter Ki Regen Rate" oninput="updateCurrentKi('ki')">
-                <button id="kiTurnButton"  class = "turn-button" onclick="updateCurrentKi('ki')">My Turn</button>
-            </div>
-            <div id = "kaiokenTogglable" >
-                
-
-                <label for="maxHealth">Max Health</label>
-                <input type="text" id="maxHealth" placeholder="Enter Max Health" oninput="updateDynamicStatsKi()">
-
-                <label for="kaiokenDrain">Kaioken Health Drain Rate</label>
-                <input type="text" id="kaiokenDrain" placeholder="Enter Drain Rate" oninput="updateDynamicStatsKi()">
-                <p><strong>Remaining Health:</strong> <span id="remainingHealth"></span><button id="myTurnButton" onclick="updateRemainingHealth()">My Turn</button></p>
+        <div class="form-group">
+            <label for="ki-damage-per-power">Damage per Extra Power:</label>
+            <input type="text" id="ki-damage-per-power" placeholder="Enter damage per power value" value="1" class="calculator-input"  oninput="updateDamageCalculations()">
+        </div>
+        <div class="form-group">
+            <label for="ki-regen-percent">Regeneration Rate (%):</label>
+            <div class="regen-group">
+                <input type="text" id="ki-regen-percent" placeholder="Enter regeneration percentage" oninput="regenerateEnergy('ki')">
+                <button id="ki-regen-button" class="regen-button">Regenerate</button>
             </div>
         </div>
     </div>
 
+    <div id="nen-pool" class="energy-pool">
+        <h3>Nen Energy Pool</h3>
+        <div class="form-group">
+            <label for="nen-max-energy">Max Energy:</label>
+            <input type="text" id="nen-max-energy" placeholder="Enter maximum energy"  oninput="calculateEnergy('nen'); updateDamageCalculations();">
+        </div>
+        <div class="form-group">
+            <label for="nen-max-multiplier">Max Energy Multiplier:</label>
+            <input type="text" id="nen-max-multiplier" placeholder="Enter multiplier value" value="1"  oninput="calculateEnergy('nen'); updateDamageCalculations();">
+        </div>
+        <div class="form-group">
+            <label for="nen-total-energy">Total Energy:</label>
+            <input type="text" id="nen-total-energy"  readonly class="auto-calculated">
+        </div>
+        <div class="form-group">
+            <label for="nen-current-energy">Current Energy:</label>
+            <input type="text" id="nen-current-energy"  readonly class="auto-calculated">
+        </div>
+        <div class="form-group">
+            <label for="nen-damage-per-power">Damage per Extra Power:</label>
+            <input type="text" id="nen-damage-per-power" placeholder="Enter damage per power value" value="1" class="calculator-input"  oninput="updateDamageCalculations()">
+        </div>
+        <div class="form-group">
+            <label for="nen-regen-percent">Regeneration Rate (%):</label>
+            <div class="regen-group">
+                <input type="text" id="nen-regen-percent" placeholder="Enter regeneration percentage"  oninput="regenerateEnergy('nen')">
+                <button id="nen-regen-button" class="regen-button">Regenerate</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="chakra-pool" class="energy-pool">
+        <h3>Chakra Energy Pool</h3>
+        <div class="form-group">
+            <label for="chakra-max-energy">Max Energy:</label>
+            <input type="text" id="chakra-max-energy" placeholder="Enter maximum energy"  oninput="calculateEnergy('chakra'); updateDamageCalculations();">
+        </div>
+        <div class="form-group">
+            <label for="chakra-max-multiplier">Max Energy Multiplier:</label>
+            <input type="text" id="chakra-max-multiplier" placeholder="Enter multiplier value" value="1"  oninput="calculateEnergy('chakra'); updateDamageCalculations();">
+        </div>
+        <div class="form-group">
+            <label for="chakra-total-energy">Total Energy:</label>
+            <input type="text" id="chakra-total-energy"  readonly class="auto-calculated">
+        </div>
+        <div class="form-group">
+            <label for="chakra-current-energy">Current Energy:</label>
+            <input type="text" id="chakra-current-energy"  readonly class="auto-calculated">
+        </div>
+        <div class="form-group">
+            <label for="chakra-damage-per-power">Damage per Extra Power:</label>
+            <input type="text" id="chakra-damage-per-power" placeholder="Enter damage per power value" value="1" class="calculator-input"  oninput="updateDamageCalculations()">
+        </div>
+        <div class="form-group">
+            <label for="chakra-regen-percent">Regeneration Rate (%):</label>
+            <div class="regen-group">
+                <input type="text" id="chakra-regen-percent" placeholder="Enter regeneration percentage" oninput="regenerateEnergy('chakra')">
+                <button id="chakra-regen-button" class="regen-button">Regenerate</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="energy-slider-container">
+        <label for="energy-slider">Energy Used for Attack:</label>
+        <input type="range" id="energy-slider" class="energy-slider" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" role="slider" oninput="updateDamageCalculations(); updateSliderValue();">
+        <div class="slider-markers">
+            <span>0%</span>
+            <span>25%</span>
+            <span>50%</span>
+            <span>75%</span>
+            <span>100%</span>
+        </div>
+        <div class="form-group">
+            <input type="text" id="energy-slider-value" value="50%" aria-label="Energy percentage value">
+        </div>
+    </div>
+
+    <div id="energy-calculation-display" class="energy-calculation-display" aria-live="polite">
+
+        <div class="calculation-secondary">Energy Used: <span id="energy-used">0</span></div>
+    </div>
+
+    <button id="calculate-btn" aria-label="Calculate final damage value" onclick="updateDamageCalculations()">Calculate Damage</button>
+
+    <div id="loading" class="loading">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <div class="loading-text">Calculating...</div>
+        <span class="sr-only">Loading, please wait</span>
+    </div>
+
+    <div id="error-message" class="error-message">
+        <span class="error-icon">⚠️</span>
+        <span id="error-text">An error occurred during calculation.</span>
+    </div>
+
+    <div id="result" class="result">
+        <div class="result-title">Calculated Damage:</div>
+        <div id="result-value" class="result-value">0</div>
+        <div id="result-details" class="result-details">
+            <p>Scientific: <span id="result-scientific">0</span></p>
+            <p>Words: <span id="result-words">Zero</span></p>
+        </div>
+    </div>
+
     <script>
-        let currentChakra = 0;
-        let currentKi = 0;
-        let maxChakra = 0;
-        let maxKi = 0;
-        function updateChakraTotal(energyType) {
-            let maxId = energyType === 'chakra' ? 'chakraMax' : 'kiMax';
-            let multiplierId = energyType === 'chakra' ? 'chakraMaxMultiplier' : 'kiMaxMultiplier';
-            let totalValueId = energyType === 'chakra' ? 'chakraTotalValueChakra' : 'chakraTotalValueKi';
+        // Show only the selected energy pool
+        function showSelectedEnergyPool() {
+            const energyType = document.getElementById('energy-type').value;
+            const kiPool = document.getElementById('ki-pool');
+            const nenPool = document.getElementById('nen-pool');
+            const chakraPool = document.getElementById('chakra-pool');//Hide all pools first
+            kiPool.style.display = 'none';
+            nenPool.style.display = 'none';
+            chakraPool.style.display = 'none';
 
-            let max = parseFloat(document.getElementById(maxId).value.replace(/,/g, '')) || 0;
-            let multiplier = parseFloat(document.getElementById(multiplierId).value.replace(/,/g, '')) || 1;
-            let totalEnergy = max * multiplier;
-            document.getElementById(totalValueId).innerText = totalEnergy.toLocaleString('en-US');
-            if (energyType === 'chakra') {
-                maxChakra = totalEnergy;
-            } else if (energyType === 'ki') {
-                maxKi = totalEnergy;
+            // Show only the selected pool
+            if (energyType === 'ki') {
+                kiPool.style.display = 'block';
+            } else if (energyType === 'nen') {
+                nenPool.style.display = 'block';
+            } else if (energyType === 'chakra') {
+                chakraPool.style.display = 'block';
             }
+            updateSliderValue();
         }
 
-        function updateChakraSliderValue(energyType) {
-            let sliderId = energyType === 'chakra' ? 'chakraUsedSliderChakra' : 'kiUsedSliderKi';
-            let displayValueId = energyType === 'chakra' ? 'chakraUsedValueChakra' : 'chakraUsedValueKi';
-            let energyName = energyType === 'chakra' ? 'Chakra' : 'Ki';
-            let maxEnergy = energyType === 'chakra' ? maxChakra : maxKi;
+        // Initialize pool visibility when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            showSelectedEnergyPool();
 
-            let slider = document.getElementById(sliderId);
-            let usedPercentage = slider.value;
-            let usedEnergyValue = Math.round((usedPercentage / 100) * maxEnergy);
+            // Add event listeners for regenerate buttons
+            document.getElementById('ki-regen-button').addEventListener('click', function() {
+                regenerateEnergy('ki');
+            });
 
-            // Format the output with commas
-            let formattedValue = usedEnergyValue.toLocaleString('en-US');
-            document.getElementById(displayValueId).innerText = usedPercentage + "% (" + formattedValue + " " + energyName + ")";
+            document.getElementById('nen-regen-button').addEventListener('click', function() {
+                regenerateEnergy('nen');
+            });
 
-        }
+            document.getElementById('chakra-regen-button').addEventListener('click', function() {
+                regenerateEnergy('chakra');
+            });
 
-        function addDynamicBox(energyType) {
-            let containerId = energyType === 'chakra' ? 'dynamicBoxesContainer' : 'dynamicBoxesContainerKi';
-            let container = document.getElementById(containerId);
+            // Calculate and display initial energy values
+            ['ki', 'nen', 'chakra'].forEach(type => {
+                calculateEnergy(type);
+            });
 
-            let div = document.createElement("div");
-            div.className = "dynamic-box";
-            div.innerHTML = `
-                <label>Name:</label>
-                <input type="text" placeholder="Enter Name">
-                <label>Type:</label>
-                <select>
-                    <option value="add">Add</option>
-                    <option value="multiply">Multiply</option>
-                </select>
-                <button class="dynamic-box-type-button dynamic-box-type-add active" onclick="setType(this, 'add', '${energyType}')">Add</button>
-                <button class="dynamic-box-type-button dynamic-box-type-multiply" onclick="setType(this, 'multiply', '${energyType}')">x</button>
-                <label>Value:</label>
-                <input type="text" value="0">
-                <button onclick="removeDynamicBox(this)">Remove</button>
+            document.getElementById('add-dynamic-box').addEventListener('click', addDynamicModifier);
+        });
+
+        let modifierType = 'additive';  // Default modifier type
+        // Event listener for modifier type selector
+        document.querySelectorAll('.modifier-type-option').forEach(option => {
+            option.addEventListener('click', function() {
+                modifierType = this.getAttribute('data-value');
+                document.querySelectorAll('.modifier-type-option').forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        function addDynamicModifier() {
+            const container = document.getElementById('dynamic-modifiers-container');
+            const modifierInputsDiv = document.getElementById('dynamic-modifier-inputs');
+            const modifierNameInput = document.getElementById('modifier-name');
+            const modifierValueInput = document.getElementById('modifier-value');
+            const modifierTypeSelector = document.getElementById('modifier-type-selector');
+
+            const newModifierInputs = document.createElement('div');
+            newModifierInputs.style.display = 'flex';
+            newModifierInputs.style.flexWrap = 'nowrap';
+            newModifierInputs.style.alignItems = 'center';
+            newModifierInputs.style.gap = '10px';
+            newModifierInputs.innerHTML = `
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="modifier-name" style="margin-bottom: 0; font-size: 12px;">Name:</label>
+                    <input type="text" id="modifier-name" placeholder="Name" aria-label="Modifier Name" style="width: 100px; padding: 6px; font-size: 12px;" oninput="updateDamageCalculations()">
+                    <button class="remove-dynamic-box" onclick="this.parentNode.parentNode.remove(); updateDamageCalculations();" aria-label="Remove this modifier">×</button>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="modifier-value" style="margin-bottom: 0; font-size: 12px;">Value:</label>
+                    <input type="text" id="modifier-value" placeholder="Value" value="0" aria-label="Modifier Value" style="width: 100px; padding: 6px; font-size: 12px;"  oninput="updateDamageCalculations()">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="margin-bottom: 0; font-size: 12px;">Type:</label>
+                    <div  role="radiogroup" aria-label="Modifier Type Selection" style="display: flex; gap: 5px;">
+                        <div class="modifier-type-option additive ${modifierType === 'additive' ? 'active' : ''}" data-value="additive"  tabindex="0" role="radio" aria-checked="true" style="padding: 6px 10px; border: 1px solid #8BC34A; color: #558b2f; border-radius: 4px; cursor: pointer; font-size: 12px; ">
+                            <input type="radio" name="modifier-type"  value="additive" class="sr-only" onchange="updateModifierType(this); updateModifierDisplay(this)">
+                            <span style="animation: none;">+</span>
+                        </div>
+                        <div class="modifier-type-option multiplicative ${modifierType === 'multiplicative' ? 'active' : ''}" data-value="multiplicative"  tabindex="0" role="radio" aria-checked="false" style="padding: 6px 10px; border: 1px solid #FF9800; color: #e65100; border-radius: 4px; cursor: pointer; font-size: 12px; ">
+                            <input type="radio" name="modifier-type" value="multiplicative" class="sr-only" onchange="updateModifierType(this); ">
+                            <span style="animation: none;">x</span>
+                        </div>
+                    </div>
+                </div>
             `;
-            container.appendChild(div);
+            container.appendChild(newModifierInputs);
 
-            const firstInput = div.querySelector("input");
-            if (firstInput) {
-                firstInput.focus();
+
+
+        }
+
+        function updateModifierType(el){
+             modifierType = el.getAttribute('data-value');
+             updateDamageCalculations();
+        }
+
+        // Add this function to update the display
+        function updateModifierDisplay(el) {
+            const modifierTypeOptions = el.closest('.form-group').querySelector('[role="radiogroup"]').querySelectorAll('.modifier-type-option');
+            modifierTypeOptions.forEach(option => {
+                option.style.animation = 'none'; // Stop any existing animation
+            });
+
+            el.style.animation = el.getAttribute('data-value') === 'additive' ? 'pulse-green 0.5s' : 'pulse-orange 0.5s';
+        }
+
+
+        // Regenerate energy function
+        function regenerateEnergy(type) {
+            const maxEnergyEl = document.getElementById(`${type}-max-energy`);
+            const currentEnergyEl = document.getElementById(`${type}-current-energy`);
+            const regenPercentEl = document.getElementById(`${type}-regen-percent`);
+            const maxMultiplierEl = document.getElementById(`${type}-max-multiplier`);
+
+            if (!maxEnergyEl.value || !regenPercentEl.value) {
+                alert('Please enter max energy and regeneration percentage values');
+                return;
+}
+
+            const maxEnergy = parseFloat(maxEnergyEl.value) * parseFloat(maxMultiplierEl.value || 1);
+            const currentEnergy = parseFloat(currentEnergyEl.value || 0);
+            const regenPercent = parseFloat(regenPercentEl.value) / 100;
+
+            let regenAmount = maxEnergy * regenPercent;
+            let newEnergy = currentEnergy + regenAmount;
+
+            // Cap at maxenergy
+            if (newEnergy > maxEnergy) {
+                newEnergy = maxEnergy;
             }
-        }
-        function setType(buttonElement, type, energyType) {
-            let selectElement = buttonElement.parentNode.querySelector("select");
-            selectElement.value = type;
-            let addBtn = buttonElement.parentNode.querySelector(".dynamic-box-type-add");
-            let multiplyBtn = buttonElement.parentNode.querySelector(".dynamic-box-type-multiply");
 
-            if (type === "add") {
-                addBtn.classList.add("active");
-                multiplyBtn.classList.remove("active");
-            } else {
-                addBtn.classList.remove("active");
-                multiplyBtn.classList.add("active");
+            currentEnergyEl.value = newEnergy;
+            calculateEnergy(type); // Update total energy display
+            updateDamageCalculations();
+        }
+
+        function calculateEnergy(type) {
+            const maxEnergyEl = document.getElementById(`${type}-max-energy`);
+            const currentEnergyEl = document.getElementById(`${type}-current-energy`);
+            const totalEnergyEl = document.getElementById(`${type}-total-energy`);
+            const maxMultiplierEl = document.getElementById(`${type}-max-multiplier`);
+
+            if (!maxEnergyEl.value) {
+                currentEnergyEl.value = '';
+                totalEnergyEl.value = '';
+                return;
             }
+
+            const maxEnergy = parseFloat(maxEnergyEl.value);
+            const multiplier = parseFloat(maxMultiplierEl.value || 1);
+            const calculatedEnergy = maxEnergy * multiplier;
+
+            currentEnergyEl.value = calculatedEnergy;
+            totalEnergyEl.value = calculatedEnergy;
+            return calculatedEnergy;
         }
 
-        function removeDynamicBox(buttonElement) {
-            buttonElement.parentNode.remove();
-        }
+        // Event listeners to update energy when max energy or multiplier changes
+        ['ki', 'nen', 'chakra'].forEach(type => {
+            const maxEnergyEl = document.getElementById(`${type}-max-energy`);
+            const maxMultiplierEl = document.getElementById(`${type}-max-multiplier`);
 
-        function calculateDamage(energyType) {
-            let baseDamageId = energyType === 'chakra' ? 'baseDamage' : 'baseDamageKi';
-            let totalValueId = energyType === 'chakra' ? 'chakraTotalValueChakra' : 'chakraTotalValueKi';
-            let sliderId = energyType === 'chakra' ? 'chakraUsedSliderChakra' : 'kiUsedSliderKi';
-            let damagePerEnergyId = energyType === 'chakra' ? 'damagePerChakra' : 'damagePerKi';
-            let formMultiplierId = energyType === 'chakra' ? 'formMultiplier' : 'formMultiplierKi';
-            let baseMultiplierId = energyType === 'chakra' ? 'baseMultiplier' : 'baseMultiplierKi';
-            let equationResultId = energyType === 'chakra' ? 'equationResultChakra' : 'equationResultKi';
-            let numberResultId = energyType === 'chakra' ? 'numberResultChakra' : 'numberResultKi';
-            let wordResultId = energyType === 'chakra' ? 'wordResultChakra' : 'wordResultKi';
-            let scientificResultId = energyType === 'chakra' ? 'scientificResultChakra' : 'scientificResultKi';
-            let energyName = energyType === 'chakra' ? 'Chakra' : 'Ki';
-            let maxEnergy = energyType === 'chakra' ? maxChakra : maxKi;
+            maxEnergyEl.addEventListener('input', () => {
+                calculateEnergy(type);
+                updateDamageCalculations();
+            });
+
+            maxMultiplierEl.addEventListener('input', () => {
+                calculateEnergy(type);
+                updateDamageCalculations();
+            });
+        });
+
+        function updateDamageCalculations() {
+            const baseDamage = parseFloat(document.getElementById('base-damage').value.replace(/e[+-]?\d+$/i, '')) || 0;
+            const baseMultiplier = parseFloat(document.getElementById('base-multiplier').value.replace(/e[+-]?\d+$/i, '')) || 1;
+            const formMultiplier = parseFloat(document.getElementById('form-multiplier').value.replace(/e[+-]?\d+$/i, '')) || 1;
+            const energyType = document.getElementById('energy-type').value;
+            const sliderValue = document.getElementById('energy-slider').value / 100;
+            const damagePerPower = parseFloat(document.getElementById(`${energyType}-damage-per-power`).value) || 0;
+            const currentEnergy = parseFloat(document.getElementById(`${energyType}-current-energy`).value) || 0;
+            const totalEnergy = parseFloat(document.getElementById(`${energyType}-total-energy`).value) || 0;
+            let finalDamage = baseDamage * baseMultiplier * formMultiplier;
+
+            const modifierNameInputs = document.querySelectorAll('#dynamic-modifiers-container input[id="modifier-name"]');
+            const modifierValueInputs = document.querySelectorAll('#dynamic-modifiers-container input[id="modifier-value"]');
+            const modifierTypeOptions = document.querySelectorAll('#dynamic-modifiers-container .modifier-type-option.active');
 
 
-            let baseDamage = parseFloat(document.getElementById(baseDamageId).value.replace(/,/g, '')) || 0;
-            let totalEnergyValue = parseFloat(document.getElementById(totalValueId).innerText.replace(/,/g, '')) || 0;
-            let energyUsedPercentage = parseFloat(document.getElementById(sliderId).value) || 0;
-            let damagePerEnergy = parseFloat(document.getElementById(damagePerEnergyId).value.replace(/,/g, '')) || 0;
-            let formMultiplier = parseFloat(document.getElementById(formMultiplierId).value.replace(/,/g, '')) || 1;
-            let baseMultiplierCheckbox = document.getElementById(baseMultiplierId + 'Checkbox');
-            let baseMultiplierValue = parseFloat(document.getElementById(baseMultiplierId).value.replace(/,/g, '')) || 1;
-            let shouldMultiplyBase = baseMultiplierCheckbox && baseMultiplierCheckbox.checked;
 
+            modifierNameInputs.forEach((nameInput, index) => {
+                const modifierName = nameInput.value;
+                const modifierValue = parseFloat(modifierValueInputs[index].value.replace(/e[+-]?\d+$/i, '')) || 0;
+                const modifierType = modifierTypeOptions[index].getAttribute('data-value');
 
-            let energyUsed = Math.round((energyUsedPercentage / 100) * totalEnergyValue);
-            let energyDamage = energyUsed * damagePerEnergy;
-
-            let finalBaseDamage = shouldMultiplyBase ? baseDamage * baseMultiplierValue : baseDamage;
-
-            let dynamicBoxes = document.querySelectorAll(`#${energyType === 'chakra' ? 'dynamicBoxesContainer' : 'dynamicBoxesContainerKi'} .dynamic-box`);  //  Use energyType
-            let dynamicEquation = '';
-            dynamicBoxes.forEach((box, index) => {
-                let name = box.querySelector("input:nth-of-type(1)").value;
-                let type = box.querySelector("select").value;
-                let value = parseFloat(box.querySelector("input:nth-of-type(2)").value.replace(/,/g, '')) || 0;
-                let boxId = `${energyType === 'chakra' ? 'chakraDynamicBoxValue' : 'kiDynamicBoxValue'}${index}`; // Unique ID
-                box.querySelector("input:nth-of-type(2)").id = boxId;
-
-                if (type === "add") {
-                    finalBaseDamage += value;
-                    dynamicEquation += ` + <span class="clickable-number" onclick="highlightInput('${boxId}')">${value.toLocaleString('en-US')}</span>`;
+                if (modifierType === 'additive') {
+                    finalDamage += modifierValue;
                 } else {
-                    finalBaseDamage *= value;
-                    dynamicEquation += ` * <span class="clickable-number" onclick="highlightInput('${boxId}')">${value.toLocaleString('en-US')}</span>`;
+                    finalDamage *= modifierValue;
                 }
             });
 
-            let equation = shouldMultiplyBase ? 
-                `((${baseDamage.toLocaleString('en-US')} * ${baseMultiplierValue.toLocaleString('en-US')} ${dynamicEquation}) + (${energyUsed.toLocaleString('en-US')} * ${damagePerEnergy.toLocaleString('en-US')}))) * ${formMultiplier.toLocaleString('en-US')}` :
-                `(${baseDamage.toLocaleString('en-US')} ${dynamicEquation}) + (${energyUsed.toLocaleString('en-US')} * ${damagePerEnergy.toLocaleString('en-US')}))) * ${formMultiplier.toLocaleString('en-US')}`;
+            const energyUsed = currentEnergy * sliderValue;
+            const extraDamage = energyUsed * damagePerPower;
+            finalDamage += extraDamage;
 
-            totalDamage = (finalBaseDamage + energyDamage) * formMultiplier;
+            document.getElementById('result-value').textContent = finalDamage.toFixed(2);
+            document.getElementById('energy-used').textContent = energyUsed.toLocaleString('en-US', { maximumFractionDigits: 2 });
 
-
-            let numberResult = totalDamage.toLocaleString('en-US');
-            let wordResult = numberToWords(totalDamage);
-            let scientificResult = totalDamage.toExponential();
-
-            if (energyType === 'chakra') {
-                document.getElementById('equationResultChakra').innerHTML = equation;
-                document.getElementById('numberResultChakra').innerText = numberResult;
-                document.getElementById('wordResultChakra').innerText = wordResult;
-                document.getElementById('scientificResultChakra').innerText = scientificResult;
-            } else {
-                document.getElementById('equationResultKi').innerHTML = equation;
-                document.getElementById('numberResultKi').innerText = numberResult;
-                document.getElementById('wordResultKi').innerText = wordResult;
-                document.getElementById('scientificResultKi').innerText = scientificResult;
-            }
-             if (energyType === 'ki') {
-                updateDynamicStatsKi();
-                updateKiDisplay();
-            }
+            updateSliderValue();
+            displayAllFormats(finalDamage);
         }
 
-        function numberToWords(number) {
-            const units = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
-            const tens = ["", "ten", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
-            const teens = ["ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
-            const magnitudes = ["", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion"];
+        function updateSliderValue() {
+            const sliderValue = document.getElementById('energy-slider').value;
+            const energyType = document.getElementById('energy-type').value;
+            const currentEnergy = parseFloat(document.getElementById(`${energyType}-current-energy`).value) || 0;
+            const totalEnergy = parseFloat(document.getElementById(`${energyType}-total-energy`).value) || 0;
+            const energyPercent = totalEnergy > 0 ? currentEnergy / totalEnergy : 0;
+            const damagePerPower = parseFloat(document.getElementById(`${energyType}-damage-per-power`).value) || 0;
+            const energyUsed = currentEnergy * (sliderValue / 100);
+            const extraDamage = (energyUsed / 100) * damagePerPower;
 
-            function convertLessThanThousand(num) {
-                if (num === 0) return "";
-                if (num < 10) return units[num];
-                if (num < 20) return teens[num - 10];
-                if (num < 100) return tens[Math.floor(num / 10)] + " " + units[num % 10];
-                return units[Math.floor(num / 100)] + " hundred " + convertLessThanThousand(num % 100);
+            document.getElementById('energy-slider-value').value = `${sliderValue}%  (Energy Used: ${energyUsed.toLocaleString('en-US', { maximumFractionDigits: 2 })}, Extra Damage: ${extraDamage.toFixed(2)})`;
+        }
+
+        function displayAllFormats(damage) {
+            const scientificFormat = parseFloat(damage).toExponential(2).replace('e', ' x 10^');
+            const wordsFormat = convertNumberToWords(damage);
+
+            document.getElementById('result-scientific').textContent = scientificFormat;
+            document.getElementById('result-words').textContent = wordsFormat;
+        }
+
+        function convertNumberToWords(number) {
+            const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            const scales = ['', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quattuordecillion', 'Quindecillion', 'Sexdecillion', 'Septendecillion', 'Octodecillion', 'Novendecillion', 'Vigintillion', 'Unvigintillion', 'Duovigintillion', 'Trevigintillion', 'Quattuorvigintillion', 'Quinvigintillion', 'Sexvigintillion', 'Septvigintillion', 'Octovigintillion', 'Novvigintillion', 'Trigintillion', 'Untrigintillion', 'Duotrigintillion', 'Tretrigintillion', 'Quattuortrigintillion', 'Quinquagintillion', 'Sexquinquagintillion', 'Septemquinquagintillion', 'Octoquinquagintillion', 'Novequinquagintillion', 'Centillion', 'Uncentillion', 'Duocentillion'];
+
+            if (number === 0) {
+                return 'Zero';
             }
 
-            if (number === 0) return "zero";
-
-            let result = "";
             if (number < 0) {
-                result = "negative ";
-                number = Math.abs(number);
+                return 'Negative ' + convertNumberToWords(Math.abs(number));
             }
 
+            let words = '';
             let i = 0;
-            while (number > 0) {
-                let chunk = number % 1000;
+
+            while (number > 0 && i < scales.length) {
+                const chunk = parseInt(number % 1000);
                 if (chunk !== 0) {
-                    result = convertLessThanThousand(chunk) + " " + magnitudes[i] + " " + result;
+                    const chunkWords = convertHundreds(chunk);
+                    words = chunkWords + scales[i] + ' ' + words;
                 }
                 number = Math.floor(number / 1000);
                 i++;
             }
-            return result.trim();
-        }
-
-        function showCalculator(energyType) {
-            document.getElementById("calculatorContainerChakra").style.display = "none";
-            document.getElementById("calculatorContainerKi").style.display = "none";
-            document.getElementById("dynamicStatsChakra").style.display = "none";
-            document.getElementById("dynamicStatsKi").style.display = "none";
-
-            if (energyType === 'chakra') {
-                document.getElementById("calculatorContainerChakra").style.display = "block";
-                document.getElementById("dynamicStatsChakra").style.display = "block";
-            } else if (energyType === 'ki') {
-                document.getElementById("calculatorContainerKi").style.display = "block";
-                document.getElementById("dynamicStatsKi").style.display = "block";
+            if (i === scales.length)
+            {
+                words = "Number too large to display"
             }
-        }
-        function updateDynamicStatsKi() {
-            let maxHealth = parseFloat(document.getElementById("maxHealth").value) || 0;
-            let kaiokenDrain = parseFloat(document.getElementById("kaiokenDrain").value) || 0;
-            let kiUsedSlider = document.getElementById("kiUsedSliderKi");
-            let kiTotal = parseFloat(document.getElementById("chakraTotalValueKi").innerText) || 0;
-            let usedKi = Math.round((kiUsedPercentage / 100) * kiTotal);
 
-            let remainingHealth = maxHealth - (usedKi * kaiokenDrain);
-            document.getElementById("remainingHealth").innerText = remainingHealth.toLocaleString('en-US');
-        }
-        function updateRemainingHealth() {
-            let maxHealth = parseFloat(document.getElementById("maxHealth").value.replace(/,/g, '')) || 0;
-            let kaiokenDrain = parseFloat(document.getElementById("kaiokenDrain").value.replace(/,/g, '')) || 0;
-
-            let remainingHealth = maxHealth - kaiokenDrain;
-            document.getElementById("remainingHealth").innerText = remainingHealth.toLocaleString('en-US');
+            return words.trim();
         }
 
-        function highlightInput(inputId) {
-            const inputElement = document.getElementById(inputId);
-            if (inputElement) {
-                inputElement.style.backgroundColor = 'yellow';
-                setTimeout(() => {
-                    inputElement.style.backgroundColor = '';
-                }, 1000);
+        function convertHundreds(num) {
+            let word = '';
+            const hundred = Math.floor(num / 100);
+            const remainder = num % 100;
+            const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+            if (hundred > 0) {
+                word += units[hundred] + ' Hundred ';
             }
-        }
-        function updateCurrentChakra(energyType) {
-            if(energyType === 'chakra'){
-                let regenRate = parseFloat(document.getElementById("chakraRegen").value.replace(/,/g, '')) || 0;
-                let chakraTotal = parseFloat(document.getElementById("chakraTotalValueChakra").innerText) || 0;
-                let regenAmount = regenRate.toString().includes("%") ? (regenRate/100) * chakraTotal : regenRate;
-                currentChakra += regenAmount;
-                 if (currentChakra > chakraTotal) {
-                    currentChakra = chakraTotal;
+
+            if (remainder > 0) {
+                if (word !== '') {
+                    word += 'and ';
                 }
-                
-            }
-            else if(energyType === 'ki'){
-                 let regenRate = parseFloat(document.getElementById("kiRegen").value.replace(/,/g, '')) || 0;
-                let kiTotal = parseFloat(document.getElementById("chakraTotalValueKi").innerText) || 0;
-                let regenAmount = regenRate.toString().includes("%") ? (regenRate/100) * kiTotal : regenRate;
-                currentKi += regenAmount;
-                 if (currentKi > kiTotal) {
-                    currentKi = kiTotal;
+                if (remainder < 20) {
+                    word += units[remainder];
+                } else {
+                    const ten = Math.floor(remainder / 10) * 10;
+                    const one = remainder % 10;
+                    word += tens[ten] + ' ' + units[one];
                 }
-                
             }
-
-        }
-        function toggleKaioken() {
-            var kaiokenInfo = document.getElementById("kaiokenTogglable");
-            if (kaiokenInfo.style.display === "none") {
-                kaiokenInfo.style.display = "block";
-            } else {
-                kaiokenInfo.style.display = "none";
-            }
-            updateKiDisplay();
-        }
-        function updateKiDisplay() {
-            let kiUsedSlider = document.getElementById("kiUsedSliderKi");
-            let kiTotal = parseFloat(document.getElementById("chakraTotalValueKi").innerText) || 0;
-            let usedPercentage = kiUsedSlider.value;
-            let usedKi = Math.round((usedPercentage / 100) * kiTotal);
-            document.getElementById("currentKiValue").innerText = (kiTotal - usedKi).toLocaleString('en-US') + " Ki";
+            return word.trim();
         }
     </script>
+<script>
+    const style = document.createElement('style');
+    style.innerHTML = `
+    @keyframes pulse-green {
+        0% {
+            color: #558b2f;
+        }
+        50% {
+            color: #8BC34A;
+        }
+        100% {
+            color: #558b2f;
+        }
+    }
+    @keyframes pulse-orange {
+        0% {
+            color: #e65100;
+        }
+        50% {
+            color: #FF9800;
+        }
+        100% {
+            color: #e65100;
+        }
+    }
+    .modifier-type-option.active[data-value="additive"] {
+        animation: pulse-green 0.5s;
+        color: #8BC34A;
+    }
+    .modifier-type-option.active[data-value="multiplicative"] {
+        animation: pulse-orange 0.5s;
+        color: #FF9800;
+    }
+    .modifier-type-option[data-value="additive"] {
+        color: #558b2f;
+    }
+    .modifier-type-option[data-value="multiplicative"] {
+        color: #e65100;
+    }
+    `;
+    document.head.appendChild(style);
+</script>
 </body>
 </html>
