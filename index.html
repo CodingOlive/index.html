@@ -12,18 +12,17 @@
                 extend: {
                     colors: {
                         // Energy types
-                        ki: '#FF9800', nen: '#2196F3', chakra: '#9C27B0',
-                        'ki-dark': '#e65100', 'nen-dark': '#0d47a1', 'chakra-dark': '#4a148c',
+                        ki: '#FF9800', nen: '#2196F3', chakra: '#9C27B0', magic: '#26a69a', cursed: '#dc2626',
+                        'ki-dark': '#e65100', 'nen-dark': '#0d47a1', 'chakra-dark': '#4a148c', 'magic-dark': '#00796b', 'cursed-dark': '#b91c1c',
                         // UI feedback
                         'success-light': '#e8f5e9', 'success': '#4CAF50', 'success-dark': '#2e7d32',
                         'error-light': '#ffebee', 'error': '#f44336', 'error-dark': '#c62828',
                         // Stats panel
-                        'stats-border': '#60a5fa', // blue-400
-                        'stats-header': '#1e3a8a', // blue-800
+                        'stats-border': '#60a5fa', 'stats-header': '#1e3a8a',
                         // Kaioken active state
-                        'kaioken-border': '#f87171', // red-400
-                        'kaioken-header': '#b91c1c', // red-700
-                        'kaioken-focus': '#ef4444', // red-500
+                        'kaioken-border': '#f87171', 'kaioken-header': '#b91c1c', 'kaioken-focus': '#ef4444',
+                        // Focus Rings per type
+                        'magic-focus': '#26a69a', 'cursed-focus': '#dc2626',
                     },
                     animation: { /* ... animations ... */ spin: 'spin 1s linear infinite', shake: 'shake 0.5s ease-in-out', fadeIn: 'fadeIn 0.3s ease-in', pulse: 'pulse 1.5s infinite', 'pulse-additive': 'pulse-additive 0.5s', 'pulse-multiplicative': 'pulse-multiplicative 0.5s', },
                     keyframes: { /* ... keyframes ... */ spin: { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' }, }, shake: { '0%, 100%': { transform: 'translateX(0)' }, '25%, 75%': { transform: 'translateX(-5px)' }, '50%': { transform: 'translateX(5px)' }, }, fadeIn: { from: { opacity: 0, transform: 'translateY(10px)' }, to: { opacity: 1, transform: 'translateY(0)' }, }, pulse: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.05)' }, }, 'pulse-additive': { '0%, 100%': { color: '#558b2f' }, '50%': { color: '#8BC34A' }, }, 'pulse-multiplicative': { '0%, 100%': { color: '#e65100' }, '50%': { color: '#FF9800' }, }, }
@@ -39,6 +38,8 @@
         .energy-pool-ki { border-left-color: theme('colors.ki'); } .energy-pool-ki h3 { color: theme('colors.ki-dark'); }
         .energy-pool-nen { border-left-color: theme('colors.nen'); } .energy-pool-nen h3 { color: theme('colors.nen-dark'); }
         .energy-pool-chakra { border-left-color: theme('colors.chakra'); } .energy-pool-chakra h3 { color: theme('colors.chakra-dark'); }
+        .energy-pool-magic { border-left-color: theme('colors.magic'); } .energy-pool-magic h3 { color: theme('colors.magic-dark'); }
+        .energy-pool-cursed { border-left-color: theme('colors.cursed'); } .energy-pool-cursed h3 { color: theme('colors.cursed-dark'); }
         /* Slider Styles */
         .energy-slider::-webkit-slider-thumb { appearance: none; width: 22px; height: 22px; border-radius: 50%; background: theme('colors.success'); cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: background 0.3s; }
         .energy-slider::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: theme('colors.success'); cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: background 0.3s; border: none; }
@@ -60,8 +61,10 @@
         .inpt { @apply w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:border-transparent text-sm; }
         .inpt-ro { @apply w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-sm cursor-not-allowed; }
         .regen-btn { @apply px-3 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition duration-150 ease-in-out text-sm font-semibold shadow-sm; }
-        /* Kaioken Specific Input Focus */
+        /* Focus Ring Specifics */
         .inpt-kaioken { @apply focus:ring-kaioken-focus; }
+        .inpt-magic { @apply focus:ring-magic-focus; }
+        .inpt-cursed { @apply focus:ring-cursed-focus; }
     </style>
 </head>
 <body class="p-4 md:p-6">
@@ -88,11 +91,14 @@
             <div class="form-group mb-5">
                 <label for="energy-type" class="lbl">Energy Type:</label>
                 <select id="energy-type" aria-label="Select energy type" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-success focus:border-transparent text-sm bg-white">
-                    <option value="ki">Ki Energy</option> <option value="nen">Nen Energy</option> <option value="chakra">Chakra Energy</option>
-                </select>
+                    <option value="ki">Ki Energy</option>
+                    <option value="nen">Nen Energy</option>
+                    <option value="chakra">Chakra Energy</option>
+                    <option value="magic">Magic Energy</option>
+                    <option value="cursed">Cursed Energy</option> </select>
             </div>
 
-            <div id="ki-pool" class="energy-pool energy-pool-ki bg-white p-5 mb-5 rounded-lg shadow-sm border-l-4">
+            <div id="ki-pool" class="energy-pool energy-pool-ki p-5 mb-5 rounded-lg shadow-sm border-l-4 bg-gradient-to-br from-white to-orange-100">
                 <h3 class="text-xl font-semibold mb-4 flex items-center">Ki Energy Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div><label for="ki-max-energy" class="lbl">Max Energy:</label><input type="text" id="ki-max-energy" placeholder="Enter maximum" value="1000" class="inpt focus:ring-ki"></div>
@@ -103,7 +109,7 @@
                     <div><label for="ki-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="ki-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-ki focus:border-transparent text-sm"><button data-type="ki" class="regen-btn bg-ki hover:bg-ki-dark focus:ring-ki">Regen</button></div></div>
                 </div>
             </div>
-            <div id="nen-pool" class="energy-pool energy-pool-nen bg-white p-5 mb-5 rounded-lg shadow-sm border-l-4" style="display: none;">
+            <div id="nen-pool" class="energy-pool energy-pool-nen p-5 mb-5 rounded-lg shadow-sm border-l-4 bg-gradient-to-br from-white to-blue-100" style="display: none;">
                  <h3 class="text-xl font-semibold mb-4 flex items-center">Nen Energy Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                      <div><label for="nen-max-energy" class="lbl">Max Energy:</label><input type="text" id="nen-max-energy" placeholder="Enter maximum" value="1000" class="inpt focus:ring-nen"></div>
@@ -114,7 +120,7 @@
                      <div><label for="nen-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="nen-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-nen focus:border-transparent text-sm"><button data-type="nen" class="regen-btn bg-nen hover:bg-nen-dark focus:ring-nen">Regen</button></div></div>
                 </div>
             </div>
-            <div id="chakra-pool" class="energy-pool energy-pool-chakra bg-white p-5 mb-5 rounded-lg shadow-sm border-l-4" style="display: none;">
+            <div id="chakra-pool" class="energy-pool energy-pool-chakra p-5 mb-5 rounded-lg shadow-sm border-l-4 bg-gradient-to-br from-white to-purple-100" style="display: none;">
                  <h3 class="text-xl font-semibold mb-4 flex items-center">Chakra Energy Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                      <div><label for="chakra-max-energy" class="lbl">Max Energy:</label><input type="text" id="chakra-max-energy" placeholder="Enter maximum" value="1000" class="inpt focus:ring-chakra"></div>
@@ -123,6 +129,28 @@
                      <div><label for="chakra-current-energy" class="lbl">Current Energy:</label><input type="text" id="chakra-current-energy" readonly class="inpt-ro"></div>
                      <div><label for="chakra-damage-per-power" class="lbl">Damage per Energy Point:</label><input type="text" id="chakra-damage-per-power" placeholder="e.g., 0.5" value="1" class="inpt focus:ring-chakra"></div>
                      <div><label for="chakra-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="chakra-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-chakra focus:border-transparent text-sm"><button data-type="chakra" class="regen-btn bg-chakra hover:bg-chakra-dark focus:ring-chakra">Regen</button></div></div>
+                </div>
+            </div>
+            <div id="magic-pool" class="energy-pool energy-pool-magic p-5 mb-5 rounded-lg shadow-sm border-l-4 bg-gradient-to-br from-white to-teal-100" style="display: none;">
+                 <h3 class="text-xl font-semibold mb-4 flex items-center">Magic Energy Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div><label for="magic-max-energy" class="lbl">Max Energy:</label><input type="text" id="magic-max-energy" placeholder="Enter maximum" value="1000" class="inpt inpt-magic"></div>
+                     <div><label for="magic-max-multiplier" class="lbl">Max Energy Multiplier:</label><input type="text" id="magic-max-multiplier" placeholder="e.g., 1" value="1" class="inpt inpt-magic"></div>
+                     <div><label for="magic-total-energy" class="lbl">Total Energy (Calculated):</label><input type="text" id="magic-total-energy" readonly class="inpt-ro"></div>
+                     <div><label for="magic-current-energy" class="lbl">Current Energy:</label><input type="text" id="magic-current-energy" readonly class="inpt-ro"></div>
+                     <div><label for="magic-damage-per-power" class="lbl">Damage per Energy Point:</label><input type="text" id="magic-damage-per-power" placeholder="e.g., 0.5" value="1" class="inpt inpt-magic"></div>
+                     <div><label for="magic-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="magic-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-magic-focus focus:border-transparent text-sm"><button data-type="magic" class="regen-btn bg-magic hover:bg-magic-dark focus:ring-magic-focus">Regen</button></div></div>
+                </div>
+            </div>
+            <div id="cursed-pool" class="energy-pool energy-pool-cursed p-5 mb-5 rounded-lg shadow-sm border-l-4 bg-gradient-to-br from-white to-red-100" style="display: none;">
+                 <h3 class="text-xl font-semibold mb-4 flex items-center">Cursed Energy Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div><label for="cursed-max-energy" class="lbl">Max Energy:</label><input type="text" id="cursed-max-energy" placeholder="Enter maximum" value="1000" class="inpt inpt-cursed"></div>
+                     <div><label for="cursed-max-multiplier" class="lbl">Max Energy Multiplier:</label><input type="text" id="cursed-max-multiplier" placeholder="e.g., 1" value="1" class="inpt inpt-cursed"></div>
+                     <div><label for="cursed-total-energy" class="lbl">Total Energy (Calculated):</label><input type="text" id="cursed-total-energy" readonly class="inpt-ro"></div>
+                     <div><label for="cursed-current-energy" class="lbl">Current Energy:</label><input type="text" id="cursed-current-energy" readonly class="inpt-ro"></div>
+                     <div><label for="cursed-damage-per-power" class="lbl">Damage per Energy Point:</label><input type="text" id="cursed-damage-per-power" placeholder="e.g., 0.5" value="1" class="inpt inpt-cursed"></div>
+                     <div><label for="cursed-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="cursed-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-cursed-focus focus:border-transparent text-sm"><button data-type="cursed" class="regen-btn bg-cursed hover:bg-cursed-dark focus:ring-cursed-focus">Regen</button></div></div>
                 </div>
             </div>
 
@@ -186,6 +214,8 @@
         const kiPoolDiv = document.getElementById('ki-pool');
         const nenPoolDiv = document.getElementById('nen-pool');
         const chakraPoolDiv = document.getElementById('chakra-pool');
+        const magicPoolDiv = document.getElementById('magic-pool');
+        const cursedPoolDiv = document.getElementById('cursed-pool'); // Added
         const energySlider = document.getElementById('energy-slider');
         const energySliderValueDisplay = document.getElementById('energy-slider-value-display');
         const calculateBtn = document.getElementById('calculate-btn');
@@ -219,7 +249,7 @@
         const maxHealthInput = document.getElementById('max-health');
         const kaiokenStrainInput = document.getElementById('kaioken-strain');
         const currentHealthEl = document.getElementById('current-health');
-        const regenHealthBtn = document.getElementById('regen-health-btn'); // Added
+        const regenHealthBtn = document.getElementById('regen-health-btn');
 
         // --- Global State for Stats ---
         let totalDamageDealt = 0;
@@ -234,7 +264,14 @@
         function showLoading(isLoading) { loadingDiv.classList.toggle('hidden', !isLoading); if(isLoading) resultDiv.classList.add('hidden'); calculateBtn.disabled = isLoading; calculateBtn.classList.toggle('opacity-50', isLoading); calculateBtn.classList.toggle('cursor-not-allowed', isLoading); }
 
         // --- Energy Pool Logic ---
-        function getEnergyElements(type) { if (!['ki', 'nen', 'chakra'].includes(type)) { console.error("Invalid type:", type); return null; } return { maxEnergyEl: document.getElementById(`${type}-max-energy`), maxMultiplierEl: document.getElementById(`${type}-max-multiplier`), totalEnergyEl: document.getElementById(`${type}-total-energy`), currentEnergyEl: document.getElementById(`${type}-current-energy`), damagePerPowerEl: document.getElementById(`${type}-damage-per-power`), regenPercentEl: document.getElementById(`${type}-regen-percent`) }; }
+        function getEnergyElements(type) {
+            // Updated validation to include 'magic' and 'cursed'
+            if (!['ki', 'nen', 'chakra', 'magic', 'cursed'].includes(type)) {
+                console.error("Invalid energy type requested:", type);
+                return null;
+            }
+            return { /* ... return elements ... */ maxEnergyEl: document.getElementById(`${type}-max-energy`), maxMultiplierEl: document.getElementById(`${type}-max-multiplier`), totalEnergyEl: document.getElementById(`${type}-total-energy`), currentEnergyEl: document.getElementById(`${type}-current-energy`), damagePerPowerEl: document.getElementById(`${type}-damage-per-power`), regenPercentEl: document.getElementById(`${type}-regen-percent`) };
+        }
         function calculateTotalEnergy(type) { const els = getEnergyElements(type); if (!els?.maxEnergyEl || !els?.maxMultiplierEl || !els?.totalEnergyEl || !els?.currentEnergyEl) { console.error(`Elements missing: ${type}`); return 0; } const maxEnergy = safeParseFloat(els.maxEnergyEl.value, 0); const multiplier = safeParseFloat(els.maxMultiplierEl.value, 1); const totalEnergy = maxEnergy * multiplier; els.totalEnergyEl.value = formatNumber(totalEnergy); els.currentEnergyEl.value = formatNumber(totalEnergy); return totalEnergy; }
         function regenerateEnergy(type) { const els = getEnergyElements(type); if (!els?.totalEnergyEl || !els?.currentEnergyEl || !els?.regenPercentEl) { console.error(`Elements missing: ${type}`); return; } const totalEnergy = safeParseFloat(els.totalEnergyEl.value.replace(/,/g, ''), 0); let currentEnergy = safeParseFloat(els.currentEnergyEl.value.replace(/,/g, ''), 0); const regenPercent = safeParseFloat(els.regenPercentEl.value, 0); if (totalEnergy <= 0) { showMessage('Max Energy must be positive.', 'error'); return; } if (regenPercent <= 0) { showMessage('Regen Rate must be positive.', 'error'); return; } const regenAmount = totalEnergy * (regenPercent / 100); let newEnergy = Math.min(currentEnergy + regenAmount, totalEnergy); els.currentEnergyEl.value = formatNumber(newEnergy); showMessage(`${formatNumber(regenAmount)} regenerated. Current: ${formatNumber(newEnergy)}`, 'success'); updateSliderDisplay(); updateStatsDisplay(); }
 
@@ -243,49 +280,29 @@
         function removeKaiokenStyle() { if (!statsPanel || !statsPanelHeader) return; statsPanel.classList.add('border-stats-border'); statsPanel.classList.remove('border-kaioken-border'); statsPanelHeader.classList.add('text-stats-header'); statsPanelHeader.classList.remove('text-kaioken-header'); }
 
         // --- Health Update ---
-        function updateCurrentHealthDisplay() {
-            if (energyTypeSelect.value === 'ki' && kaiokenCheckbox.checked && maxHealthInput && currentHealthEl) {
-                const maxHealth = safeParseFloat(maxHealthInput.value, 0);
-                let currentHealth = safeParseFloat(currentHealthEl.value.replace(/,/g,''), -1);
-                if (currentHealth === -1 || currentHealth > maxHealth || currentHealthEl.value === '') {
-                     currentHealthEl.value = formatNumber(maxHealth);
-                }
-            } else if (currentHealthEl) {
-                 if (maxHealthInput && currentHealthEl.value === '') {
-                    currentHealthEl.value = formatNumber(safeParseFloat(maxHealthInput.value, 0));
-                 }
-            }
-        }
-
-        // --- Added: Regenerate Health Function ---
-        function regenerateHealth() {
-            if (!maxHealthInput || !currentHealthEl) {
-                console.error("Health elements missing for regeneration.");
-                return;
-            }
-            const maxHealth = safeParseFloat(maxHealthInput.value, 0);
-            currentHealthEl.value = formatNumber(maxHealth);
-            showMessage('Health fully regenerated!', 'success');
-            // Update stats display in case other stats depend on health later
-            updateStatsDisplay();
-        }
+        function updateCurrentHealthDisplay() { if (energyTypeSelect.value === 'ki' && kaiokenCheckbox.checked && maxHealthInput && currentHealthEl) { const maxHealth = safeParseFloat(maxHealthInput.value, 0); let currentHealth = safeParseFloat(currentHealthEl.value.replace(/,/g,''), -1); if (currentHealth === -1 || currentHealth > maxHealth || currentHealthEl.value === '') { currentHealthEl.value = formatNumber(maxHealth); } } else if (currentHealthEl) { if (maxHealthInput && currentHealthEl.value === '') { currentHealthEl.value = formatNumber(safeParseFloat(maxHealthInput.value, 0)); } } }
+        function regenerateHealth() { if (!maxHealthInput || !currentHealthEl) { console.error("Health elements missing."); return; } const maxHealth = safeParseFloat(maxHealthInput.value, 0); currentHealthEl.value = formatNumber(maxHealth); showMessage('Health fully regenerated!', 'success'); updateStatsDisplay(); }
 
 
         // --- Show/Hide Logic ---
         function showSelectedEnergyPool() {
             const selectedType = energyTypeSelect.value;
+            // Hide/show energy pool divs
             kiPoolDiv.style.display = selectedType === 'ki' ? 'block' : 'none';
             nenPoolDiv.style.display = selectedType === 'nen' ? 'block' : 'none';
             chakraPoolDiv.style.display = selectedType === 'chakra' ? 'block' : 'none';
+            magicPoolDiv.style.display = selectedType === 'magic' ? 'block' : 'none';
+            cursedPoolDiv.style.display = selectedType === 'cursed' ? 'block' : 'none'; // Added Cursed
 
+            // Show/Hide Kaioken section
             if (kaiokenSection) {
                  if (selectedType === 'ki') {
                      kaiokenSection.classList.remove('hidden');
                      if (kaiokenCheckbox.checked) {
                         kaiokenDetails.classList.remove('hidden');
-                        updateCurrentHealthDisplay(); // Ensure health display is correct
+                        updateCurrentHealthDisplay();
                      }
-                 } else {
+                 } else { // Hide for Nen, Chakra, Magic, Cursed
                      kaiokenSection.classList.add('hidden');
                      if (kaiokenCheckbox.checked) {
                          kaiokenCheckbox.checked = false;
@@ -315,14 +332,14 @@
             showLoading(true);
             setTimeout(() => {
                 try {
-                    // --- Gather Inputs & Calculate Damage (as before) ---
+                    // Gather Inputs & Calculate Damage
                     const baseDamage = safeParseFloat(baseDamageInput.value, 0); const baseMultiplier = safeParseFloat(baseMultiplierInput.value, 1); const formMultiplier = safeParseFloat(formMultiplierInput.value, 1); const energyType = energyTypeSelect.value; const sliderPercent = safeParseFloat(energySlider.value, 0); const els = getEnergyElements(energyType); if (!els?.currentEnergyEl || !els?.damagePerPowerEl) { throw new Error(`Elements missing: ${energyType}`); } const currentEnergy = safeParseFloat(els.currentEnergyEl.value.replace(/,/g, ''), 0); const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1); let finalDamage = baseDamage * baseMultiplier * formMultiplier; document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach(modifierDiv => { const valueInput = modifierDiv.querySelector('.modifier-value-input'); const typeOption = modifierDiv.querySelector('.modifier-type-option.active'); if (valueInput && typeOption) { const modifierValue = safeParseFloat(valueInput.value, 0); const modifierType = typeOption.dataset.value; if (modifierType === 'additive') { finalDamage += modifierValue; } else if (modifierType === 'multiplicative') { const multiplier = (modifierValue === 0 && valueInput.value.trim() !== '0') ? 1 : modifierValue; finalDamage *= multiplier; } } }); const energyUsed = currentEnergy * (sliderPercent / 100); const extraDamage = energyUsed * damagePerPower; finalDamage += extraDamage;
 
-                    // --- Update Current Energy ---
+                    // Update Current Energy
                     let newCurrentEnergy = Math.max(0, currentEnergy - energyUsed);
                     els.currentEnergyEl.value = formatNumber(newCurrentEnergy);
 
-                    // --- Apply Kaioken Strain (if active) ---
+                    // Apply Kaioken Strain (if active)
                     if (energyType === 'ki' && kaiokenCheckbox.checked) {
                         const currentHealth = safeParseFloat(currentHealthEl.value.replace(/,/g, ''), 0);
                         if (currentHealth > 0) {
@@ -334,14 +351,13 @@
                                 currentHealthEl.value = formatNumber(newHealth);
                                 if (newHealth === 0) { showMessage('Warning: Current Health depleted by Kaioken strain!', 'error'); }
                             }
-                        } else { showMessage('Cannot attack: Current Health is zero while Kaioken is active.', 'error'); /* throw new Error('Cannot attack with zero health in Kaioken'); */ }
+                        } else { showMessage('Cannot attack: Current Health is zero while Kaioken is active.', 'error'); /* Consider preventing calculation */ }
                     }
-                    // --- End Kaioken Strain ---
 
-                    // --- Update Stats ---
+                    // Update Stats
                     totalDamageDealt += finalDamage; totalEnergySpent += energyUsed; attackCount++; if (finalDamage > highestDamage) { highestDamage = finalDamage; } updateStatsDisplay();
 
-                    // --- Display Results ---
+                    // Display Results
                     resultValueEl.textContent = formatNumber(finalDamage); resultEnergyUsedEl.textContent = formatNumber(energyUsed); resultExtraDamageEl.textContent = formatNumber(extraDamage); displayAllFormats(finalDamage); resultDiv.classList.remove('hidden', 'bg-error-light', 'border-error', 'text-error-dark'); resultDiv.classList.add('bg-success-light', 'border-success', 'text-success-dark'); resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-success-dark'; showMessage('Calculation successful!', 'success'); updateSliderDisplay();
 
                 } catch (error) { console.error("Calc Error:", error); resultValueEl.textContent = 'Error'; resultEnergyUsedEl.textContent = 'N/A'; resultExtraDamageEl.textContent = 'N/A'; resultScientificEl.textContent = 'N/A'; resultWordsEl.textContent = 'Error'; resultDiv.classList.remove('hidden', 'bg-success-light', 'border-success', 'text-success-dark'); resultDiv.classList.add('bg-error-light', 'border-error', 'text-error-dark'); resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-error-dark'; showMessage(`Calculation failed: ${error.message || 'Unknown error'}`, 'error'); } finally { showLoading(false); }
@@ -358,7 +374,8 @@
         energySlider.addEventListener('input', updateSliderDisplay);
         calculateBtn.addEventListener('click', performCalculation);
         addDynamicBoxBtn.addEventListener('click', addDynamicModifier);
-        ['ki', 'nen', 'chakra'].forEach(type => { const els = getEnergyElements(type); if (els?.maxEnergyEl && els?.maxMultiplierEl && els?.damagePerPowerEl) { els.maxEnergyEl.addEventListener('input', () => { calculateTotalEnergy(type); updateSliderDisplay(); updateStatsDisplay(); }); els.maxMultiplierEl.addEventListener('input', () => { calculateTotalEnergy(type); updateSliderDisplay(); updateStatsDisplay(); }); els.damagePerPowerEl.addEventListener('input', updateSliderDisplay); } else { console.warn(`Listeners not attached: ${type}.`); } });
+        // Updated loop to include 'cursed'
+        ['ki', 'nen', 'chakra', 'magic', 'cursed'].forEach(type => { const els = getEnergyElements(type); if (els?.maxEnergyEl && els?.maxMultiplierEl && els?.damagePerPowerEl) { els.maxEnergyEl.addEventListener('input', () => { calculateTotalEnergy(type); updateSliderDisplay(); updateStatsDisplay(); }); els.maxMultiplierEl.addEventListener('input', () => { calculateTotalEnergy(type); updateSliderDisplay(); updateStatsDisplay(); }); els.damagePerPowerEl.addEventListener('input', updateSliderDisplay); } else { console.warn(`Listeners not attached: ${type}.`); } });
         document.querySelectorAll('.regen-btn').forEach(button => { button.addEventListener('click', function() { regenerateEnergy(this.dataset.type); }); });
         baseDamageInput.addEventListener('input', updateDamageCalculations);
         baseMultiplierInput.addEventListener('input', updateDamageCalculations);
@@ -367,9 +384,7 @@
         // Kaioken Listeners
         if (kaiokenCheckbox) { kaiokenCheckbox.addEventListener('change', () => { const isChecked = kaiokenCheckbox.checked; kaiokenDetails.classList.toggle('hidden', !isChecked); if (isChecked) { applyKaiokenStyle(); updateCurrentHealthDisplay(); } else { removeKaiokenStyle(); } }); }
         if (maxHealthInput) { maxHealthInput.addEventListener('input', updateCurrentHealthDisplay); }
-        // Added Listener for Health Regen Button
         if (regenHealthBtn) { regenHealthBtn.addEventListener('click', regenerateHealth); }
-
 
         // --- Initial Setup on Page Load ---
         document.addEventListener('DOMContentLoaded', () => { showSelectedEnergyPool(); });
