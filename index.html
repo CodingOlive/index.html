@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy Calculator - Individual Sliders</title>
+    <title>Energy Calculator - Multi-Slider (Refactored)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Tailwind Custom Configuration
+        // Tailwind Custom Configuration (from original)
         tailwind.config = {
             theme: {
                 extend: {
@@ -26,16 +26,23 @@
                         // Focus Rings per type
                         'magic-focus': '#26a69a', 'cursed-focus': '#dc2626', 'reiatsu-focus': '#475569',
                         'haki-focus': '#1f2937', 'alchemy-focus': '#f59e0b', 'nature-focus': '#84cc16',
+                        // Specific focus rings matching base colors (if needed)
+                        'ki-focus': '#FF9800', 'nen-focus': '#2196F3', 'chakra-focus': '#9C27B0'
                     },
                     animation: {
                         spin: 'spin 1s linear infinite', shake: 'shake 0.5s ease-in-out', fadeIn: 'fadeIn 0.3s ease-in', pulse: 'pulse 1.5s infinite',
                         'pulse-additive': 'pulse-additive 0.5s', 'pulse-multiplicative': 'pulse-multiplicative 0.5s', 'pulse-result': 'pulse-result 0.3s ease-in-out',
                         'flash-red': 'flash-red-bg 0.5s ease-out', 'flash-green': 'flash-green-bg 0.5s ease-out', 'kaioken-glow': 'kaioken-glow 1.5s infinite ease-in-out',
-                        'pulse-glow-ki': 'pulse-glow-ki 1.5s infinite ease-in-out', 'pulse-glow-nen': 'pulse-glow-nen 1.5s infinite ease-in-out',
-                        'pulse-glow-chakra': 'pulse-glow-chakra 1.5s infinite ease-in-out', 'pulse-glow-magic': 'pulse-glow-magic 1.5s infinite ease-in-out',
-                        'pulse-glow-cursed': 'pulse-glow-cursed 1.5s infinite ease-in-out', 'pulse-glow-reiatsu': 'pulse-glow-reiatsu 1.5s infinite ease-in-out',
-                        'pulse-glow-haki': 'pulse-glow-haki 1.5s infinite ease-in-out', 'pulse-glow-alchemy': 'pulse-glow-alchemy 1.5s infinite ease-in-out',
-                        'pulse-glow-nature': 'pulse-glow-nature 1.5s infinite ease-in-out',
+                        // Dynamic glow animations linked in JS map
+                        'animate-pulse-glow-ki': 'pulse-glow-ki 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-nen': 'pulse-glow-nen 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-chakra': 'pulse-glow-chakra 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-magic': 'pulse-glow-magic 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-cursed': 'pulse-glow-cursed 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-reiatsu': 'pulse-glow-reiatsu 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-haki': 'pulse-glow-haki 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-alchemy': 'pulse-glow-alchemy 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-nature': 'pulse-glow-nature 1.5s infinite ease-in-out',
                     },
                     keyframes: {
                         spin: { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' }, },
@@ -48,7 +55,16 @@
                         'flash-red-bg': { '50%': { backgroundColor: '#ffebee', borderColor: '#f44336' } },
                         'flash-green-bg': { '50%': { backgroundColor: '#e8f5e9', borderColor: '#4CAF50' } },
                         'kaioken-glow': { '0%, 100%': { boxShadow: `0 0 10px #f8717180` }, '50%': { boxShadow: `0 0 20px #f87171CC` } },
-                        'pulse-glow-ki': { '0%, 100%': { boxShadow: `0 0 8px #FF980066` }, '50%': { boxShadow: `0 0 16px #FF9800B3` } }, 'pulse-glow-nen': { '0%, 100%': { boxShadow: `0 0 8px #2196F366` }, '50%': { boxShadow: `0 0 16px #2196F3B3` } }, 'pulse-glow-chakra': { '0%, 100%': { boxShadow: `0 0 8px #9C27B066` }, '50%': { boxShadow: `0 0 16px #9C27B0B3` } }, 'pulse-glow-magic': { '0%, 100%': { boxShadow: `0 0 8px #26a69a66` }, '50%': { boxShadow: `0 0 16px #26a69aB3` } }, 'pulse-glow-cursed': { '0%, 100%': { boxShadow: `0 0 8px #dc262666` }, '50%': { boxShadow: `0 0 16px #dc2626B3` } }, 'pulse-glow-reiatsu': { '0%, 100%': { boxShadow: `0 0 8px #47556966` }, '50%': { boxShadow: `0 0 16px #475569B3` } }, 'pulse-glow-haki': { '0%, 100%': { boxShadow: `0 0 8px #1f293766` }, '50%': { boxShadow: `0 0 16px #1f2937B3` } }, 'pulse-glow-alchemy': { '0%, 100%': { boxShadow: `0 0 8px #f59e0b66` }, '50%': { boxShadow: `0 0 16px #f59e0bB3` } }, 'pulse-glow-nature': { '0%, 100%': { boxShadow: `0 0 8px #84cc1666` }, '50%': { boxShadow: `0 0 16px #84cc16B3` } },
+                        // Dynamic Glow Keyframes (ensure names match animation names)
+                         'pulse-glow-ki': { '0%, 100%': { boxShadow: `0 0 8px #FF980066` }, '50%': { boxShadow: `0 0 16px #FF9800B3` } },
+                         'pulse-glow-nen': { '0%, 100%': { boxShadow: `0 0 8px #2196F366` }, '50%': { boxShadow: `0 0 16px #2196F3B3` } },
+                         'pulse-glow-chakra': { '0%, 100%': { boxShadow: `0 0 8px #9C27B066` }, '50%': { boxShadow: `0 0 16px #9C27B0B3` } },
+                         'pulse-glow-magic': { '0%, 100%': { boxShadow: `0 0 8px #26a69a66` }, '50%': { boxShadow: `0 0 16px #26a69aB3` } },
+                         'pulse-glow-cursed': { '0%, 100%': { boxShadow: `0 0 8px #dc262666` }, '50%': { boxShadow: `0 0 16px #dc2626B3` } },
+                         'pulse-glow-reiatsu': { '0%, 100%': { boxShadow: `0 0 8px #47556966` }, '50%': { boxShadow: `0 0 16px #475569B3` } },
+                         'pulse-glow-haki': { '0%, 100%': { boxShadow: `0 0 8px #1f293766` }, '50%': { boxShadow: `0 0 16px #1f2937B3` } },
+                         'pulse-glow-alchemy': { '0%, 100%': { boxShadow: `0 0 8px #f59e0b66` }, '50%': { boxShadow: `0 0 16px #f59e0bB3` } },
+                         'pulse-glow-nature': { '0%, 100%': { boxShadow: `0 0 8px #84cc1666` }, '50%': { boxShadow: `0 0 16px #84cc16B3` } },
                     }
                 }
             }
@@ -57,8 +73,11 @@
     <link rel="preconnect" href="https://rsms.me/">
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <style>
+        /* Base Styles */
         body { font-family: 'Inter', sans-serif; background-color: #f9f9f9; color: #333; }
         .energy-pool { @apply p-5 mb-5 rounded-lg shadow-sm border-l-4; transition: box-shadow 0.3s ease-in-out, opacity 0.3s ease-in-out; }
+
+        /* Dynamic Pool Styles (applied by JS using ENERGY_TYPE_DETAILS map) */
         .energy-pool-ki { border-left-color: theme('colors.ki'); } .energy-pool-ki h3 { color: theme('colors.ki-dark'); }
         .energy-pool-nen { border-left-color: theme('colors.nen'); } .energy-pool-nen h3 { color: theme('colors.nen-dark'); }
         .energy-pool-chakra { border-left-color: theme('colors.chakra'); } .energy-pool-chakra h3 { color: theme('colors.chakra-dark'); }
@@ -71,8 +90,11 @@
 
         /* Base Slider Track */
         .energy-slider { @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer; }
+        /* Base Slider Thumb */
+        .energy-slider::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: background 0.3s; border: none; }
+        .energy-slider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: background 0.3s; border: none; }
 
-        /* Individual Slider Thumb Styles */
+        /* Individual Slider Thumb Styles (Still needed as CSS targets generated IDs) */
         #ki-energy-slider::-webkit-slider-thumb { background: theme('colors.ki'); } #ki-energy-slider::-moz-range-thumb { background: theme('colors.ki'); }
         #nen-energy-slider::-webkit-slider-thumb { background: theme('colors.nen'); } #nen-energy-slider::-moz-range-thumb { background: theme('colors.nen'); }
         #chakra-energy-slider::-webkit-slider-thumb { background: theme('colors.chakra'); } #chakra-energy-slider::-moz-range-thumb { background: theme('colors.chakra'); }
@@ -83,14 +105,12 @@
         #alchemy-energy-slider::-webkit-slider-thumb { background: theme('colors.alchemy'); } #alchemy-energy-slider::-moz-range-thumb { background: theme('colors.alchemy'); }
         #nature-energy-slider::-webkit-slider-thumb { background: theme('colors.nature'); } #nature-energy-slider::-moz-range-thumb { background: theme('colors.nature'); }
 
-        /* Base Slider Thumb */
-        .energy-slider::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: background 0.3s; border: none; }
-        .energy-slider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: background 0.3s; border: none; }
-        /* Optional: Darker hover for thumbs */
+        /* Optional: Darker hover for thumbs (can keep or remove) */
         #ki-energy-slider:hover::-webkit-slider-thumb { background: theme('colors.ki-dark'); } #ki-energy-slider:hover::-moz-range-thumb { background: theme('colors.ki-dark'); }
         #nen-energy-slider:hover::-webkit-slider-thumb { background: theme('colors.nen-dark'); } #nen-energy-slider:hover::-moz-range-thumb { background: theme('colors.nen-dark'); }
-        /* ... add hover styles for other types if desired ... */
+        /* ... add other hover styles if desired ... */
 
+        /* Other Styles */
         .modifier-type-option.additive { border-color: theme('colors.success'); color: theme('colors.success-dark'); }
         .modifier-type-option.additive.active { background-color: theme('colors.success-light'); box-shadow: 0 1px 5px rgba(76, 175, 80, 0.3); animation: pulse-additive 0.5s; color: theme('colors.success'); }
         .modifier-type-option.multiplicative { border-color: theme('colors.ki'); color: theme('colors.ki-dark'); }
@@ -99,8 +119,9 @@
         .animate-flash-red { animation: flash-red-bg 0.5s ease-out; }
         .animate-flash-green { animation: flash-green-bg 0.5s ease-out; }
         .animate-kaioken-glow { animation: kaioken-glow 1.5s infinite ease-in-out; }
-        .animate-pulse-glow-ki { animation: pulse-glow-ki 1.5s infinite ease-in-out; } .animate-pulse-glow-nen { animation: pulse-glow-nen 1.5s infinite ease-in-out; } .animate-pulse-glow-chakra { animation: pulse-glow-chakra 1.5s infinite ease-in-out; } .animate-pulse-glow-magic { animation: pulse-glow-magic 1.5s infinite ease-in-out; } .animate-pulse-glow-cursed { animation: pulse-glow-cursed 1.5s infinite ease-in-out; } .animate-pulse-glow-reiatsu { animation: pulse-glow-reiatsu 1.5s infinite ease-in-out; } .animate-pulse-glow-haki { animation: pulse-glow-haki 1.5s infinite ease-in-out; } .animate-pulse-glow-alchemy { animation: pulse-glow-alchemy 1.5s infinite ease-in-out; } .animate-pulse-glow-nature { animation: pulse-glow-nature 1.5s infinite ease-in-out; }
+        /* Static Glow classes (applied by JS when not pulsing) */
         .static-glow-ki { box-shadow: 0 0 10px #FF980080; } .static-glow-nen { box-shadow: 0 0 10px #2196F380; } .static-glow-chakra { box-shadow: 0 0 10px #9C27B080; } .static-glow-magic { box-shadow: 0 0 10px #26a69a80; } .static-glow-cursed { box-shadow: 0 0 10px #dc262680; } .static-glow-reiatsu { box-shadow: 0 0 10px #47556980; } .static-glow-haki { box-shadow: 0 0 10px #1f293780; } .static-glow-alchemy { box-shadow: 0 0 10px #f59e0b80; } .static-glow-nature { box-shadow: 0 0 10px #84cc1680; }
+
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
         .stats-panel { border-left-width: 4px; transition: border-color 0.3s ease-in-out, box-shadow 1.5s ease-in-out; }
         .stats-panel-header { transition: color 0.3s ease-in-out; }
@@ -109,7 +130,10 @@
         .inpt-ro { @apply w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-sm cursor-not-allowed transition-colors duration-300; }
         .regen-btn { @apply px-3 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95; }
         .save-load-btn { @apply px-3 py-1 text-sm text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all duration-150 ease-in-out active:scale-95; }
-        .inpt-kaioken { @apply focus:ring-kaioken-focus; } .inpt-magic { @apply focus:ring-magic-focus; } .inpt-cursed { @apply focus:ring-cursed-focus; } .inpt-reiatsu { @apply focus:ring-reiatsu-focus; } .inpt-haki { @apply focus:ring-haki-focus; } .inpt-alchemy { @apply focus:ring-alchemy-focus; } .inpt-nature { @apply focus:ring-nature-focus; }
+
+        /* Focus rings applied by JS */
+        /* .focus:ring-ki, .focus:ring-nen, etc. are defined in tailwind.config */
+
     </style>
 </head>
 <body class="p-4 md:p-6">
@@ -119,7 +143,6 @@
         <button id="load-state-btn" class="save-load-btn bg-gray-500 hover:bg-gray-600 focus:ring-gray-400">Load State</button>
         <button id="clear-state-btn" class="save-load-btn bg-red-500 hover:bg-red-600 focus:ring-red-400">Clear Saved</button>
     </div>
-
     <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Energy Calculator</h1>
 
     <div class="flex flex-col md:flex-row gap-6 max-w-7xl mx-auto">
@@ -129,183 +152,61 @@
             <div id="message-area" class="mb-4 p-3 rounded-md text-sm hidden" role="alert"></div>
 
             <div class="energy-pool bg-white p-5 mb-5 rounded-lg shadow-sm border-l-4 border-gray-400">
-                <h3 class="text-xl font-semibold mb-4 flex items-center"> Damage Modifiers <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div><label for="base-damage" class="lbl">Base Damage:</label><input type="text" id="base-damage" placeholder="e.g., 100" aria-required="true" class="inpt focus:ring-success"></div>
-                    <div><label for="attack-compression-points" class="lbl">Attack Compression Points:</label><input type="text" id="attack-compression-points" placeholder="e.g., 10" value="0" class="inpt focus:ring-red-500"></div>
-                    <div><label for="base-multiplier" class="lbl">Base Multiplier:</label><input type="text" id="base-multiplier" placeholder="e.g., 1.5" value="1" class="inpt focus:ring-success"></div>
-                    <div><label for="form-multiplier" class="lbl">Form Multiplier:</label><input type="text" id="form-multiplier" placeholder="e.g., 2" value="1" class="inpt focus:ring-success"></div>
-                </div>
-                <div id="dynamic-modifiers-container" class="mb-4"><h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4></div>
-                <button id="add-dynamic-box" aria-label="Add modifier factor" class="px-4 py-2 bg-chakra text-white rounded-md hover:bg-chakra-dark focus:outline-none focus:ring-2 focus:ring-chakra focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95"> Add Factor </button>
+                 <h3 class="text-xl font-semibold mb-4 flex items-center"> Damage Modifiers <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                     <div><label for="base-damage" class="lbl">Base Damage:</label><input type="text" id="base-damage" placeholder="e.g., 100" aria-required="true" class="inpt focus:ring-success"></div>
+                     <div><label for="attack-compression-points" class="lbl">Attack Compression Points:</label><input type="text" id="attack-compression-points" placeholder="e.g., 10" value="0" class="inpt focus:ring-red-500"></div>
+                     <div><label for="base-multiplier" class="lbl">Base Multiplier:</label><input type="text" id="base-multiplier" placeholder="e.g., 1.5" value="1" class="inpt focus:ring-success"></div>
+                     <div><label for="form-multiplier" class="lbl">Form Multiplier:</label><input type="text" id="form-multiplier" placeholder="e.g., 2" value="1" class="inpt focus:ring-success"></div>
+                 </div>
+                 <div id="dynamic-modifiers-container" class="mb-4"><h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4></div>
+                 <button id="add-dynamic-box" aria-label="Add modifier factor" class="px-4 py-2 bg-chakra text-white rounded-md hover:bg-chakra-dark focus:outline-none focus:ring-2 focus:ring-chakra focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95"> Add Factor </button>
             </div>
 
             <div class="form-group mb-5">
-                <label for="energy-type" class="lbl">Energy Type:</label>
-                <select id="energy-type" aria-label="Select energy type" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-success focus:border-transparent text-sm bg-white">
-                    <option value="ki">Ki Energy</option> <option value="nen">Nen Energy</option> <option value="chakra">Chakra Energy</option> <option value="magic">Magic Energy</option> <option value="cursed">Cursed Energy</option> <option value="reiatsu">Reiatsu</option> <option value="haki">Haki</option> <option value="alchemy">Alchemy</option> <option value="nature">Nature Energy</option>
-                </select>
+                 <label for="energy-type" class="lbl">Energy Type:</label>
+                 <select id="energy-type" aria-label="Select energy type" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-success focus:border-transparent text-sm bg-white">
+                     <option value="ki">Ki Energy</option> <option value="nen">Nen Energy</option> <option value="chakra">Chakra Energy</option> <option value="magic">Magic Energy</option> <option value="cursed">Cursed Energy</option> <option value="reiatsu">Reiatsu</option> <option value="haki">Haki</option> <option value="alchemy">Alchemy</option> <option value="nature">Nature Energy</option>
+                 </select>
             </div>
 
-            <div id="ki-pool" class="energy-pool energy-pool-ki bg-gradient-to-br from-white to-orange-100">
-                <h3 class="text-xl font-semibold mb-4 flex items-center">Ki Energy Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label for="ki-max-energy" class="lbl">Max Energy:</label><input type="text" id="ki-max-energy" value="1000" class="inpt focus:ring-ki"></div>
-                    <div><label for="ki-max-multiplier" class="lbl">Max Energy Multiplier:</label><input type="text" id="ki-max-multiplier" value="1" class="inpt focus:ring-ki"></div>
-                    <div><label for="ki-total-energy" class="lbl">Total Energy (Calculated):</label><input type="text" id="ki-total-energy" readonly class="inpt-ro"></div>
-                    <div><label for="ki-current-energy" class="lbl">Current Energy:</label><input type="text" id="ki-current-energy" readonly class="inpt-ro"></div>
-                    <div><label for="ki-damage-per-power" class="lbl">Damage per Energy Point:</label><input type="text" id="ki-damage-per-power" value="1" class="inpt focus:ring-ki"></div>
-                    <div><label for="ki-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="ki-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-ki focus:border-transparent text-sm"><button data-type="ki" class="regen-btn bg-success hover:bg-success-dark focus:ring-success">Regen</button></div></div>
-                    <div class="md:col-span-2 mt-4 pt-4 border-t border-gray-200">
-                        <div class="flex items-center gap-2 mb-2">
-                             <input type="checkbox" id="add-ki-energy-checkbox" class="add-energy-checkbox rounded shadow-sm focus:ring-ki" data-type="ki">
-                             <label for="add-ki-energy-checkbox" class="lbl cursor-pointer">Add Ki Energy to Attack?</label>
-                        </div>
-                        <div id="ki-slider-container" class="energy-slider-container hidden mt-2 space-y-1">
-                            <input type="range" id="ki-energy-slider" class="energy-slider" data-type="ki" min="0" max="100" value="0">
-                            <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div>
-                            <div id="ki-slider-value-display" class="energy-slider-value-display text-xs text-center bg-gray-100 text-gray-700 p-1 rounded-md">0% (Energy: 0, Damage: 0.00)</div>
-                        </div>
+            <div id="energy-pools-container" class="mb-5">
+                </div>
+
+            <div id="all-sliders-container" class="bg-white p-5 mb-5 rounded-lg shadow-sm">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Energy Usage Sliders</h3>
+                <div id="sliders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                     </div>
-                </div>
-            </div>
-            <div id="nen-pool" class="energy-pool energy-pool-nen bg-gradient-to-br from-white to-blue-100" style="display: none;">
-                 <h3 class="text-xl font-semibold mb-4 flex items-center">Nen Energy Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div><label for="nen-max-energy" class="lbl">Max Energy:</label><input type="text" id="nen-max-energy" value="1000" class="inpt focus:ring-nen"></div>
-                     <div><label for="nen-max-multiplier" class="lbl">Max Energy Multiplier:</label><input type="text" id="nen-max-multiplier" value="1" class="inpt focus:ring-nen"></div>
-                     <div><label for="nen-total-energy" class="lbl">Total Energy (Calculated):</label><input type="text" id="nen-total-energy" readonly class="inpt-ro"></div>
-                     <div><label for="nen-current-energy" class="lbl">Current Energy:</label><input type="text" id="nen-current-energy" readonly class="inpt-ro"></div>
-                     <div><label for="nen-damage-per-power" class="lbl">Damage per Energy Point:</label><input type="text" id="nen-damage-per-power" value="1" class="inpt focus:ring-nen"></div>
-                     <div><label for="nen-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="nen-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-nen focus:border-transparent text-sm"><button data-type="nen" class="regen-btn bg-success hover:bg-success-dark focus:ring-success">Regen</button></div></div>
-                     <div class="md:col-span-2 mt-4 pt-4 border-t border-gray-200">
-                         <div class="flex items-center gap-2 mb-2">
-                              <input type="checkbox" id="add-nen-energy-checkbox" class="add-energy-checkbox rounded shadow-sm focus:ring-nen" data-type="nen">
-                              <label for="add-nen-energy-checkbox" class="lbl cursor-pointer">Add Nen Energy to Attack?</label>
-                         </div>
-                         <div id="nen-slider-container" class="energy-slider-container hidden mt-2 space-y-1">
-                             <input type="range" id="nen-energy-slider" class="energy-slider" data-type="nen" min="0" max="100" value="0">
-                             <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div>
-                             <div id="nen-slider-value-display" class="energy-slider-value-display text-xs text-center bg-gray-100 text-gray-700 p-1 rounded-md">0% (Energy: 0, Damage: 0.00)</div>
-                         </div>
-                     </div>
-                </div>
-            </div>
-            <div id="chakra-pool" class="energy-pool energy-pool-chakra bg-gradient-to-br from-white to-purple-100" style="display: none;">
-                 <h3 class="text-xl font-semibold mb-4 flex items-center">Chakra Energy Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div><label for="chakra-max-energy" class="lbl">Max Energy:</label><input type="text" id="chakra-max-energy" value="1000" class="inpt focus:ring-chakra"></div>
-                     <div><label for="chakra-max-multiplier" class="lbl">Max Energy Multiplier:</label><input type="text" id="chakra-max-multiplier" value="1" class="inpt focus:ring-chakra"></div>
-                     <div><label for="chakra-total-energy" class="lbl">Total Energy (Calculated):</label><input type="text" id="chakra-total-energy" readonly class="inpt-ro"></div>
-                     <div><label for="chakra-current-energy" class="lbl">Current Energy:</label><input type="text" id="chakra-current-energy" readonly class="inpt-ro"></div>
-                     <div><label for="chakra-damage-per-power" class="lbl">Damage per Energy Point:</label><input type="text" id="chakra-damage-per-power" value="1" class="inpt focus:ring-chakra"></div>
-                     <div><label for="chakra-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="chakra-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-chakra focus:border-transparent text-sm"><button data-type="chakra" class="regen-btn bg-success hover:bg-success-dark focus:ring-success">Regen</button></div></div>
-                     <div class="md:col-span-2 mt-4 pt-4 border-t border-gray-200"> <div class="flex items-center gap-2 mb-2"> <input type="checkbox" id="add-chakra-energy-checkbox" class="add-energy-checkbox rounded shadow-sm focus:ring-chakra" data-type="chakra"> <label for="add-chakra-energy-checkbox" class="lbl cursor-pointer">Add Chakra Energy to Attack?</label> </div> <div id="chakra-slider-container" class="energy-slider-container hidden mt-2 space-y-1"> <input type="range" id="chakra-energy-slider" class="energy-slider" data-type="chakra" min="0" max="100" value="0"> <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div> <div id="chakra-slider-value-display" class="energy-slider-value-display text-xs text-center bg-gray-100 text-gray-700 p-1 rounded-md">0% (Energy: 0, Damage: 0.00)</div> </div> </div>
-                </div>
-            </div>
-            <div id="magic-pool" class="energy-pool energy-pool-magic bg-gradient-to-br from-white to-teal-100" style="display: none;">
-                 <h3 class="text-xl font-semibold mb-4 flex items-center">Magic Energy Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div><label for="magic-max-energy" class="lbl">Max Energy:</label><input type="text" id="magic-max-energy" value="1000" class="inpt inpt-magic"></div>
-                     <div><label for="magic-max-multiplier" class="lbl">Max Energy Multiplier:</label><input type="text" id="magic-max-multiplier" value="1" class="inpt inpt-magic"></div>
-                     <div><label for="magic-total-energy" class="lbl">Total Energy (Calculated):</label><input type="text" id="magic-total-energy" readonly class="inpt-ro"></div>
-                     <div><label for="magic-current-energy" class="lbl">Current Energy:</label><input type="text" id="magic-current-energy" readonly class="inpt-ro"></div>
-                     <div><label for="magic-damage-per-power" class="lbl">Damage per Energy Point:</label><input type="text" id="magic-damage-per-power" value="1" class="inpt inpt-magic"></div>
-                     <div><label for="magic-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="magic-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-magic-focus focus:border-transparent text-sm"><button data-type="magic" class="regen-btn bg-success hover:bg-success-dark focus:ring-success">Regen</button></div></div>
-                     <div class="md:col-span-2 mt-4 pt-4 border-t border-gray-200"> <div class="flex items-center gap-2 mb-2"> <input type="checkbox" id="add-magic-energy-checkbox" class="add-energy-checkbox rounded shadow-sm focus:ring-magic-focus" data-type="magic"> <label for="add-magic-energy-checkbox" class="lbl cursor-pointer">Add Magic Energy to Attack?</label> </div> <div id="magic-slider-container" class="energy-slider-container hidden mt-2 space-y-1"> <input type="range" id="magic-energy-slider" class="energy-slider" data-type="magic" min="0" max="100" value="0"> <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div> <div id="magic-slider-value-display" class="energy-slider-value-display text-xs text-center bg-gray-100 text-gray-700 p-1 rounded-md">0% (Energy: 0, Damage: 0.00)</div> </div> </div>
-                </div>
-            </div>
-            <div id="cursed-pool" class="energy-pool energy-pool-cursed bg-gradient-to-br from-white to-red-100" style="display: none;">
-                 <h3 class="text-xl font-semibold mb-4 flex items-center">Cursed Energy Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div><label for="cursed-max-energy" class="lbl">Max Energy:</label><input type="text" id="cursed-max-energy" value="1000" class="inpt inpt-cursed"></div>
-                     <div><label for="cursed-max-multiplier" class="lbl">Max Energy Multiplier:</label><input type="text" id="cursed-max-multiplier" value="1" class="inpt inpt-cursed"></div>
-                     <div><label for="cursed-total-energy" class="lbl">Total Energy (Calculated):</label><input type="text" id="cursed-total-energy" readonly class="inpt-ro"></div>
-                     <div><label for="cursed-current-energy" class="lbl">Current Energy:</label><input type="text" id="cursed-current-energy" readonly class="inpt-ro"></div>
-                     <div><label for="cursed-damage-per-power" class="lbl">Damage per Energy Point:</label><input type="text" id="cursed-damage-per-power" value="1" class="inpt inpt-cursed"></div>
-                     <div><label for="cursed-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="cursed-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-cursed-focus focus:border-transparent text-sm"><button data-type="cursed" class="regen-btn bg-success hover:bg-success-dark focus:ring-success">Regen</button></div></div>
-                     <div class="md:col-span-2 mt-4 pt-4 border-t border-gray-200"> <div class="flex items-center gap-2 mb-2"> <input type="checkbox" id="add-cursed-energy-checkbox" class="add-energy-checkbox rounded shadow-sm focus:ring-cursed-focus" data-type="cursed"> <label for="add-cursed-energy-checkbox" class="lbl cursor-pointer">Add Cursed Energy to Attack?</label> </div> <div id="cursed-slider-container" class="energy-slider-container hidden mt-2 space-y-1"> <input type="range" id="cursed-energy-slider" class="energy-slider" data-type="cursed" min="0" max="100" value="0"> <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div> <div id="cursed-slider-value-display" class="energy-slider-value-display text-xs text-center bg-gray-100 text-gray-700 p-1 rounded-md">0% (Energy: 0, Damage: 0.00)</div> </div> </div>
-                </div>
-            </div>
-            <div id="reiatsu-pool" class="energy-pool energy-pool-reiatsu bg-gradient-to-br from-white to-slate-100" style="display: none;">
-                 <h3 class="text-xl font-semibold mb-4 flex items-center">Reiatsu Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div><label for="reiatsu-max-energy" class="lbl">Max Energy:</label><input type="text" id="reiatsu-max-energy" value="1000" class="inpt inpt-reiatsu"></div>
-                     <div><label for="reiatsu-max-multiplier" class="lbl">Max Energy Multiplier:</label><input type="text" id="reiatsu-max-multiplier" value="1" class="inpt inpt-reiatsu"></div>
-                     <div><label for="reiatsu-total-energy" class="lbl">Total Energy (Calculated):</label><input type="text" id="reiatsu-total-energy" readonly class="inpt-ro"></div>
-                     <div><label for="reiatsu-current-energy" class="lbl">Current Energy:</label><input type="text" id="reiatsu-current-energy" readonly class="inpt-ro"></div>
-                     <div><label for="reiatsu-damage-per-power" class="lbl">Damage per Energy Point:</label><input type="text" id="reiatsu-damage-per-power" value="1" class="inpt inpt-reiatsu"></div>
-                     <div><label for="reiatsu-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="reiatsu-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-reiatsu-focus focus:border-transparent text-sm"><button data-type="reiatsu" class="regen-btn bg-success hover:bg-success-dark focus:ring-success">Regen</button></div></div>
-                     <div class="md:col-span-2 mt-4 pt-4 border-t border-gray-200"> <div class="flex items-center gap-2 mb-2"> <input type="checkbox" id="add-reiatsu-energy-checkbox" class="add-energy-checkbox rounded shadow-sm focus:ring-reiatsu-focus" data-type="reiatsu"> <label for="add-reiatsu-energy-checkbox" class="lbl cursor-pointer">Add Reiatsu to Attack?</label> </div> <div id="reiatsu-slider-container" class="energy-slider-container hidden mt-2 space-y-1"> <input type="range" id="reiatsu-energy-slider" class="energy-slider" data-type="reiatsu" min="0" max="100" value="0"> <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div> <div id="reiatsu-slider-value-display" class="energy-slider-value-display text-xs text-center bg-gray-100 text-gray-700 p-1 rounded-md">0% (Energy: 0, Damage: 0.00)</div> </div> </div>
-                </div>
-            </div>
-            <div id="haki-pool" class="energy-pool energy-pool-haki bg-gradient-to-br from-white to-gray-100" style="display: none;">
-                 <h3 class="text-xl font-semibold mb-4 flex items-center">Haki Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div><label for="haki-max-energy" class="lbl">Max Energy:</label><input type="text" id="haki-max-energy" value="1000" class="inpt inpt-haki"></div>
-                     <div><label for="haki-max-multiplier" class="lbl">Max Energy Multiplier:</label><input type="text" id="haki-max-multiplier" value="1" class="inpt inpt-haki"></div>
-                     <div><label for="haki-total-energy" class="lbl">Total Energy (Calculated):</label><input type="text" id="haki-total-energy" readonly class="inpt-ro"></div>
-                     <div><label for="haki-current-energy" class="lbl">Current Energy:</label><input type="text" id="haki-current-energy" readonly class="inpt-ro"></div>
-                     <div><label for="haki-damage-per-power" class="lbl">Damage per Energy Point:</label><input type="text" id="haki-damage-per-power" value="1" class="inpt inpt-haki"></div>
-                     <div><label for="haki-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="haki-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-haki-focus focus:border-transparent text-sm"><button data-type="haki" class="regen-btn bg-success hover:bg-success-dark focus:ring-success">Regen</button></div></div>
-                     <div class="md:col-span-2 mt-4 pt-4 border-t border-gray-200"> <div class="flex items-center gap-2 mb-2"> <input type="checkbox" id="add-haki-energy-checkbox" class="add-energy-checkbox rounded shadow-sm focus:ring-haki-focus" data-type="haki"> <label for="add-haki-energy-checkbox" class="lbl cursor-pointer">Add Haki to Attack?</label> </div> <div id="haki-slider-container" class="energy-slider-container hidden mt-2 space-y-1"> <input type="range" id="haki-energy-slider" class="energy-slider" data-type="haki" min="0" max="100" value="0"> <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div> <div id="haki-slider-value-display" class="energy-slider-value-display text-xs text-center bg-gray-100 text-gray-700 p-1 rounded-md">0% (Energy: 0, Damage: 0.00)</div> </div> </div>
-                </div>
-            </div>
-            <div id="alchemy-pool" class="energy-pool energy-pool-alchemy bg-gradient-to-br from-white to-amber-100" style="display: none;">
-                 <h3 class="text-xl font-semibold mb-4 flex items-center">Alchemy Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div><label for="alchemy-max-energy" class="lbl">Max Energy:</label><input type="text" id="alchemy-max-energy" value="1000" class="inpt inpt-alchemy"></div>
-                     <div><label for="alchemy-max-multiplier" class="lbl">Max Energy Multiplier:</label><input type="text" id="alchemy-max-multiplier" value="1" class="inpt inpt-alchemy"></div>
-                     <div><label for="alchemy-total-energy" class="lbl">Total Energy (Calculated):</label><input type="text" id="alchemy-total-energy" readonly class="inpt-ro"></div>
-                     <div><label for="alchemy-current-energy" class="lbl">Current Energy:</label><input type="text" id="alchemy-current-energy" readonly class="inpt-ro"></div>
-                     <div><label for="alchemy-damage-per-power" class="lbl">Damage per Energy Point:</label><input type="text" id="alchemy-damage-per-power" value="1" class="inpt inpt-alchemy"></div>
-                     <div><label for="alchemy-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="alchemy-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-alchemy-focus focus:border-transparent text-sm"><button data-type="alchemy" class="regen-btn bg-success hover:bg-success-dark focus:ring-success">Regen</button></div></div>
-                     <div class="md:col-span-2 mt-4 pt-4 border-t border-gray-200"> <div class="flex items-center gap-2 mb-2"> <input type="checkbox" id="add-alchemy-energy-checkbox" class="add-energy-checkbox rounded shadow-sm focus:ring-alchemy-focus" data-type="alchemy"> <label for="add-alchemy-energy-checkbox" class="lbl cursor-pointer">Add Alchemy to Attack?</label> </div> <div id="alchemy-slider-container" class="energy-slider-container hidden mt-2 space-y-1"> <input type="range" id="alchemy-energy-slider" class="energy-slider" data-type="alchemy" min="0" max="100" value="0"> <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div> <div id="alchemy-slider-value-display" class="energy-slider-value-display text-xs text-center bg-gray-100 text-gray-700 p-1 rounded-md">0% (Energy: 0, Damage: 0.00)</div> </div> </div>
-                </div>
-            </div>
-            <div id="nature-pool" class="energy-pool energy-pool-nature bg-gradient-to-br from-white to-lime-100" style="display: none;">
-                 <h3 class="text-xl font-semibold mb-4 flex items-center">Nature Energy Pool <span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div><label for="nature-max-energy" class="lbl">Max Energy:</label><input type="text" id="nature-max-energy" value="1000" class="inpt inpt-nature"></div>
-                     <div><label for="nature-max-multiplier" class="lbl">Max Energy Multiplier:</label><input type="text" id="nature-max-multiplier" value="1" class="inpt inpt-nature"></div>
-                     <div><label for="nature-total-energy" class="lbl">Total Energy (Calculated):</label><input type="text" id="nature-total-energy" readonly class="inpt-ro"></div>
-                     <div><label for="nature-current-energy" class="lbl">Current Energy:</label><input type="text" id="nature-current-energy" readonly class="inpt-ro"></div>
-                     <div><label for="nature-damage-per-power" class="lbl">Damage per Energy Point:</label><input type="text" id="nature-damage-per-power" value="1" class="inpt inpt-nature"></div>
-                     <div><label for="nature-regen-percent" class="lbl">Regeneration Rate (% of Max):</label><div class="flex items-center gap-2"><input type="text" id="nature-regen-percent" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-nature-focus focus:border-transparent text-sm"><button data-type="nature" class="regen-btn bg-success hover:bg-success-dark focus:ring-success">Regen</button></div></div>
-                     <div class="md:col-span-2 mt-4 pt-4 border-t border-gray-200"> <div class="flex items-center gap-2 mb-2"> <input type="checkbox" id="add-nature-energy-checkbox" class="add-energy-checkbox rounded shadow-sm focus:ring-nature-focus" data-type="nature"> <label for="add-nature-energy-checkbox" class="lbl cursor-pointer">Add Nature Energy to Attack?</label> </div> <div id="nature-slider-container" class="energy-slider-container hidden mt-2 space-y-1"> <input type="range" id="nature-energy-slider" class="energy-slider" data-type="nature" min="0" max="100" value="0"> <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div> <div id="nature-slider-value-display" class="energy-slider-value-display text-xs text-center bg-gray-100 text-gray-700 p-1 rounded-md">0% (Energy: 0, Damage: 0.00)</div> </div> </div>
-                </div>
             </div>
 
             <button id="calculate-btn" aria-label="Calculate final damage value" class="w-full px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 ease-in-out text-lg font-semibold shadow-md mb-5 active:scale-95"> Calculate Damage </button>
-
             <div id="loading" class="loading text-center p-5 hidden">
-                 <div class="loading-spinner inline-block w-8 h-8 border-4 border-t-success border-gray-200 rounded-full animate-spin" aria-hidden="true"></div>
-                 <div class="loading-text mt-2 text-gray-600">Calculating...</div><span class="sr-only">Loading, please wait</span>
-            </div>
-
+                <div class="loading-spinner inline-block w-8 h-8 border-4 border-t-success border-gray-200 rounded-full animate-spin" aria-hidden="true"></div>
+                <div class="loading-text mt-2 text-gray-600">Calculating...</div><span class="sr-only">Loading, please wait</span>
+             </div>
             <div id="result" class="result bg-success-light p-5 rounded-lg border-l-4 border-success shadow-sm hidden animate-fadeIn" aria-live="polite">
-                 <div class="result-title text-lg font-semibold mb-2 text-success-dark">Calculated Damage:</div>
-                 <div id="result-value" class="result-value text-3xl font-bold mb-3 break-words">0</div>
-                 <div id="result-details" class="result-details text-sm text-gray-700 mt-3 border-t border-success/30 pt-3">
-                     <p><strong>Total Energy Used:</strong> <span id="result-total-energy-used">0</span></p>
-                     <p><strong>Total Extra Damage from Energy:</strong> <span id="result-total-extra-damage">0.00</span></p>
-                     <hr class="my-2 border-success/20">
-                     <p><strong>Scientific Notation:</strong> <span id="result-scientific">0</span></p>
-                     <p><strong>In Words:</strong> <span id="result-words">Zero</span></p>
-                 </div>
-            </div>
+                <div class="result-title text-lg font-semibold mb-2 text-success-dark">Calculated Damage:</div>
+                <div id="result-value" class="result-value text-3xl font-bold mb-3 break-words">0</div>
+                <div id="result-details" class="result-details text-sm text-gray-700 mt-3 border-t border-success/30 pt-3">
+                    <p><strong>Total Energy Used:</strong> <span id="result-total-energy-used">0</span></p>
+                    <p><strong>Total Extra Damage from Energy:</strong> <span id="result-total-extra-damage">0.00</span></p>
+                    <hr class="my-2 border-success/20">
+                    <p><strong>Scientific Notation:</strong> <span id="result-scientific">0</span></p>
+                    <p><strong>In Words:</strong> <span id="result-words">Zero</span></p>
+                </div>
+             </div>
 
         </div><div id="stats-panel" class="stats-panel md:w-1/4 lg:w-1/5 p-5 bg-white rounded-lg shadow-sm self-start sticky top-6 border-stats-border">
-            <h3 id="stats-panel-header" class="stats-panel-header text-xl font-semibold mb-4 flex items-center text-stats-header"> Stats <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
-            <div class="space-y-3">
-                <p class="text-sm text-gray-600">Selected Current Energy: <span id="stat-current-energy" class="font-medium text-gray-800">0</span></p>
-                <hr class="border-gray-200">
-                <p class="text-sm text-gray-600">Total Damage Dealt: <span id="stat-total-damage" class="font-medium text-gray-800">0</span></p>
-                <p class="text-sm text-gray-600">Total Energy Spent: <span id="stat-total-energy-spent" class="font-medium text-gray-800">0</span></p>
-                <p class="text-sm text-gray-600">Highest Damage: <span id="stat-highest-damage" class="font-medium text-gray-800">0</span></p>
-                <p class="text-sm text-gray-600">Number of Attacks: <span id="stat-attack-count" class="font-medium text-gray-800">0</span></p>
+             <h3 id="stats-panel-header" class="stats-panel-header text-xl font-semibold mb-4 flex items-center text-stats-header"> Stats <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
+             <div class="space-y-3">
+                 <p class="text-sm text-gray-600">Selected Current Energy: <span id="stat-current-energy" class="font-medium text-gray-800">0</span></p>
+                 <hr class="border-gray-200">
+                 <p class="text-sm text-gray-600">Total Damage Dealt: <span id="stat-total-damage" class="font-medium text-gray-800">0</span></p>
+                 <p class="text-sm text-gray-600">Total Energy Spent: <span id="stat-total-energy-spent" class="font-medium text-gray-800">0</span></p>
+                 <p class="text-sm text-gray-600">Highest Damage: <span id="stat-highest-damage" class="font-medium text-gray-800">0</span></p>
+                 <p class="text-sm text-gray-600">Number of Attacks: <span id="stat-attack-count" class="font-medium text-gray-800">0</span></p>
 
-                <div id="kaioken-section" class="hidden pt-3 border-t border-gray-200">
+                 <div id="kaioken-section" class="hidden pt-3 border-t border-gray-200">
                      <div class="flex items-center gap-2 mb-3">
                          <input type="checkbox" id="kaioken-checkbox" class="rounded border-gray-300 text-red-600 shadow-sm focus:ring-kaioken-focus">
                          <label for="kaioken-checkbox" class="text-sm font-medium text-kaioken-header">Kaioken?</label>
@@ -313,46 +214,84 @@
                      <div id="kaioken-details" class="hidden space-y-2">
                          <div class="flex items-center gap-2">
                              <div class="flex-grow">
-                                  <label for="max-health" class="lbl">Max Health:</label>
-                                  <input type="text" id="max-health" placeholder="e.g., 1000" value="1000" class="inpt inpt-kaioken">
-                             </div>
+                                 <label for="max-health" class="lbl">Max Health:</label>
+                                 <input type="text" id="max-health" placeholder="e.g., 1000" value="1000" class="inpt focus:ring-kaioken-focus"> </div>
                              <button id="regen-health-btn" title="Regenerate Health to Max" class="px-2 py-1 text-xs bg-success hover:bg-success-dark text-white rounded-md focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-1 self-end mb-1 transition-transform active:scale-95">Regen Health</button>
                          </div>
-                         <div><label for="kaioken-strain" class="lbl">Kaioken Strain (% Max HP):</label><input type="text" id="kaioken-strain" placeholder="e.g., 10" value="10" class="inpt inpt-kaioken"></div>
-                         <div><label for="current-health" class="lbl">Current Health:</label><input type="text" id="current-health" readonly class="inpt-ro"></div>
+                         <div><label for="kaioken-strain" class="lbl">Kaioken Strain (% Max HP):</label><input type="text" id="kaioken-strain" placeholder="e.g., 10" value="10" class="inpt focus:ring-kaioken-focus"></div> <div><label for="current-health" class="lbl">Current Health:</label><input type="text" id="current-health" readonly class="inpt-ro"></div>
                      </div>
+                 </div>
+             </div>
+        </div> </div><template id="energy-pool-template">
+        <div class="energy-pool bg-gradient-to-br from-white p-5 mb-5 rounded-lg shadow-sm border-l-4" style="display: none;"> <h3 class="text-xl font-semibold mb-4 flex items-center">
+                <span class="pool-title">Energy Pool Title</span> <span class="flex-grow h-px bg-gray-200 ml-3"></span>
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><label class="lbl max-energy-label">Max Energy:</label><input type="text" value="1000" class="inpt max-energy"></div>
+                <div><label class="lbl max-multiplier-label">Max Energy Multiplier:</label><input type="text" value="1" class="inpt max-multiplier"></div>
+                <div><label class="lbl total-energy-label">Total Energy (Calculated):</label><input type="text" readonly class="inpt-ro total-energy"></div>
+                <div><label class="lbl current-energy-label">Current Energy:</label><input type="text" readonly class="inpt-ro current-energy"></div>
+                <div><label class="lbl damage-per-power-label">Damage per Energy Point:</label><input type="text" value="1" class="inpt damage-per-power"></div>
+                <div>
+                    <label class="lbl regen-percent-label">Regeneration Rate (% of Max):</label>
+                    <div class="flex items-center gap-2">
+                        <input type="text" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:border-transparent text-sm regen-percent">
+                        <button class="regen-btn bg-success hover:bg-success-dark focus:ring-success px-3 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">Regen</button>
+                    </div>
                 </div>
-                </div>
-        </div></div><script>
+            </div>
+        </div>
+    </template>
+
+    <template id="energy-slider-template">
+         <div class="energy-slider-section hidden"> <label class="lbl text-sm slider-label">Energy Used (%):</label> <input type="range" class="energy-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" min="0" max="100" value="0"> <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div>
+             <div class="energy-slider-value-display text-xs text-center bg-gray-100 text-gray-700 p-1 rounded-md">0% (Energy: 0, Damage: 0.00)</div>
+         </div>
+    </template>
+
+
+    <script>
         // --- DOM Element References ---
         const energyTypeSelect = document.getElementById('energy-type');
-        const energyPoolDivs = {
-            ki: document.getElementById('ki-pool'), nen: document.getElementById('nen-pool'), chakra: document.getElementById('chakra-pool'),
-            magic: document.getElementById('magic-pool'), cursed: document.getElementById('cursed-pool'), reiatsu: document.getElementById('reiatsu-pool'),
-            haki: document.getElementById('haki-pool'), alchemy: document.getElementById('alchemy-pool'), nature: document.getElementById('nature-pool')
-        };
-        // Remove old global slider ref
-        // const energySlider = document.getElementById('energy-slider');
-        // const energySliderValueDisplay = document.getElementById('energy-slider-value-display');
-        const calculateBtn = document.getElementById('calculate-btn'); const resultDiv = document.getElementById('result');
+        // Containers for generated content
+        const energyPoolsContainer = document.getElementById('energy-pools-container');
+        const slidersGrid = document.getElementById('sliders-grid');
+        // Templates
+        const energyPoolTemplate = document.getElementById('energy-pool-template');
+        const energySliderTemplate = document.getElementById('energy-slider-template');
+
+        // Other UI elements
+        const calculateBtn = document.getElementById('calculate-btn');
+        const resultDiv = document.getElementById('result');
         const resultValueEl = document.getElementById('result-value');
-        // Updated result display refs
         const resultTotalEnergyUsedEl = document.getElementById('result-total-energy-used');
         const resultTotalExtraDamageEl = document.getElementById('result-total-extra-damage');
         const resultScientificEl = document.getElementById('result-scientific');
-        const resultWordsEl = document.getElementById('result-words'); const loadingDiv = document.getElementById('loading');
-        const messageArea = document.getElementById('message-area'); const dynamicModifiersContainer = document.getElementById('dynamic-modifiers-container');
-        const addDynamicBoxBtn = document.getElementById('add-dynamic-box'); const baseDamageInput = document.getElementById('base-damage');
-        const baseMultiplierInput = document.getElementById('base-multiplier'); const formMultiplierInput = document.getElementById('form-multiplier');
+        const resultWordsEl = document.getElementById('result-words');
+        const loadingDiv = document.getElementById('loading');
+        const messageArea = document.getElementById('message-area');
+        const dynamicModifiersContainer = document.getElementById('dynamic-modifiers-container');
+        const addDynamicBoxBtn = document.getElementById('add-dynamic-box');
+        const baseDamageInput = document.getElementById('base-damage');
+        const baseMultiplierInput = document.getElementById('base-multiplier');
+        const formMultiplierInput = document.getElementById('form-multiplier');
         const attackCompressionPointsInput = document.getElementById('attack-compression-points');
-        const statsPanel = document.getElementById('stats-panel'); const statsPanelHeader = document.getElementById('stats-panel-header');
-        const statCurrentEnergyEl = document.getElementById('stat-current-energy'); const statTotalDamageEl = document.getElementById('stat-total-damage');
-        const statTotalEnergySpentEl = document.getElementById('stat-total-energy-spent'); const statAttackCountEl = document.getElementById('stat-attack-count');
-        const statHighestDamageEl = document.getElementById('stat-highest-damage'); const kaiokenSection = document.getElementById('kaioken-section');
-        const kaiokenCheckbox = document.getElementById('kaioken-checkbox'); const kaiokenDetails = document.getElementById('kaioken-details');
-        const maxHealthInput = document.getElementById('max-health'); const kaiokenStrainInput = document.getElementById('kaioken-strain');
-        const currentHealthEl = document.getElementById('current-health'); const regenHealthBtn = document.getElementById('regen-health-btn');
-        const saveBtn = document.getElementById('save-state-btn'); const loadBtn = document.getElementById('load-state-btn');
+        const statsPanel = document.getElementById('stats-panel');
+        const statsPanelHeader = document.getElementById('stats-panel-header');
+        const statCurrentEnergyEl = document.getElementById('stat-current-energy');
+        const statTotalDamageEl = document.getElementById('stat-total-damage');
+        const statTotalEnergySpentEl = document.getElementById('stat-total-energy-spent');
+        const statAttackCountEl = document.getElementById('stat-attack-count');
+        const statHighestDamageEl = document.getElementById('stat-highest-damage');
+        const kaiokenSection = document.getElementById('kaioken-section');
+        const kaiokenCheckbox = document.getElementById('kaioken-checkbox');
+        const kaiokenDetails = document.getElementById('kaioken-details');
+        const maxHealthInput = document.getElementById('max-health');
+        const kaiokenStrainInput = document.getElementById('kaioken-strain');
+        const currentHealthEl = document.getElementById('current-health');
+        const regenHealthBtn = document.getElementById('regen-health-btn');
+        const saveBtn = document.getElementById('save-state-btn');
+        const loadBtn = document.getElementById('load-state-btn');
         const clearBtn = document.getElementById('clear-state-btn');
 
         // --- Global State & Constants ---
@@ -360,6 +299,21 @@
         const LOCAL_STORAGE_KEY = 'energyCalculatorState_v1';
         let poolAnimationTimeoutId = null;
         const ALL_ENERGY_TYPES = ['ki', 'nen', 'chakra', 'magic', 'cursed', 'reiatsu', 'haki', 'alchemy', 'nature'];
+        let dynamicModifierCount = 0;
+
+        // Map for easy lookup of display names and styles defined in Tailwind config
+        // Ensure focus ring class names match your Tailwind config and usage (.e.g., 'focus:ring-ki' vs 'focus:ring-ki-focus')
+        const ENERGY_TYPE_DETAILS = {
+            ki:      { name: 'Ki',      color: 'ki',      colorDark: 'ki-dark',      gradientTo: 'to-orange-100', focusRing: 'focus:ring-ki',      staticGlow: 'static-glow-ki',      pulseGlow: 'animate-pulse-glow-ki',      border: 'border-l-ki' },
+            nen:     { name: 'Nen',     color: 'nen',     colorDark: 'nen-dark',     gradientTo: 'to-blue-100',   focusRing: 'focus:ring-nen',     staticGlow: 'static-glow-nen',     pulseGlow: 'animate-pulse-glow-nen',     border: 'border-l-nen' },
+            chakra:  { name: 'Chakra',  color: 'chakra',  colorDark: 'chakra-dark',  gradientTo: 'to-purple-100', focusRing: 'focus:ring-chakra',  staticGlow: 'static-glow-chakra',  pulseGlow: 'animate-pulse-glow-chakra',  border: 'border-l-chakra' },
+            magic:   { name: 'Magic',   color: 'magic',   colorDark: 'magic-dark',   gradientTo: 'to-teal-100',   focusRing: 'focus:ring-magic-focus',   staticGlow: 'static-glow-magic',   pulseGlow: 'animate-pulse-glow-magic',   border: 'border-l-magic' },
+            cursed:  { name: 'Cursed',  color: 'cursed',  colorDark: 'cursed-dark',  gradientTo: 'to-red-100',    focusRing: 'focus:ring-cursed-focus',  staticGlow: 'static-glow-cursed',  pulseGlow: 'animate-pulse-glow-cursed',  border: 'border-l-cursed' },
+            reiatsu: { name: 'Reiatsu', color: 'reiatsu', colorDark: 'reiatsu-dark', gradientTo: 'to-slate-100',  focusRing: 'focus:ring-reiatsu-focus', staticGlow: 'static-glow-reiatsu', pulseGlow: 'animate-pulse-glow-reiatsu', border: 'border-l-reiatsu' },
+            haki:    { name: 'Haki',    color: 'haki',    colorDark: 'haki-dark',    gradientTo: 'to-gray-100',   focusRing: 'focus:ring-haki-focus',    staticGlow: 'static-glow-haki',    pulseGlow: 'animate-pulse-glow-haki',    border: 'border-l-haki' },
+            alchemy: { name: 'Alchemy', color: 'alchemy', colorDark: 'alchemy-dark', gradientTo: 'to-amber-100',  focusRing: 'focus:ring-alchemy-focus', staticGlow: 'static-glow-alchemy', pulseGlow: 'animate-pulse-glow-alchemy', border: 'border-l-alchemy' },
+            nature:  { name: 'Nature',  color: 'nature',  colorDark: 'nature-dark',  gradientTo: 'to-lime-100',   focusRing: 'focus:ring-nature-focus',  staticGlow: 'static-glow-nature',  pulseGlow: 'animate-pulse-glow-nature',  border: 'border-l-nature' },
+        };
 
         // --- Utility Functions ---
         function safeParseFloat(value, defaultValue = 0) { if (typeof value !== 'string' && typeof value !== 'number') return defaultValue; const num = parseFloat(String(value).replace(/,/g, '')); return isNaN(num) ? defaultValue : num; }
@@ -368,303 +322,333 @@
         function showLoading(isLoading) { loadingDiv.classList.toggle('hidden', !isLoading); if(isLoading) resultDiv.classList.add('hidden'); calculateBtn.disabled = isLoading; calculateBtn.classList.toggle('opacity-50', isLoading); calculateBtn.classList.toggle('cursor-not-allowed', isLoading); }
         function triggerAnimation(element, animationClass, duration = 500) { if (!element) return; element.classList.remove(animationClass); void element.offsetWidth; element.classList.add(animationClass); setTimeout(() => { element.classList.remove(animationClass); }, duration); }
 
+
         // --- Energy Pool Logic ---
-        function getEnergyElements(type) { if (!ALL_ENERGY_TYPES.includes(type)) { console.error("Invalid type:", type); return null; } return { maxEnergyEl: document.getElementById(`${type}-max-energy`), maxMultiplierEl: document.getElementById(`${type}-max-multiplier`), totalEnergyEl: document.getElementById(`${type}-total-energy`), currentEnergyEl: document.getElementById(`${type}-current-energy`), damagePerPowerEl: document.getElementById(`${type}-damage-per-power`), regenPercentEl: document.getElementById(`${type}-regen-percent`), /* Added for new sliders */ addEnergyCheckbox: document.getElementById(`add-${type}-energy-checkbox`), energySlider: document.getElementById(`${type}-energy-slider`), sliderContainer: document.getElementById(`${type}-slider-container`), sliderValueDisplay: document.getElementById(`${type}-slider-value-display`) }; }
-        function calculateTotalEnergy(type) { const els = getEnergyElements(type); if (!els?.maxEnergyEl || !els?.maxMultiplierEl || !els?.totalEnergyEl || !els?.currentEnergyEl) { console.error(`Elements missing: ${type}`); return 0; } const maxEnergy = safeParseFloat(els.maxEnergyEl.value, 0); const multiplier = safeParseFloat(els.maxMultiplierEl.value, 1); const totalEnergy = maxEnergy * multiplier; els.totalEnergyEl.value = formatNumber(totalEnergy); els.currentEnergyEl.value = formatNumber(totalEnergy); updateSingleSliderDisplay(type); /* Update slider display on total change */ return totalEnergy; }
-        function regenerateEnergy(type) { const els = getEnergyElements(type); if (!els?.totalEnergyEl || !els?.currentEnergyEl || !els?.regenPercentEl) { console.error(`Elements missing: ${type}`); return; } const totalEnergy = safeParseFloat(els.totalEnergyEl.value.replace(/,/g, ''), 0); let currentEnergy = safeParseFloat(els.currentEnergyEl.value.replace(/,/g, ''), 0); const regenPercent = safeParseFloat(els.regenPercentEl.value, 0); if (totalEnergy <= 0) { showMessage('Max Energy must be positive.', 'error'); return; } if (regenPercent <= 0) { showMessage('Regen Rate must be positive.', 'error'); return; } const regenAmount = totalEnergy * (regenPercent / 100); let newEnergy = Math.min(currentEnergy + regenAmount, totalEnergy); els.currentEnergyEl.value = formatNumber(newEnergy); showMessage(`${formatNumber(regenAmount)} regenerated. Current: ${formatNumber(newEnergy)}`, 'success'); triggerAnimation(els.currentEnergyEl, 'animate-flash-green'); updateSingleSliderDisplay(type); /* Update slider display */ updateStatsDisplay(); }
+        function getEnergyElements(type) {
+            if (!ALL_ENERGY_TYPES.includes(type)) { console.error("Invalid type:", type); return null; }
+            return {
+                poolDiv: document.getElementById(`${type}-pool`),
+                maxEnergyEl: document.getElementById(`${type}-max-energy`),
+                maxMultiplierEl: document.getElementById(`${type}-max-multiplier`),
+                totalEnergyEl: document.getElementById(`${type}-total-energy`),
+                currentEnergyEl: document.getElementById(`${type}-current-energy`),
+                damagePerPowerEl: document.getElementById(`${type}-damage-per-power`),
+                regenPercentEl: document.getElementById(`${type}-regen-percent`),
+                sliderSection: document.getElementById(`${type}-slider-section`),
+                energySlider: document.getElementById(`${type}-energy-slider`),
+                sliderValueDisplay: document.getElementById(`${type}-slider-value-display`)
+            };
+        }
+
+         function updateSliderVisibility(type) {
+             const els = getEnergyElements(type);
+             if (els?.totalEnergyEl && els.sliderSection) {
+                 const totalEnergy = safeParseFloat(els.totalEnergyEl.value.replace(/,/g, ''), 0);
+                 const shouldShow = totalEnergy > 0;
+                 els.sliderSection.classList.toggle('hidden', !shouldShow);
+                 if (!shouldShow && els.energySlider) {
+                     els.energySlider.value = 0;
+                     updateSingleSliderDisplay(type);
+                 }
+             }
+         }
+         function calculateAndResetEnergy(type) {
+             const els = getEnergyElements(type);
+             if (!els?.maxEnergyEl || !els?.maxMultiplierEl || !els?.totalEnergyEl || !els?.currentEnergyEl) { console.error(`Elements missing for reset: ${type}`); return 0; }
+             const maxEnergy = safeParseFloat(els.maxEnergyEl.value, 0);
+             const multiplier = safeParseFloat(els.maxMultiplierEl.value, 1);
+             const totalEnergy = maxEnergy * multiplier;
+             els.totalEnergyEl.value = formatNumber(totalEnergy);
+             els.currentEnergyEl.value = formatNumber(totalEnergy);
+             updateSliderVisibility(type);
+             updateSingleSliderDisplay(type);
+             return totalEnergy;
+         }
+         function regenerateEnergy(type) {
+             const els = getEnergyElements(type);
+             if (!els?.totalEnergyEl || !els?.currentEnergyEl || !els?.regenPercentEl) { console.error(`Elements missing for regen: ${type}`); return; }
+             const totalEnergy = safeParseFloat(els.totalEnergyEl.value.replace(/,/g, ''), 0);
+             let currentEnergy = safeParseFloat(els.currentEnergyEl.value.replace(/,/g, ''), 0);
+             const regenPercent = safeParseFloat(els.regenPercentEl.value, 0);
+             if (totalEnergy <= 0) { showMessage('Max Energy must be positive to regenerate.', 'error'); return; }
+             if (regenPercent <= 0) { showMessage('Regen Rate must be positive.', 'error'); return; }
+             const regenAmount = totalEnergy * (regenPercent / 100);
+             let newEnergy = Math.min(currentEnergy + regenAmount, totalEnergy);
+             els.currentEnergyEl.value = formatNumber(newEnergy);
+             showMessage(`${formatNumber(regenAmount)} ${type} regenerated. Current: ${formatNumber(newEnergy)}`, 'success');
+             triggerAnimation(els.currentEnergyEl, 'animate-flash-green');
+             updateSingleSliderDisplay(type);
+             updateStatsDisplay();
+         }
+
 
         // --- Kaioken Styling ---
         function applyKaiokenStyle() { if (!statsPanel || !statsPanelHeader) return; statsPanel.classList.remove('border-stats-border'); statsPanel.classList.add('border-kaioken-border', 'animate-kaioken-glow'); statsPanelHeader.classList.remove('text-stats-header'); statsPanelHeader.classList.add('text-kaioken-header'); }
         function removeKaiokenStyle() { if (!statsPanel || !statsPanelHeader) return; statsPanel.classList.add('border-stats-border'); statsPanel.classList.remove('border-kaioken-border', 'animate-kaioken-glow'); statsPanelHeader.classList.add('text-stats-header'); statsPanelHeader.classList.remove('text-kaioken-header'); }
 
         // --- Health Update ---
-        function updateCurrentHealthDisplay() { if (energyTypeSelect.value === 'ki' && kaiokenCheckbox.checked && maxHealthInput && currentHealthEl) { const maxHealth = safeParseFloat(maxHealthInput.value, 0); let currentHealth = safeParseFloat(currentHealthEl.value.replace(/,/g,''), -1); if (currentHealth === -1 || currentHealth > maxHealth || currentHealthEl.value === '') { currentHealthEl.value = formatNumber(maxHealth); } } else if (currentHealthEl) { if (maxHealthInput && currentHealthEl.value === '') { currentHealthEl.value = formatNumber(safeParseFloat(maxHealthInput.value, 0)); } } }
-        function regenerateHealth() { if (!maxHealthInput || !currentHealthEl) { console.error("Health elements missing."); return; } const maxHealth = safeParseFloat(maxHealthInput.value, 0); currentHealthEl.value = formatNumber(maxHealth); showMessage('Health fully regenerated!', 'success'); triggerAnimation(currentHealthEl, 'animate-flash-green'); updateStatsDisplay(); }
+         function updateCurrentHealthDisplay() { if (energyTypeSelect.value === 'ki' && kaiokenCheckbox.checked && maxHealthInput && currentHealthEl) { const maxHealth = safeParseFloat(maxHealthInput.value, 0); let currentHealth = safeParseFloat(currentHealthEl.value.replace(/,/g,''), -1); if (currentHealth === -1 || currentHealth > maxHealth || currentHealthEl.value === '') { currentHealthEl.value = formatNumber(maxHealth); } } else if (currentHealthEl && maxHealthInput && currentHealthEl.value === '') { currentHealthEl.value = formatNumber(safeParseFloat(maxHealthInput.value, 0)); } }
+         function regenerateHealth() { if (!maxHealthInput || !currentHealthEl) { console.error("Health elements missing."); return; } const maxHealth = safeParseFloat(maxHealthInput.value, 0); currentHealthEl.value = formatNumber(maxHealth); showMessage('Health fully regenerated!', 'success'); triggerAnimation(currentHealthEl, 'animate-flash-green'); }
 
 
         // --- Show/Hide Logic & Pool Animation ---
         function showSelectedEnergyPool() {
             const selectedType = energyTypeSelect.value;
+            const details = ENERGY_TYPE_DETAILS[selectedType];
             let newlyVisiblePool = null;
 
             if (poolAnimationTimeoutId) { clearTimeout(poolAnimationTimeoutId); poolAnimationTimeoutId = null; }
 
             // Hide all pools, remove glow/pulse classes
             ALL_ENERGY_TYPES.forEach(type => {
-                const poolDiv = energyPoolDivs[type];
-                if (poolDiv) {
-                    poolDiv.classList.remove( `animate-pulse-glow-${type}`, `static-glow-${type}` );
-                    if (type !== selectedType) { poolDiv.style.display = 'none'; }
+                const els = getEnergyElements(type);
+                const typeDetails = ENERGY_TYPE_DETAILS[type];
+                if (els?.poolDiv && typeDetails) {
+                    els.poolDiv.classList.remove(typeDetails.pulseGlow, typeDetails.staticGlow);
+                    if (type !== selectedType) { els.poolDiv.style.display = 'none'; }
                 }
             });
 
             // Find the pool to show
-            const poolToShow = energyPoolDivs[selectedType];
-            if (poolToShow) {
-                poolToShow.style.display = 'block';
-                newlyVisiblePool = poolToShow;
+            const poolToShowEls = getEnergyElements(selectedType);
+            if (poolToShowEls?.poolDiv && details) {
+                poolToShowEls.poolDiv.style.display = 'block';
+                newlyVisiblePool = poolToShowEls.poolDiv;
+                poolToShowEls.poolDiv.classList.add(details.pulseGlow); // Apply pulse
 
-                // Apply pulse animation
-                poolToShow.classList.add(`animate-pulse-glow-${selectedType}`);
-
-                // Set timeout to switch from pulse to static glow
-                poolAnimationTimeoutId = setTimeout(() => {
-                    if (poolToShow && energyTypeSelect.value === selectedType) {
-                        poolToShow.classList.remove(`animate-pulse-glow-${selectedType}`);
-                        poolToShow.classList.add(`static-glow-${selectedType}`);
+                poolAnimationTimeoutId = setTimeout(() => { // Switch to static glow
+                    const currentSelectedType = energyTypeSelect.value;
+                    const stillSelectedPoolEls = getEnergyElements(currentSelectedType);
+                    const stillSelectedDetails = ENERGY_TYPE_DETAILS[currentSelectedType];
+                    if (stillSelectedPoolEls?.poolDiv && stillSelectedDetails && currentSelectedType === selectedType) {
+                        stillSelectedPoolEls.poolDiv.classList.remove(stillSelectedDetails.pulseGlow);
+                        stillSelectedPoolEls.poolDiv.classList.add(stillSelectedDetails.staticGlow);
                     }
                     poolAnimationTimeoutId = null;
                 }, 5000);
             }
 
             // Show/Hide Kaioken section
-            if (kaiokenSection) {
-                 if (selectedType === 'ki') {
-                     kaiokenSection.classList.remove('hidden');
-                     if (kaiokenCheckbox.checked) { kaiokenDetails.classList.remove('hidden'); updateCurrentHealthDisplay(); }
-                 } else {
-                     kaiokenSection.classList.add('hidden');
-                     if (kaiokenCheckbox.checked) { kaiokenCheckbox.checked = false; kaiokenDetails.classList.add('hidden'); removeKaiokenStyle(); }
-                 }
+             if (kaiokenSection) { if (selectedType === 'ki') { kaiokenSection.classList.remove('hidden'); if (kaiokenCheckbox.checked) { kaiokenDetails.classList.remove('hidden'); updateCurrentHealthDisplay(); } } else { kaiokenSection.classList.add('hidden'); if (kaiokenCheckbox.checked) { kaiokenCheckbox.checked = false; kaiokenDetails.classList.add('hidden'); removeKaiokenStyle(); } } }
+
+            // --- Persist Current Energy Logic ---
+            const els = getEnergyElements(selectedType);
+            if (els?.maxEnergyEl && els?.maxMultiplierEl && els?.totalEnergyEl && els?.currentEnergyEl) {
+                const maxEnergy = safeParseFloat(els.maxEnergyEl.value, 0);
+                const multiplier = safeParseFloat(els.maxMultiplierEl.value, 1);
+                const totalEnergy = maxEnergy * multiplier;
+                els.totalEnergyEl.value = formatNumber(totalEnergy);
+                let currentEnergy = safeParseFloat(els.currentEnergyEl.value.replace(/,/g, ''), -1);
+                if (currentEnergy === -1 || currentEnergy > totalEnergy || els.currentEnergyEl.value.trim() === '') {
+                    els.currentEnergyEl.value = formatNumber(totalEnergy);
+                }
+                updateSliderVisibility(selectedType);
+                updateSingleSliderDisplay(selectedType);
             }
 
-            calculateTotalEnergy(selectedType);
-            // Update all slider displays as current energy might have changed
-            ALL_ENERGY_TYPES.forEach(updateSingleSliderDisplay);
             updateStatsDisplay();
         }
 
+
         // --- Dynamic Modifiers Logic ---
-        let dynamicModifierCount = 0;
-        function addDynamicModifier(modifierData = null) { dynamicModifierCount++; const modifierId = `dynamic-modifier-${dynamicModifierCount}`; const newModifierDiv = document.createElement('div'); const initialType = modifierData?.type || 'additive'; const initialValue = modifierData?.value || '0'; const initialName = modifierData?.name || ''; const isActiveAdditive = initialType === 'additive'; const boxClasses = isActiveAdditive ? 'dynamic-box additive p-4 mt-3 border rounded-md border-l-4 relative transition-all duration-300 ease-in-out bg-success-light border-success animate-fadeIn' : 'dynamic-box multiplicative p-4 mt-3 border rounded-md border-l-4 relative transition-all duration-300 ease-in-out bg-ki/10 border-ki animate-fadeIn'; newModifierDiv.className = boxClasses; newModifierDiv.id = modifierId; newModifierDiv.innerHTML = `<div class="absolute top-2 right-2"><button class="remove-dynamic-box bg-error text-white rounded-md shadow-sm w-6 h-6 flex items-center justify-center text-xs hover:bg-error-dark focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-1 transition-transform active:scale-95" aria-label="Remove this modifier" data-target="${modifierId}">×</button></div><div class="modifier-type-selector flex gap-2 mb-3 border-b pb-2"><div class="modifier-type-option additive ${isActiveAdditive ? 'active' : ''} flex-1 p-2 text-center border rounded-md cursor-pointer transition-all duration-300 ease-in-out text-sm" data-value="additive" tabindex="0" role="radio" aria-checked="${isActiveAdditive}"><input type="radio" name="modifier-type-${modifierId}" value="additive" class="sr-only" ${isActiveAdditive ? 'checked' : ''}> Additive (+)</div><div class="modifier-type-option multiplicative ${!isActiveAdditive ? 'active' : ''} flex-1 p-2 text-center border rounded-md cursor-pointer transition-all duration-300 ease-in-out text-sm" data-value="multiplicative" tabindex="0" role="radio" aria-checked="${!isActiveAdditive}"><input type="radio" name="modifier-type-${modifierId}" value="multiplicative" class="sr-only" ${!isActiveAdditive ? 'checked' : ''}> Multiplier (×)</div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label for="modifier-name-${modifierId}" class="lbl">Modifier Name:</label><input type="text" id="modifier-name-${modifierId}" placeholder="e.g., Buff" value="${initialName}" class="modifier-name-input w-full p-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-success focus:border-transparent text-sm"></div><div><label for="modifier-value-${modifierId}" class="lbl">Value:</label><input type="text" id="modifier-value-${modifierId}" placeholder="e.g., 50 or 1.2" value="${initialValue}" class="modifier-value-input w-full p-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-success focus:border-transparent text-sm"></div></div>`; dynamicModifiersContainer.appendChild(newModifierDiv); addListenersToModifierBox(newModifierDiv); }
-        function addListenersToModifierBox(modifierDiv) { modifierDiv.querySelector('.remove-dynamic-box').addEventListener('click', function() { document.getElementById(this.dataset.target)?.remove(); /* Doesn't directly affect sliders, no update needed here */ }); modifierDiv.querySelectorAll('.modifier-type-option').forEach(option => { option.addEventListener('click', function() { const box = this.closest('.dynamic-box'); const value = this.dataset.value; box.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false); this.querySelector('input[type="radio"]').checked = true; box.querySelectorAll('.modifier-type-option').forEach(opt => { opt.classList.remove('active'); opt.setAttribute('aria-checked', 'false'); }); this.classList.add('active'); this.setAttribute('aria-checked', 'true'); box.classList.remove('additive', 'multiplicative', 'bg-success-light', 'border-success', 'bg-ki/10', 'border-ki'); if (value === 'additive') { box.classList.add('additive', 'bg-success-light', 'border-success'); } else { box.classList.add('multiplicative', 'bg-ki/10', 'border-ki'); } /* Doesn't directly affect sliders */ }); option.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); } }); }); /* Input listener removed as it doesn't affect sliders */ }
+        function addDynamicModifier(modifierData = null) { dynamicModifierCount++; const modifierId = `dynamic-modifier-${dynamicModifierCount}`; const newModifierDiv = document.createElement('div'); const initialType = modifierData?.type || 'additive'; const initialValue = modifierData?.value || '0'; const initialName = modifierData?.name || ''; const isActiveAdditive = initialType === 'additive'; const boxClasses = `dynamic-box p-4 mt-3 border rounded-md border-l-4 relative transition-all duration-300 ease-in-out animate-fadeIn ${isActiveAdditive ? 'additive bg-success-light border-success' : 'multiplicative bg-ki/10 border-ki'}`; newModifierDiv.className = boxClasses; newModifierDiv.id = modifierId; newModifierDiv.innerHTML = ` <div class="absolute top-2 right-2"><button class="remove-dynamic-box bg-error text-white rounded-md shadow-sm w-6 h-6 flex items-center justify-center text-xs hover:bg-error-dark focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-1 transition-transform active:scale-95" aria-label="Remove this modifier" data-target="${modifierId}">×</button></div><div class="modifier-type-selector flex gap-2 mb-3 border-b pb-2"><div class="modifier-type-option additive ${isActiveAdditive ? 'active' : ''} flex-1 p-2 text-center border rounded-md cursor-pointer transition-all duration-300 ease-in-out text-sm" data-value="additive" tabindex="0" role="radio" aria-checked="${isActiveAdditive}"><input type="radio" name="modifier-type-${modifierId}" value="additive" class="sr-only" ${isActiveAdditive ? 'checked' : ''}> Additive (+)</div><div class="modifier-type-option multiplicative ${!isActiveAdditive ? 'active' : ''} flex-1 p-2 text-center border rounded-md cursor-pointer transition-all duration-300 ease-in-out text-sm" data-value="multiplicative" tabindex="0" role="radio" aria-checked="${!isActiveAdditive}"><input type="radio" name="modifier-type-${modifierId}" value="multiplicative" class="sr-only" ${!isActiveAdditive ? 'checked' : ''}> Multiplier (×)</div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label for="modifier-name-${modifierId}" class="lbl">Modifier Name:</label><input type="text" id="modifier-name-${modifierId}" placeholder="e.g., Buff" value="${initialName}" class="modifier-name-input w-full p-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-success focus:border-transparent text-sm"></div><div><label for="modifier-value-${modifierId}" class="lbl">Value:</label><input type="text" id="modifier-value-${modifierId}" placeholder="e.g., 50 or 1.2" value="${initialValue}" class="modifier-value-input w-full p-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-success focus:border-transparent text-sm"></div></div>`; dynamicModifiersContainer.appendChild(newModifierDiv); addListenersToModifierBox(newModifierDiv); }
+        function addListenersToModifierBox(modifierDiv) { modifierDiv.querySelector('.remove-dynamic-box').addEventListener('click', function() { document.getElementById(this.dataset.target)?.remove(); }); modifierDiv.querySelectorAll('.modifier-type-option').forEach(option => { option.addEventListener('click', function() { const box = this.closest('.dynamic-box'); const value = this.dataset.value; box.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = (radio.value === value)); box.querySelectorAll('.modifier-type-option').forEach(opt => { const isActive = opt.dataset.value === value; opt.classList.toggle('active', isActive); opt.setAttribute('aria-checked', isActive); }); box.classList.remove('additive', 'multiplicative', 'bg-success-light', 'border-success', 'bg-ki/10', 'border-ki'); box.classList.add(value === 'additive' ? 'additive' : 'multiplicative'); box.classList.add(value === 'additive' ? 'bg-success-light' : 'bg-ki/10'); box.classList.add(value === 'additive' ? 'border-success' : 'border-ki'); }); option.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); } }); }); }
+
 
         // --- Stats Update Logic ---
-        function updateStatsDisplay() { if (statTotalDamageEl) statTotalDamageEl.textContent = formatNumber(totalDamageDealt); if (statTotalEnergySpentEl) statTotalEnergySpentEl.textContent = formatNumber(totalEnergySpent); if (statAttackCountEl) statAttackCountEl.textContent = attackCount.toLocaleString(); if (statHighestDamageEl) statHighestDamageEl.textContent = formatNumber(highestDamage); const selectedType = energyTypeSelect.value; const els = getEnergyElements(selectedType); if (statCurrentEnergyEl && els?.currentEnergyEl) { statCurrentEnergyEl.textContent = els.currentEnergyEl.value; } else if (statCurrentEnergyEl) { statCurrentEnergyEl.textContent = 'N/A'; } }
+         function updateStatsDisplay() { if (statTotalDamageEl) statTotalDamageEl.textContent = formatNumber(totalDamageDealt); if (statTotalEnergySpentEl) statTotalEnergySpentEl.textContent = formatNumber(totalEnergySpent); if (statAttackCountEl) statAttackCountEl.textContent = attackCount.toLocaleString(); if (statHighestDamageEl) statHighestDamageEl.textContent = formatNumber(highestDamage); const selectedType = energyTypeSelect.value; const els = getEnergyElements(selectedType); if (statCurrentEnergyEl && els?.currentEnergyEl) { statCurrentEnergyEl.textContent = els.currentEnergyEl.value || '0'; } else if (statCurrentEnergyEl) { statCurrentEnergyEl.textContent = 'N/A'; } }
 
         // --- Calculation Logic ---
-        /** Updates the display text for a single energy slider */
-        function updateSingleSliderDisplay(type) {
-            const els = getEnergyElements(type);
-            if (!els?.energySlider || !els?.sliderValueDisplay || !els?.currentEnergyEl || !els?.damagePerPowerEl) {
-                // Silently return if elements aren't ready (e.g., during initial load)
-                return;
-            }
-            const sliderPercent = els.energySlider.value;
-            const currentEnergy = safeParseFloat(els.currentEnergyEl.value.replace(/,/g, ''), 0);
-            const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1);
-            const energyUsed = currentEnergy * (sliderPercent / 100);
-            const extraDamage = energyUsed * damagePerPower;
-            els.sliderValueDisplay.textContent = `${sliderPercent}% (Energy: ${formatNumber(energyUsed)}, Damage: ${formatNumber(extraDamage)})`;
-        }
+         function updateSingleSliderDisplay(type) { const els = getEnergyElements(type); if (!els?.energySlider || !els?.sliderValueDisplay || !els?.currentEnergyEl || !els?.damagePerPowerEl) { return; } const sliderPercent = els.energySlider.value; const currentEnergy = safeParseFloat(els.currentEnergyEl.value.replace(/,/g, ''), 0); const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1); const potentialEnergyUsed = currentEnergy * (sliderPercent / 100); const actualEnergyUsed = Math.min(potentialEnergyUsed, currentEnergy); const extraDamage = actualEnergyUsed * damagePerPower; els.sliderValueDisplay.textContent = `${sliderPercent}% (Use: ${formatNumber(actualEnergyUsed)}, Damage: ${formatNumber(extraDamage)})`; }
+         function performCalculation() {
+             showLoading(true);
+             setTimeout(() => {
+                 try {
+                     const baseDamage = safeParseFloat(baseDamageInput.value, 0);
+                     const compressionPoints = safeParseFloat(attackCompressionPointsInput.value, 0);
+                     const baseMultiplier = safeParseFloat(baseMultiplierInput.value, 1);
+                     const formMultiplier = safeParseFloat(formMultiplierInput.value, 1);
+                     const energyType = energyTypeSelect.value;
 
-        function performCalculation() {
-            showLoading(true);
-            setTimeout(() => {
-                try {
-                    // Gather Base Inputs
-                    const baseDamage = safeParseFloat(baseDamageInput.value, 0);
-                    const compressionPoints = safeParseFloat(attackCompressionPointsInput.value, 0);
-                    const baseMultiplier = safeParseFloat(baseMultiplierInput.value, 1);
-                    const formMultiplier = safeParseFloat(formMultiplierInput.value, 1);
+                     let effectiveBaseMultiplier = baseMultiplier;
+                      if (compressionPoints > 0) {
+                          // Example: Each point adds 5% multiplier, every 10 points adds an extra 10%
+                          effectiveBaseMultiplier *= (1 + (compressionPoints * 0.05) + (Math.floor(compressionPoints / 10) * 0.1));
+                      }
+                      let finalDamage = baseDamage * effectiveBaseMultiplier * formMultiplier;
 
-                    // --- Calculate Base Damage with Compression ---
-                    let compressionMultiplier = 1;
-                    if (compressionPoints > 0) {
-                         compressionMultiplier = (compressionPoints * 1.5) + (Math.floor(compressionPoints / 10) * 3);
-                    }
-                    let finalDamage = (baseDamage * compressionMultiplier) * baseMultiplier * formMultiplier;
+                     document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach(modifierDiv => {
+                         const valueInput = modifierDiv.querySelector('.modifier-value-input');
+                         const typeOption = modifierDiv.querySelector('.modifier-type-option.active');
+                         if (valueInput && typeOption) {
+                             const modifierValue = safeParseFloat(valueInput.value, 0);
+                             const modifierType = typeOption.dataset.value;
+                             if (modifierType === 'additive') { finalDamage += modifierValue; }
+                             else if (modifierType === 'multiplicative') { finalDamage *= ((modifierValue === 0) ? 1 : modifierValue); }
+                         }
+                     });
 
-                    // --- Apply Dynamic Modifiers ---
-                    document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach(modifierDiv => { const valueInput = modifierDiv.querySelector('.modifier-value-input'); const typeOption = modifierDiv.querySelector('.modifier-type-option.active'); if (valueInput && typeOption) { const modifierValue = safeParseFloat(valueInput.value, 0); const modifierType = typeOption.dataset.value; if (modifierType === 'additive') { finalDamage += modifierValue; } else if (modifierType === 'multiplicative') { const multiplier = (modifierValue === 0 && valueInput.value.trim() !== '0') ? 1 : modifierValue; finalDamage *= multiplier; } } });
+                     let totalEnergyUsedFromSliders = 0;
+                     let totalExtraDamageFromEnergy = 0;
+                     ALL_ENERGY_TYPES.forEach(type => {
+                         const els = getEnergyElements(type);
+                         if (els?.energySlider && els.currentEnergyEl && els.damagePerPowerEl) {
+                             const sliderPercent = safeParseFloat(els.energySlider.value, 0);
+                             if (sliderPercent > 0) {
+                                 const currentEnergy = safeParseFloat(els.currentEnergyEl.value.replace(/,/g, ''), 0);
+                                 const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1);
+                                 const energyUsedThisType = currentEnergy * (sliderPercent / 100);
+                                 const actualEnergyUsed = Math.min(energyUsedThisType, currentEnergy);
+                                 const extraDamageThisType = actualEnergyUsed * damagePerPower;
+                                 totalEnergyUsedFromSliders += actualEnergyUsed;
+                                 totalExtraDamageFromEnergy += extraDamageThisType;
+                                 let newCurrentEnergyThisType = Math.max(0, currentEnergy - actualEnergyUsed);
+                                 els.currentEnergyEl.value = formatNumber(newCurrentEnergyThisType);
+                                 if (newCurrentEnergyThisType < currentEnergy) { triggerAnimation(els.currentEnergyEl, 'animate-flash-red'); }
+                                 updateSingleSliderDisplay(type);
+                             }
+                         }
+                     });
+                     finalDamage += totalExtraDamageFromEnergy;
 
-                    // --- Calculate Energy Bonuses & Costs ---
-                    let totalEnergyUsedFromSliders = 0;
-                    let totalExtraDamageFromEnergy = 0;
+                     let healthDepleted = false;
+                     if (energyType === 'ki' && kaiokenCheckbox.checked) {
+                         const currentHealthVal = safeParseFloat(currentHealthEl.value.replace(/,/g, ''), 0);
+                         if (currentHealthVal > 0) {
+                             const maxHealth = safeParseFloat(maxHealthInput.value, 0);
+                             const kaiokenStrainPercent = safeParseFloat(kaiokenStrainInput.value, 0);
+                             if (maxHealth > 0 && kaiokenStrainPercent > 0) {
+                                 const strainCost = maxHealth * (kaiokenStrainPercent / 100);
+                                 let newHealth = Math.max(0, currentHealthVal - strainCost);
+                                 currentHealthEl.value = formatNumber(newHealth);
+                                 if (newHealth < currentHealthVal) { triggerAnimation(currentHealthEl, 'animate-flash-red'); }
+                                 if (newHealth === 0) { healthDepleted = true; }
+                             }
+                         } else { /* Health already 0 */ }
+                     }
 
-                    ALL_ENERGY_TYPES.forEach(type => {
-                        const els = getEnergyElements(type);
-                        if (els?.addEnergyCheckbox?.checked && els.energySlider && els.currentEnergyEl && els.damagePerPowerEl) {
-                            const currentEnergy = safeParseFloat(els.currentEnergyEl.value.replace(/,/g, ''), 0);
-                            const sliderPercent = safeParseFloat(els.energySlider.value, 0);
-                            const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1);
+                     // Update Stats
+                     totalDamageDealt += finalDamage;
+                     totalEnergySpent += totalEnergyUsedFromSliders;
+                     attackCount++;
+                     if (finalDamage > highestDamage) { highestDamage = finalDamage; }
+                     updateStatsDisplay();
 
-                            const energyUsedThisType = currentEnergy * (sliderPercent / 100);
-                            const extraDamageThisType = energyUsedThisType * damagePerPower;
+                     // Display Results
+                     resultValueEl.textContent = formatNumber(finalDamage);
+                     triggerAnimation(resultValueEl, 'animate-pulse-result', 300);
+                     resultTotalEnergyUsedEl.textContent = formatNumber(totalEnergyUsedFromSliders);
+                     resultTotalExtraDamageEl.textContent = formatNumber(totalExtraDamageFromEnergy);
+                     displayAllFormats(finalDamage);
+                     resultDiv.classList.remove('hidden', 'bg-error-light', 'border-error', 'text-error-dark');
+                     resultDiv.classList.add('bg-success-light', 'border-success', 'text-success-dark');
+                     resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-success-dark';
+                     let successMsg = 'Calculation successful!';
+                     if (healthDepleted) { successMsg += ' Warning: Health depleted by Kaioken strain!'; }
+                     showMessage(successMsg, healthDepleted ? 'error' : 'success');
 
-                            totalEnergyUsedFromSliders += energyUsedThisType;
-                            totalExtraDamageFromEnergy += extraDamageThisType;
-
-                            // Subtract energy cost for this type
-                            let newCurrentEnergyThisType = Math.max(0, currentEnergy - energyUsedThisType);
-                            els.currentEnergyEl.value = formatNumber(newCurrentEnergyThisType);
-                            if (newCurrentEnergyThisType < currentEnergy) {
-                                triggerAnimation(els.currentEnergyEl, 'animate-flash-red');
-                            }
-                            // Update this specific slider's display text after cost deduction
-                            updateSingleSliderDisplay(type);
-                        }
-                    });
-
-                    // Add total energy bonus to final damage
-                    finalDamage += totalExtraDamageFromEnergy;
-
-                    // --- Apply Kaioken Strain ---
-                    if (energyTypeSelect.value === 'ki' && kaiokenCheckbox.checked) { // Check selected type is ki
-                        const currentHealthVal = safeParseFloat(currentHealthEl.value.replace(/,/g, ''), 0);
-                        if (currentHealthVal > 0) {
-                            const maxHealth = safeParseFloat(maxHealthInput.value, 0);
-                            const kaiokenStrain = safeParseFloat(kaiokenStrainInput.value, 0);
-                            if (maxHealth > 0 && kaiokenStrain > 0) {
-                                const strainCost = maxHealth * (kaiokenStrain / 100);
-                                let newHealth = Math.max(0, currentHealthVal - strainCost);
-                                currentHealthEl.value = formatNumber(newHealth);
-                                if (newHealth < currentHealthVal) { triggerAnimation(currentHealthEl, 'animate-flash-red'); }
-                                if (newHealth === 0) { showMessage('Warning: Current Health depleted by Kaioken strain!', 'error'); }
-                            }
-                        } else { showMessage('Cannot attack: Current Health is zero while Kaioken is active.', 'error'); /* Consider preventing calc */ }
-                    }
-
-                    // --- Update Stats ---
-                    totalDamageDealt += finalDamage;
-                    totalEnergySpent += totalEnergyUsedFromSliders; // Use total from sliders
-                    attackCount++;
-                    if (finalDamage > highestDamage) { highestDamage = finalDamage; }
-                    updateStatsDisplay(); // Update stats panel display
-
-                    // --- Display Results ---
-                    resultValueEl.textContent = formatNumber(finalDamage);
-                    triggerAnimation(resultValueEl, 'animate-pulse-result', 300);
-                    // Update result details with totals
-                    resultTotalEnergyUsedEl.textContent = formatNumber(totalEnergyUsedFromSliders);
-                    resultTotalExtraDamageEl.textContent = formatNumber(totalExtraDamageFromEnergy);
-                    displayAllFormats(finalDamage);
-                    resultDiv.classList.remove('hidden', 'bg-error-light', 'border-error', 'text-error-dark');
-                    resultDiv.classList.add('bg-success-light', 'border-success', 'text-success-dark');
-                    resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-success-dark';
-                    showMessage('Calculation successful!', 'success');
-                    // No global slider display to update
-
-                } catch (error) { console.error("Calc Error:", error); resultValueEl.textContent = 'Error'; resultTotalEnergyUsedEl.textContent = 'N/A'; resultTotalExtraDamageEl.textContent = 'N/A'; resultScientificEl.textContent = 'N/A'; resultWordsEl.textContent = 'Error'; resultDiv.classList.remove('hidden', 'bg-success-light', 'border-success', 'text-success-dark'); resultDiv.classList.add('bg-error-light', 'border-error', 'text-error-dark'); resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-error-dark'; showMessage(`Calculation failed: ${error.message || 'Unknown error'}`, 'error'); } finally { showLoading(false); }
-            }, 50);
-        }
-        // Removed updateDamageCalculations as it only called updateSliderDisplay which is gone
-
-        // --- Number Formatting (Scientific & Words) ---
-        function displayAllFormats(damage) { try { resultScientificEl.textContent = damage.toExponential(2).replace(/e\+?(-?)/, ' x 10^$1'); } catch (e) { resultScientificEl.textContent = "Invalid"; console.error("Sci err:", e); } try { resultWordsEl.textContent = convertNumberToWords(damage); } catch (e) { resultWordsEl.textContent = "Error: " + e.message; console.error("Words err:", e); } }
-        function convertNumberToWords(number) { /* ... Full function ... */ const units=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen']; const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety']; const scales=['','Thousand','Million','Billion','Trillion','Quadrillion','Quintillion','Sextillion','Septillion','Octillion','Nonillion','Decillion','Undecillion','Duodecillion','Tredecillion','Quattuordecillion','Quindecillion']; if(typeof number!=='number'||!isFinite(number)){return'Invalid Number';} if(number===0){return'Zero';} let isNegative=number<0; if(isNegative)number=-number; let integerPart; let fractionalPart=0; try{const numStr=number.toLocaleString('en-US',{useGrouping:false,maximumFractionDigits:20}); const parts=numStr.split('.'); integerPart=BigInt(parts[0]); if(parts.length>1){fractionalPart=parseFloat('0.'+parts[1]);}}catch(e){console.error("Error processing number for words:",number,e); return"Number too large or invalid format";} let words=isNegative?'Negative ':''; function convertHundreds(num){let word='';const h=Math.floor(num/100);const r=num%100;if(h>0)word+=units[h]+' Hundred';if(r>0){if(word!=='')word+=' ';if(r<20)word+=units[r];else{const t=Math.floor(r/10);const o=r%10;word+=tens[t];if(o>0)word+='-'+units[o];}}return word;} if(integerPart===0n){words+='Zero';}else{let scaleIndex=0;let tempWords=[];let currentInt=integerPart;while(currentInt>0n){if(scaleIndex>=scales.length){console.error("Number exceeds defined scales:",number);return number.toExponential(2)+" (Too large for words)";}const chunk=Number(currentInt%1000n);if(chunk!==0){const chunkWords=convertHundreds(chunk);tempWords.push(chunkWords+(scaleIndex>0?' '+scales[scaleIndex]:''));}currentInt/=1000n;scaleIndex++;}words+=tempWords.reverse().filter(w=>w.trim()).join(', ');} if(fractionalPart>1e-9){words+=' Point';let fractionalStr=String(fractionalPart).substring(2);fractionalStr=fractionalStr.substring(0,6);for(const digit of fractionalStr){words+=' '+(units[parseInt(digit)]||'Zero');}} return words.trim();}
-
-
-        // --- State Management (Save/Load/Clear) ---
-        function gatherState() {
-            const state={ baseDamage:baseDamageInput.value, baseMultiplier:baseMultiplierInput.value, formMultiplier:formMultiplierInput.value, attackCompressionPoints: attackCompressionPointsInput.value, selectedEnergyType:energyTypeSelect.value, energyPools:{}, dynamicModifiers:[], kaiokenActive:kaiokenCheckbox.checked, maxHealth:maxHealthInput.value, kaiokenStrain:kaiokenStrainInput.value, currentHealth:currentHealthEl.value, totalDamageDealt:totalDamageDealt, totalEnergySpent:totalEnergySpent, attackCount:attackCount, highestDamage:highestDamage,
-                // Added: Save checkbox and slider states
-                addEnergyStates: {}, sliderPercentages: {}
-            };
-            ALL_ENERGY_TYPES.forEach(type=>{ const els=getEnergyElements(type); if(els){ state.energyPools[type]={maxEnergy:els.maxEnergyEl.value,maxMultiplier:els.maxMultiplierEl.value,currentEnergy:els.currentEnergyEl.value,damagePerPower:els.damagePerPowerEl.value,regenPercent:els.regenPercentEl.value}; state.addEnergyStates[type] = els.addEnergyCheckbox?.checked || false; state.sliderPercentages[type] = els.energySlider?.value || '0'; } });
-            dynamicModifiersContainer.querySelectorAll('.dynamic-box').forEach(box=>{ const nameInput=box.querySelector('.modifier-name-input');const valueInput=box.querySelector('.modifier-value-input');const typeOption=box.querySelector('.modifier-type-option.active');if(nameInput&&valueInput&&typeOption){state.dynamicModifiers.push({name:nameInput.value,value:valueInput.value,type:typeOption.dataset.value});}});
-            return state;
+                 } catch (error) {
+                     console.error("Calculation Error:", error);
+                     resultValueEl.textContent = 'Error'; resultTotalEnergyUsedEl.textContent = 'N/A'; resultTotalExtraDamageEl.textContent = 'N/A'; resultScientificEl.textContent = 'N/A'; resultWordsEl.textContent = 'Error';
+                     resultDiv.classList.remove('hidden', 'bg-success-light', 'border-success', 'text-success-dark'); resultDiv.classList.add('bg-error-light', 'border-error', 'text-error-dark'); resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-error-dark';
+                     showMessage(`Calculation failed: ${error.message || 'Unknown error'}`, 'error');
+                 } finally {
+                     showLoading(false);
+                 }
+             }, 50);
          }
-        function applyState(state) {
-             if(!state)return;
-             baseDamageInput.value=state.baseDamage||''; baseMultiplierInput.value=state.baseMultiplier||'1'; formMultiplierInput.value=state.formMultiplier||'1';
-             attackCompressionPointsInput.value = state.attackCompressionPoints || '0';
-             energyTypeSelect.value=state.selectedEnergyType||'ki';
-             // Don't set global slider value anymore
 
-             if(state.energyPools){ALL_ENERGY_TYPES.forEach(type=>{const els=getEnergyElements(type);const poolData=state.energyPools[type];if(els&&poolData){els.maxEnergyEl.value=poolData.maxEnergy||'';els.maxMultiplierEl.value=poolData.maxMultiplier||'1';els.damagePerPowerEl.value=poolData.damagePerPower||'1';els.regenPercentEl.value=poolData.regenPercent||'';calculateTotalEnergy(type);els.currentEnergyEl.value=poolData.currentEnergy||els.totalEnergyEl.value;}});}
-             dynamicModifiersContainer.innerHTML='<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>';dynamicModifierCount=0;if(state.dynamicModifiers&&Array.isArray(state.dynamicModifiers)){state.dynamicModifiers.forEach(modData=>{addDynamicModifier(modData);});}
-             kaiokenCheckbox.checked=state.kaiokenActive||false;maxHealthInput.value=state.maxHealth||'1000';kaiokenStrainInput.value=state.kaiokenStrain||'10';currentHealthEl.value=state.currentHealth||formatNumber(safeParseFloat(maxHealthInput.value));
-             totalDamageDealt=state.totalDamageDealt||0;totalEnergySpent=state.totalEnergySpent||0;attackCount=state.attackCount||0;highestDamage=state.highestDamage||0;
 
-             // Apply checkbox and slider states AFTER pools are potentially updated by calculateTotalEnergy
-             if (state.addEnergyStates) {
-                 ALL_ENERGY_TYPES.forEach(type => {
-                     const els = getEnergyElements(type);
-                     if (els?.addEnergyCheckbox) {
-                         els.addEnergyCheckbox.checked = state.addEnergyStates[type] || false;
-                     }
-                     if (els?.energySlider && state.sliderPercentages) {
-                         els.energySlider.value = state.sliderPercentages[type] || '0';
-                     }
-                     // Update visibility and display based on loaded state
-                     if (els?.sliderContainer) {
-                         els.sliderContainer.classList.toggle('hidden', !els.addEnergyCheckbox.checked);
-                     }
-                     updateSingleSliderDisplay(type); // Update text for each slider
-                 });
-             }
+        // --- Number Formatting ---
+         function displayAllFormats(damage) { try { resultScientificEl.textContent = damage.toExponential(2).replace(/e\+?(-?)/, ' x 10^$1'); } catch (e) { resultScientificEl.textContent = "Invalid"; console.error("Scientific notation error:", e); } try { resultWordsEl.textContent = convertNumberToWords(damage); } catch (e) { resultWordsEl.textContent = "Error: " + e.message; console.error("Number to words error:", e); } }
+         function convertNumberToWords(number) { const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen']; const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']; const scales = ['', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quattuordecillion', 'Quindecillion']; if (typeof number !== 'number' || !isFinite(number)) { return 'Invalid Number'; } if (number === 0) { return 'Zero'; } const MAX_SAFE_INTEGER_FOR_WORDS = BigInt("9".repeat((scales.length) * 3)); let numForCheck = number < 0 ? BigInt(Math.abs(Math.trunc(number))) : BigInt(Math.trunc(number)); if (numForCheck > MAX_SAFE_INTEGER_FOR_WORDS) { console.warn("Number too large for full word conversion, returning scientific."); return number.toExponential(2) + " (Too large for words)"; } let isNegative = number < 0; if (isNegative) number = -number; let integerPart; let fractionalPart = 0; try { const numStr = number.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 20 }); const parts = numStr.split('.'); integerPart = BigInt(parts[0]); if (parts.length > 1) { fractionalPart = parseFloat('0.' + parts[1]); } } catch (e) { console.error("Error processing number for words:", number, e); return "Number too large or invalid format"; } let words = isNegative ? 'Negative ' : ''; function convertHundreds(num) { let word = ''; const h = Math.floor(num / 100); const r = num % 100; if (h > 0) word += units[h] + ' Hundred'; if (r > 0) { if (word !== '') word += ' '; if (r < 20) { word += units[r]; } else { const t = Math.floor(r / 10); const o = r % 10; word += tens[t]; if (o > 0) word += '-' + units[o]; } } return word; } if (integerPart === 0n) { words += 'Zero'; } else { let scaleIndex = 0; let tempWords = []; let currentInt = integerPart; while (currentInt > 0n) { if (scaleIndex >= scales.length) { console.error("Number exceeds defined scales during conversion:", number); return number.toExponential(2) + " (Too large for words)"; } const chunk = Number(currentInt % 1000n); if (chunk !== 0) { const chunkWords = convertHundreds(chunk); tempWords.push(chunkWords + (scaleIndex > 0 ? ' ' + scales[scaleIndex] : '')); } currentInt /= 1000n; scaleIndex++; } words += tempWords.reverse().filter(w => w.trim()).join(', '); } if (fractionalPart > 1e-9) { words += ' Point'; let fractionalStr = fractionalPart.toFixed(6).substring(2).replace(/0+$/, ''); if (fractionalStr.length > 0) { for (const digit of fractionalStr) { words += ' ' + (units[parseInt(digit)] || 'Zero'); } } else { words = words.replace(/ Point$/, ''); } } return words.trim(); }
 
-             showSelectedEnergyPool(); // Update overall visibility etc.
-             kaiokenDetails.classList.toggle('hidden',!kaiokenCheckbox.checked);if(kaiokenCheckbox.checked){applyKaiokenStyle();updateCurrentHealthDisplay();}else{removeKaiokenStyle();}
-             updateStatsDisplay();
-             // No global slider to update
+        // --- State Management ---
+        function gatherState() { const state = { baseDamage: baseDamageInput.value, baseMultiplier: baseMultiplierInput.value, formMultiplier: formMultiplierInput.value, attackCompressionPoints: attackCompressionPointsInput.value, selectedEnergyType: energyTypeSelect.value, sliderPercentages: {}, energyPools: {}, dynamicModifiers: [], kaiokenActive: kaiokenCheckbox.checked, maxHealth: maxHealthInput.value, kaiokenStrain: kaiokenStrainInput.value, currentHealth: currentHealthEl.value, totalDamageDealt: totalDamageDealt, totalEnergySpent: totalEnergySpent, attackCount: attackCount, highestDamage: highestDamage }; ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); if (els) { state.energyPools[type] = { maxEnergy: els.maxEnergyEl?.value || '0', maxMultiplier: els.maxMultiplierEl?.value || '1', currentEnergy: els.currentEnergyEl?.value || '0', damagePerPower: els.damagePerPowerEl?.value || '1', regenPercent: els.regenPercentEl?.value || '' }; state.sliderPercentages[type] = els.energySlider?.value || '0'; } }); dynamicModifiersContainer.querySelectorAll('.dynamic-box').forEach(box => { const nameInput = box.querySelector('.modifier-name-input'); const valueInput = box.querySelector('.modifier-value-input'); const typeOption = box.querySelector('.modifier-type-option.active'); if (nameInput && valueInput && typeOption) { state.dynamicModifiers.push({ name: nameInput.value, value: valueInput.value, type: typeOption.dataset.value }); } }); return state; }
+        function applyState(state) { if (!state) return; baseDamageInput.value = state.baseDamage || ''; baseMultiplierInput.value = state.baseMultiplier || '1'; formMultiplierInput.value = state.formMultiplier || '1'; attackCompressionPointsInput.value = state.attackCompressionPoints || '0'; energyTypeSelect.value = state.selectedEnergyType || 'ki'; if (state.energyPools) { ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); const poolData = state.energyPools[type]; if (els && poolData && els.maxEnergyEl) { els.maxEnergyEl.value = poolData.maxEnergy || ''; els.maxMultiplierEl.value = poolData.maxMultiplier || '1'; els.damagePerPowerEl.value = poolData.damagePerPower || '1'; els.regenPercentEl.value = poolData.regenPercent || ''; const loadedTotal = (safeParseFloat(poolData.maxEnergy, 0) * safeParseFloat(poolData.maxMultiplier, 1)); els.totalEnergyEl.value = formatNumber(loadedTotal); els.currentEnergyEl.value = formatNumber(Math.min(safeParseFloat(poolData.currentEnergy, loadedTotal), loadedTotal)); } }); } if (state.sliderPercentages) { ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); if (els?.energySlider) { els.energySlider.value = state.sliderPercentages[type] || '0'; } updateSliderVisibility(type); updateSingleSliderDisplay(type); }); } dynamicModifiersContainer.innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>'; dynamicModifierCount = 0; if (state.dynamicModifiers && Array.isArray(state.dynamicModifiers)) { state.dynamicModifiers.forEach(modData => { addDynamicModifier(modData); }); } kaiokenCheckbox.checked = state.kaiokenActive || false; maxHealthInput.value = state.maxHealth || '1000'; kaiokenStrainInput.value = state.kaiokenStrain || '10'; currentHealthEl.value = state.currentHealth || formatNumber(safeParseFloat(maxHealthInput.value, 0)); totalDamageDealt = state.totalDamageDealt || 0; totalEnergySpent = state.totalEnergySpent || 0; attackCount = state.attackCount || 0; highestDamage = state.highestDamage || 0; /* UI update happens after applyState in DOMContentLoaded */ }
+        function saveState() { try { const state = gatherState(); const stateString = JSON.stringify(state); localStorage.setItem(LOCAL_STORAGE_KEY, stateString); showMessage('State saved successfully!', 'success'); } catch (error) { console.error("Error saving state:", error); showMessage(`Failed to save state. ${error.message}`, 'error'); } }
+        function loadState() { const stateString = localStorage.getItem(LOCAL_STORAGE_KEY); if (stateString) { try { const state = JSON.parse(stateString); applyState(state); showMessage('State loaded successfully!', 'success'); return true; /* Indicate state was loaded */ } catch (error) { console.error("Error loading state:", error); showMessage(`Failed to load saved state. Data might be corrupted. ${error.message}`, 'error'); localStorage.removeItem(LOCAL_STORAGE_KEY); } } return false; /* Indicate no state loaded */ }
+        function clearState() { if (confirm('Are you sure you want to clear the saved state? This cannot be undone.')) { localStorage.removeItem(LOCAL_STORAGE_KEY); showMessage('Saved state cleared. Reloading.', 'success'); setTimeout(() => window.location.reload(), 1000); } }
+
+
+        // +++ Function to Generate Elements from Templates +++
+        function generateEnergySections() {
+            if (!energyPoolTemplate || !energySliderTemplate || !energyPoolsContainer || !slidersGrid) { console.error("Required templates or containers not found!"); return; }
+            energyPoolsContainer.innerHTML = ''; slidersGrid.innerHTML = ''; // Clear containers
+            ALL_ENERGY_TYPES.forEach(type => {
+                const details = ENERGY_TYPE_DETAILS[type]; if (!details) return;
+                // Generate Energy Pool
+                const poolClone = energyPoolTemplate.content.cloneNode(true);
+                const poolDiv = poolClone.querySelector('.energy-pool');
+                if (poolDiv) {
+                    poolDiv.id = `${type}-pool`; poolDiv.style.display = 'none';
+                    poolDiv.classList.add(details.border, details.gradientTo);
+                    const titleEl = poolDiv.querySelector('.pool-title');
+                    if (titleEl) titleEl.textContent = `${details.name} Energy Pool`;
+                    const setupInput = (selectorSuffix, focusClass = '') => { const inputEl = poolDiv.querySelector(`.${selectorSuffix}`); const labelEl = poolDiv.querySelector(`.${selectorSuffix}-label`); if (inputEl) { inputEl.id = `${type}-${selectorSuffix}`; if(labelEl) labelEl.htmlFor = inputEl.id; if (focusClass) inputEl.classList.add(focusClass); } };
+                    setupInput('max-energy', details.focusRing); setupInput('max-multiplier', details.focusRing); setupInput('total-energy'); setupInput('current-energy'); setupInput('damage-per-power', details.focusRing); setupInput('regen-percent', details.focusRing);
+                    const regenBtn = poolDiv.querySelector('.regen-btn'); if (regenBtn) { regenBtn.dataset.type = type; }
+                    energyPoolsContainer.appendChild(poolClone);
+                } else { console.error(`Could not find .energy-pool in template clone for ${type}`);}
+                // Generate Energy Slider
+                const sliderClone = energySliderTemplate.content.cloneNode(true);
+                const sliderSection = sliderClone.querySelector('.energy-slider-section');
+                if (sliderSection) {
+                     sliderSection.id = `${type}-slider-section`; sliderSection.dataset.type = type;
+                     const sliderLabel = sliderSection.querySelector('.slider-label'); const energySlider = sliderSection.querySelector('.energy-slider'); const valueDisplay = sliderSection.querySelector('.energy-slider-value-display');
+                     if (sliderLabel) { sliderLabel.htmlFor = `${type}-energy-slider`; sliderLabel.textContent = `${details.name} Energy Used (%):`; }
+                     if (energySlider) { energySlider.id = `${type}-energy-slider`; energySlider.dataset.type = type; }
+                     if (valueDisplay) { valueDisplay.id = `${type}-slider-value-display`; }
+                     slidersGrid.appendChild(sliderClone);
+                } else { console.error(`Could not find .energy-slider-section in template clone for ${type}`);}
+            });
+            console.log("Energy sections generated.");
         }
-        function saveState() { try { const state = gatherState(); const stateString = JSON.stringify(state); localStorage.setItem(LOCAL_STORAGE_KEY, stateString); showMessage('State saved successfully!', 'success'); } catch (error) { console.error("Error saving state:", error); showMessage('Failed to save state.', 'error'); } }
-        function loadState() { const stateString = localStorage.getItem(LOCAL_STORAGE_KEY); if (stateString) { try { const state = JSON.parse(stateString); applyState(state); showMessage('State loaded successfully!', 'success'); } catch (error) { console.error("Error loading state:", error); showMessage('Failed to load saved state. Data might be corrupted.', 'error'); } } else { /* showMessage('No saved state found.', 'info'); */ } }
-        function clearState() { if (confirm('Are you sure you want to clear the saved state? This cannot be undone.')) { localStorage.removeItem(LOCAL_STORAGE_KEY); showMessage('Saved state cleared.', 'success'); window.location.reload(); } }
 
 
         // --- Event Listeners Setup ---
-        energyTypeSelect.addEventListener('change', showSelectedEnergyPool);
-        // Removed global slider listener
-        calculateBtn.addEventListener('click', performCalculation);
-        addDynamicBoxBtn.addEventListener('click', () => addDynamicModifier());
-
-        // Add listeners for NEW checkboxes and sliders
-        document.querySelectorAll('.add-energy-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', (event) => {
-                const type = event.target.dataset.type;
-                const sliderContainer = document.getElementById(`${type}-slider-container`);
-                if (sliderContainer) {
-                    sliderContainer.classList.toggle('hidden', !event.target.checked);
-                }
-                // If unchecked, reset slider and update display
-                if (!event.target.checked) {
-                    const slider = document.getElementById(`${type}-energy-slider`);
-                    if (slider) slider.value = 0;
-                    updateSingleSliderDisplay(type);
-                }
+        function setupEventListeners() {
+            energyTypeSelect.addEventListener('change', showSelectedEnergyPool);
+            calculateBtn.addEventListener('click', performCalculation);
+            addDynamicBoxBtn.addEventListener('click', () => addDynamicModifier());
+            document.querySelectorAll('.energy-slider').forEach(slider => { slider.addEventListener('input', (event) => { updateSingleSliderDisplay(event.target.dataset.type); }); });
+            ALL_ENERGY_TYPES.forEach(type => {
+                const els = getEnergyElements(type);
+                if (els) {
+                    if (els.maxEnergyEl) els.maxEnergyEl.addEventListener('input', () => { calculateAndResetEnergy(type); updateStatsDisplay(); });
+                    if (els.maxMultiplierEl) els.maxMultiplierEl.addEventListener('input', () => { calculateAndResetEnergy(type); updateStatsDisplay(); });
+                    if (els.damagePerPowerEl) els.damagePerPowerEl.addEventListener('input', () => updateSingleSliderDisplay(type));
+                    const regenBtn = els.poolDiv?.querySelector('.regen-btn');
+                     if (regenBtn) { regenBtn.addEventListener('click', function() { regenerateEnergy(this.dataset.type); }); }
+                } else { console.warn(`Could not find elements for type ${type} to attach listeners.`); }
             });
-        });
-        document.querySelectorAll('.energy-slider').forEach(slider => {
-            slider.addEventListener('input', (event) => {
-                updateSingleSliderDisplay(event.target.dataset.type);
-            });
-        });
-
-
-        ALL_ENERGY_TYPES.forEach(type => {
-            const els = getEnergyElements(type);
-            // Update relevant slider display when pool inputs change
-            if (els?.maxEnergyEl) els.maxEnergyEl.addEventListener('input', () => { calculateTotalEnergy(type); updateStatsDisplay(); updateSingleSliderDisplay(type); });
-            if (els?.maxMultiplierEl) els.maxMultiplierEl.addEventListener('input', () => { calculateTotalEnergy(type); updateStatsDisplay(); updateSingleSliderDisplay(type); });
-            if (els?.damagePerPowerEl) els.damagePerPowerEl.addEventListener('input', () => updateSingleSliderDisplay(type)); // Update slider display on DPP change
-        });
-        document.querySelectorAll('.regen-btn').forEach(button => { button.addEventListener('click', function() { regenerateEnergy(this.dataset.type); }); });
-        // Removed listeners calling updateDamageCalculations as it's gone
-        // baseDamageInput.addEventListener('input', updateDamageCalculations);
-        // baseMultiplierInput.addEventListener('input', updateDamageCalculations);
-        // formMultiplierInput.addEventListener('input', updateDamageCalculations);
-        // attackCompressionPointsInput.addEventListener('input', updateDamageCalculations);
-
-        // Kaioken Listeners
-        if (kaiokenCheckbox) { kaiokenCheckbox.addEventListener('change', () => { const isChecked = kaiokenCheckbox.checked; kaiokenDetails.classList.toggle('hidden', !isChecked); if (isChecked) { applyKaiokenStyle(); updateCurrentHealthDisplay(); } else { removeKaiokenStyle(); } }); }
-        if (maxHealthInput) { maxHealthInput.addEventListener('input', updateCurrentHealthDisplay); }
-        if (regenHealthBtn) { regenHealthBtn.addEventListener('click', regenerateHealth); }
-
-        // Save/Load/Clear Listeners
-        if (saveBtn) saveBtn.addEventListener('click', saveState);
-        if (loadBtn) loadBtn.addEventListener('click', loadState);
-        if (clearBtn) clearBtn.addEventListener('click', clearState);
+             if (kaiokenCheckbox) { kaiokenCheckbox.addEventListener('change', () => { const isChecked = kaiokenCheckbox.checked; kaiokenDetails.classList.toggle('hidden', !isChecked); if (isChecked) { applyKaiokenStyle(); updateCurrentHealthDisplay(); } else { removeKaiokenStyle(); } }); }
+             if (maxHealthInput) { maxHealthInput.addEventListener('input', updateCurrentHealthDisplay); }
+             if (regenHealthBtn) { regenHealthBtn.addEventListener('click', regenerateHealth); }
+             if (saveBtn) saveBtn.addEventListener('click', saveState);
+             if (loadBtn) loadBtn.addEventListener('click', loadState);
+             if (clearBtn) clearBtn.addEventListener('click', clearState);
+             console.log("Event listeners set up.");
+        }
 
 
         // --- Initial Setup on Page Load ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize all slider displays before loading state
-             ALL_ENERGY_TYPES.forEach(updateSingleSliderDisplay);
-            showSelectedEnergyPool(); // Set up initial UI based on default selected energy
-            loadState(); // Attempt to load saved state over defaults
+            console.log("DOM Loaded. Initializing...");
+            generateEnergySections(); // 1. Generate HTML elements
+
+            // 2. Initialize energy values from defaults (needed before loadState)
+            ALL_ENERGY_TYPES.forEach(type => { calculateAndResetEnergy(type); });
+
+            const stateLoaded = loadState(); // 3. Try loading saved state
+
+            setupEventListeners(); // 4. Attach event listeners
+
+            // 5. Set initial UI state and update displays
+            showSelectedEnergyPool(); // Show the correct pool based on dropdown (which loadState might have set)
+            updateStatsDisplay(); // Update stats panel based on loaded or default data
+
+            console.log(`Initialization complete. ${stateLoaded ? '(State Loaded)' : '(No State Loaded)'}`);
         });
 
     </script>
