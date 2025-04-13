@@ -162,8 +162,8 @@
             <div class="energy-pool bg-white p-5 mb-5 rounded-lg shadow-sm border-l-4 border-gray-400">
                  <h3 class="text-xl font-semibold mb-4 flex items-center"> Damage Modifiers <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                     <div><label for="base-damage" class="lbl">Base Damage:</label><input type="text" id="base-damage" placeholder="e.g., 100" aria-required="true" class="inpt focus:ring-success"></div>
-                     <div><label for="attack-compression-points" class="lbl">Attack Compression Points:</label><input type="text" id="attack-compression-points" placeholder="e.g., 10" value="0" class="inpt focus:ring-red-500"></div>
+                     <div><label for="base-damage" class="lbl">Base Damage:</label><input type="text" id="base-damage" placeholder="e.g., 100 or 1,000" aria-required="true" class="inpt focus:ring-success"></div>
+                     <div><label for="attack-compression-points" class="lbl">Attack Compression Points:</label><input type="text" id="attack-compression-points" placeholder="e.g., 10 or 1,000" value="0" class="inpt focus:ring-red-500"></div>
                      <div><label for="base-multiplier" class="lbl">Base Multiplier:</label><input type="text" id="base-multiplier" placeholder="e.g., 1.5" value="1" class="inpt focus:ring-success"></div>
                      <div><label for="form-multiplier" class="lbl">Form Multiplier:</label><input type="text" id="form-multiplier" placeholder="e.g., 2" value="1" class="inpt focus:ring-success"></div>
                  </div>
@@ -204,674 +204,463 @@
                 </div>
              </div>
 
-        </div><div id="stats-panel" class="stats-panel md:w-1/4 lg:w-1/5 p-5 bg-white rounded-lg shadow-sm self-start sticky top-6 border-stats-border">
+        </div> <div id="stats-panel" class="stats-panel md:w-1/4 lg:w-1/5 p-5 bg-white rounded-lg shadow-sm self-start sticky top-6 border-stats-border">
              <h3 id="stats-panel-header" class="stats-panel-header text-xl font-semibold mb-4 flex items-center text-stats-header"> Stats <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
              <div class="space-y-3">
                  <p class="text-sm text-gray-600">Selected Current Energy: <span id="stat-current-energy" class="font-medium text-gray-800 break-words">0</span></p>
                  <hr class="border-gray-200">
                  <p class="text-sm text-gray-600">Total Damage Dealt: <span id="stat-total-damage" class="font-medium text-gray-800 break-words">0</span></p>
-                 <p class="text-sm text-gray-600">Total Energy Spent: <span id="stat-total-energy-spent" class="font-medium text-gray-800 break-words">0</span></p>
-                 <p class="text-sm text-gray-600">Highest Damage: <span id="stat-highest-damage" class="font-medium text-gray-800 break-words">0</span></p>
-                 <p class="text-sm text-gray-600">Number of Attacks: <span id="stat-attack-count" class="font-medium text-gray-800 break-words">0</span></p>
-
-                 <div id="kaioken-section" class="hidden pt-3 border-t border-gray-200">
-                     <div class="flex items-center gap-2 mb-3">
-                         <input type="checkbox" id="kaioken-checkbox" class="rounded border-gray-300 text-red-600 shadow-sm focus:ring-kaioken-focus">
-                         <label for="kaioken-checkbox" class="text-sm font-medium text-kaioken-header">Kaioken?</label>
-                     </div>
-                     <div id="kaioken-details" class="hidden space-y-2">
-                         <div class="flex items-center gap-2">
-                             <div class="flex-grow">
-                                 <label for="max-health" class="lbl">Max Health:</label>
-                                 <input type="text" id="max-health" placeholder="e.g., 1000" value="1000" class="inpt focus:ring-kaioken-focus">
-                             </div>
-                             <button id="regen-health-btn" title="Regenerate Health to Max" class="px-2 py-1 text-xs bg-success hover:bg-success-dark text-white rounded-md focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-1 self-end mb-1 transition-transform active:scale-95">Regen Health</button>
-                         </div>
-                         <div><label for="kaioken-strain" class="lbl">Kaioken Strain (% Max HP):</label><input type="text" id="kaioken-strain" placeholder="e.g., 10" value="10" class="inpt focus:ring-kaioken-focus"></div>
-                         <div>
-                             <label class="lbl">Current Health:</label> <span id="current-health" class="readonly-display current-health">1000</span> </div>
-                     </div>
-                 </div>
+                 <p class="text-sm text-gray-600">Calculations Performed: <span id="stat-calculation-count" class="font-medium text-gray-800 break-words">0</span></p>
+                 <p class="text-sm text-gray-600">Active Energy Type: <span id="stat-active-energy-type" class="font-medium text-gray-800 capitalize">N/A</span></p>
              </div>
-        </div> </div><template id="energy-pool-template">
-        <div class="energy-pool bg-gradient-to-br from-white p-5 mb-5 rounded-lg shadow-sm border-l-4" style="display: none;">
-            <h3 class="text-xl font-semibold mb-4 flex items-center">
-                <span class="pool-title">Energy Pool Title</span>
-                <span class="flex-grow h-px bg-gray-200 ml-3"></span>
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><label class="lbl max-energy-label" for="">Max Energy:</label><input type="text" value="1000" class="inpt max-energy"></div>
-                <div><label class="lbl max-multiplier-label" for="">Max Energy Multiplier:</label><input type="text" value="1" class="inpt max-multiplier"></div>
-                <div>
-                    <label class="lbl total-energy-label" for="">Total Energy (Calculated):</label>
-                    <span class="readonly-display total-energy">0</span> </div>
-                <div>
-                    <label class="lbl current-energy-label" for="">Current Energy:</label>
-                    <span class="readonly-display current-energy">0</span> </div>
-                <div><label class="lbl damage-per-power-label" for="">Damage per Energy Point:</label><input type="text" value="1" class="inpt damage-per-power"></div>
-                <div>
-                    <label class="lbl regen-percent-label" for="">Regeneration Rate (% of Max):</label>
-                    <div class="flex items-center gap-2">
-                        <input type="text" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:border-transparent text-sm regen-percent">
-                        <button class="regen-btn bg-success hover:bg-success-dark focus:ring-success px-3 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">Regen</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </template>
+        </div> </div> <script>
+        // Minimal JS to demonstrate interaction placeholders
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Element References ---
+            const energyTypeSelect = document.getElementById('energy-type');
+            const statsPanel = document.getElementById('stats-panel');
+            const statsPanelHeader = document.getElementById('stats-panel-header');
+            const statActiveEnergyType = document.getElementById('stat-active-energy-type');
+            const statCurrentEnergy = document.getElementById('stat-current-energy');
+            const energyPoolsContainer = document.getElementById('energy-pools-container');
+            const slidersGrid = document.getElementById('sliders-grid');
+            const baseDamageInput = document.getElementById('base-damage');
+            const resultDiv = document.getElementById('result');
+            const resultValue = document.getElementById('result-value');
+            const calculateBtn = document.getElementById('calculate-btn');
+            const loadingDiv = document.getElementById('loading');
+            const messageArea = document.getElementById('message-area'); // Added message area reference
+            const addDynamicBoxBtn = document.getElementById('add-dynamic-box');
+            const dynamicModifiersContainer = document.getElementById('dynamic-modifiers-container');
 
-    <template id="energy-slider-template">
-         <div class="energy-slider-section hidden">
-             <label class="lbl text-sm slider-label" for="">Energy Used (%):</label>
-             <input type="range" class="energy-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" min="0" max="100" value="0">
-             <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div>
-             <div class="energy-slider-value-display flex justify-between items-center text-xs bg-gray-100 text-gray-700 p-1 rounded-md min-h-[2.5rem]"> <span class="slider-percent-value">0%</span>
-                 <span class="slider-details-value text-right">(E: 0, D: 0.00)</span> </div>
-         </div>
-    </template>
-
-
-    <script>
-        // --- DOM Element References ---
-        const energyTypeSelect = document.getElementById('energy-type');
-        const energyPoolsContainer = document.getElementById('energy-pools-container');
-        const slidersGrid = document.getElementById('sliders-grid');
-        const energyPoolTemplate = document.getElementById('energy-pool-template');
-        const energySliderTemplate = document.getElementById('energy-slider-template');
-        const calculateBtn = document.getElementById('calculate-btn');
-        const resultDiv = document.getElementById('result');
-        const resultValueEl = document.getElementById('result-value');
-        const resultTotalEnergyUsedEl = document.getElementById('result-total-energy-used');
-        const resultTotalExtraDamageEl = document.getElementById('result-total-extra-damage');
-        const resultScientificEl = document.getElementById('result-scientific');
-        const resultWordsEl = document.getElementById('result-words');
-        const loadingDiv = document.getElementById('loading');
-        const messageArea = document.getElementById('message-area');
-        const dynamicModifiersContainer = document.getElementById('dynamic-modifiers-container');
-        const addDynamicBoxBtn = document.getElementById('add-dynamic-box');
-        const baseDamageInput = document.getElementById('base-damage');
-        const baseMultiplierInput = document.getElementById('base-multiplier');
-        const formMultiplierInput = document.getElementById('form-multiplier');
-        const attackCompressionPointsInput = document.getElementById('attack-compression-points');
-        const statsPanel = document.getElementById('stats-panel');
-        const statsPanelHeader = document.getElementById('stats-panel-header');
-        const statCurrentEnergyEl = document.getElementById('stat-current-energy');
-        const statTotalDamageEl = document.getElementById('stat-total-damage');
-        const statTotalEnergySpentEl = document.getElementById('stat-total-energy-spent');
-        const statAttackCountEl = document.getElementById('stat-attack-count');
-        const statHighestDamageEl = document.getElementById('stat-highest-damage');
-        const kaiokenSection = document.getElementById('kaioken-section');
-        const kaiokenCheckbox = document.getElementById('kaioken-checkbox');
-        const kaiokenDetails = document.getElementById('kaioken-details');
-        const maxHealthInput = document.getElementById('max-health');
-        const kaiokenStrainInput = document.getElementById('kaioken-strain');
-        // Reference the new span for current health
-        const currentHealthEl = document.getElementById('current-health');
-        const regenHealthBtn = document.getElementById('regen-health-btn');
-        const saveBtn = document.getElementById('save-state-btn');
-        const loadBtn = document.getElementById('load-state-btn');
-        const clearBtn = document.getElementById('clear-state-btn');
-
-        // --- Global State & Constants ---
-        let totalDamageDealt = 0, totalEnergySpent = 0, attackCount = 0, highestDamage = 0;
-        const LOCAL_STORAGE_KEY = 'energyCalculatorState_v1';
-        let poolAnimationTimeoutId = null;
-        const ALL_ENERGY_TYPES = ['ki', 'nen', 'chakra', 'magic', 'cursed', 'reiatsu', 'haki', 'alchemy', 'nature'];
-        let dynamicModifierCount = 0;
-
-        // Map for easy lookup of display names and styles defined in Tailwind config
-        const ENERGY_TYPE_DETAILS = {
-            ki:      { name: 'Ki',      color: 'ki',      colorDark: 'ki-dark',      gradientTo: 'to-orange-100', focusRing: 'focus:ring-ki-focus',      staticGlow: 'static-glow-ki',      pulseGlow: 'animate-pulse-glow-ki',      border: 'border-l-ki' },
-            nen:     { name: 'Nen',     color: 'nen',     colorDark: 'nen-dark',     gradientTo: 'to-blue-100',   focusRing: 'focus:ring-nen-focus',     staticGlow: 'static-glow-nen',     pulseGlow: 'animate-pulse-glow-nen',     border: 'border-l-nen' },
-            chakra:  { name: 'Chakra',  color: 'chakra',  colorDark: 'chakra-dark',  gradientTo: 'to-purple-100', focusRing: 'focus:ring-chakra-focus',  staticGlow: 'static-glow-chakra',  pulseGlow: 'animate-pulse-glow-chakra',  border: 'border-l-chakra' },
-            magic:   { name: 'Magic',   color: 'magic',   colorDark: 'magic-dark',   gradientTo: 'to-teal-100',   focusRing: 'focus:ring-magic-focus',   staticGlow: 'static-glow-magic',   pulseGlow: 'animate-pulse-glow-magic',   border: 'border-l-magic' },
-            cursed:  { name: 'Cursed',  color: 'cursed',  colorDark: 'cursed-dark',  gradientTo: 'to-red-100',    focusRing: 'focus:ring-cursed-focus',  staticGlow: 'static-glow-cursed',  pulseGlow: 'animate-pulse-glow-cursed',  border: 'border-l-cursed' },
-            reiatsu: { name: 'Reiatsu', color: 'reiatsu', colorDark: 'reiatsu-dark', gradientTo: 'to-slate-100',  focusRing: 'focus:ring-reiatsu-focus', staticGlow: 'static-glow-reiatsu', pulseGlow: 'animate-pulse-glow-reiatsu', border: 'border-l-reiatsu' },
-            haki:    { name: 'Haki',    color: 'haki',    colorDark: 'haki-dark',    gradientTo: 'to-gray-100',   focusRing: 'focus:ring-haki-focus',    staticGlow: 'static-glow-haki',    pulseGlow: 'animate-pulse-glow-haki',    border: 'border-l-haki' },
-            alchemy: { name: 'Alchemy', color: 'alchemy', colorDark: 'alchemy-dark', gradientTo: 'to-amber-100',  focusRing: 'focus:ring-alchemy-focus', staticGlow: 'static-glow-alchemy', pulseGlow: 'animate-pulse-glow-alchemy', border: 'border-l-alchemy' },
-            nature:  { name: 'Nature',  color: 'nature',  colorDark: 'nature-dark',  gradientTo: 'to-lime-100',   focusRing: 'focus:ring-nature-focus',  staticGlow: 'static-glow-nature',  pulseGlow: 'animate-pulse-glow-nature',  border: 'border-l-nature' },
-        };
-
-        // --- Utility Functions ---
-        function safeParseFloat(value, defaultValue = 0) { if (typeof value !== 'string' && typeof value !== 'number') return defaultValue; const num = parseFloat(String(value).replace(/,/g, '')); return isNaN(num) ? defaultValue : num; }
-        // Simple number formatting with commas and limited decimals
-        function formatSimpleNumber(num) { if (typeof num !== 'number' || isNaN(num)) return '0'; try { const options = { maximumFractionDigits: 2 }; return num.toLocaleString('en-US', options); } catch (e) { return num.toString(); } }
-        function showMessage(text, type = 'info') { messageArea.textContent = text; messageArea.className = 'mb-4 p-3 rounded-md text-sm border'; messageArea.classList.remove('hidden'); switch (type) { case 'error': messageArea.classList.add('bg-error-light', 'text-error-dark', 'border-error'); break; case 'success': messageArea.classList.add('bg-success-light', 'text-success-dark', 'border-success'); break; default: messageArea.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300'); } setTimeout(() => { messageArea.classList.add('hidden'); }, 5000); }
-        function showLoading(isLoading) { loadingDiv.classList.toggle('hidden', !isLoading); if(isLoading) resultDiv.classList.add('hidden'); calculateBtn.disabled = isLoading; calculateBtn.classList.toggle('opacity-50', isLoading); calculateBtn.classList.toggle('cursor-not-allowed', isLoading); }
-        function triggerAnimation(element, animationClass, duration = 500) { if (!element) return; element.classList.remove(animationClass); void element.offsetWidth; element.classList.add(animationClass); setTimeout(() => { element.classList.remove(animationClass); }, duration); }
-
-        /**
-         * Formats numbers using abbreviations K, M for < 1B,
-         * or scientific notation for >= 1B.
-         */
-        function formatStatNumber(num) {
-            if (typeof num !== 'number' || isNaN(num)) return '0';
-            const absNum = Math.abs(num);
-
-            // Use scientific notation for numbers >= 1 Billion (1e9)
-            if (absNum >= 1e9) {
-                return num.toExponential(2);
-            }
-            // Use 'M' for millions (1e6 to < 1e9)
-            if (absNum >= 1e6) {
-                let shortNum = num / 1e6;
-                let formatted = shortNum.toLocaleString('en-US', { minimumFractionDigits: absNum < 10e6 ? 2 : 1, maximumFractionDigits: absNum < 10e6 ? 2 : 1 });
-                formatted = formatted.replace(/\.0$/, '');
-                return formatted + 'M';
-            }
-            // Use 'K' for thousands (1e3 to < 1e6)
-            if (absNum >= 1e3) {
-                let shortNum = num / 1e3;
-                let formatted = shortNum.toLocaleString('en-US', { minimumFractionDigits: absNum < 10e3 ? 2 : 1, maximumFractionDigits: absNum < 10e3 ? 2 : 1 });
-                formatted = formatted.replace(/\.0$/, '');
-                return formatted + 'K';
-            }
-            // Use standard formatting for numbers between -1000 and 1000
-            if (absNum < 1000) {
-                 return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
-            }
-            // Fallback (shouldn't be reached with current logic)
-            return num.toLocaleString('en-US');
-        }
-
-
-        // --- Energy Pool Logic ---
-        // Updated to use textContent for readonly spans
-        function getEnergyElements(type) {
-            if (!ALL_ENERGY_TYPES.includes(type)) { console.error("Invalid type:", type); return null; }
-            return {
-                poolDiv: document.getElementById(`${type}-pool`),
-                maxEnergyEl: document.getElementById(`${type}-max-energy`),
-                maxMultiplierEl: document.getElementById(`${type}-max-multiplier`),
-                // Get span elements now
-                totalEnergyEl: document.getElementById(`${type}-total-energy`),
-                currentEnergyEl: document.getElementById(`${type}-current-energy`),
-                damagePerPowerEl: document.getElementById(`${type}-damage-per-power`),
-                regenPercentEl: document.getElementById(`${type}-regen-percent`),
-                sliderSection: document.getElementById(`${type}-slider-section`),
-                energySlider: document.getElementById(`${type}-energy-slider`),
-                sliderValueDisplay: document.getElementById(`${type}-slider-value-display`) // The container div
+            // --- Energy Type Configuration ---
+            const energyTypes = {
+                ki: { name: 'Ki Energy', color: 'ki', focus: 'ki-focus', border: 'stats-border-ki', header: 'stats-header-ki', glow: 'animate-pulse-glow-ki', staticGlow: 'static-glow-ki' },
+                nen: { name: 'Nen Energy', color: 'nen', focus: 'nen-focus', border: 'stats-border-nen', header: 'stats-header-nen', glow: 'animate-pulse-glow-nen', staticGlow: 'static-glow-nen' },
+                chakra: { name: 'Chakra Energy', color: 'chakra', focus: 'chakra-focus', border: 'stats-border-chakra', header: 'stats-header-chakra', glow: 'animate-pulse-glow-chakra', staticGlow: 'static-glow-chakra' },
+                magic: { name: 'Magic Energy', color: 'magic', focus: 'magic-focus', border: 'stats-border-magic', header: 'stats-header-magic', glow: 'animate-pulse-glow-magic', staticGlow: 'static-glow-magic' },
+                cursed: { name: 'Cursed Energy', color: 'cursed', focus: 'cursed-focus', border: 'stats-border-cursed', header: 'stats-header-cursed', glow: 'animate-pulse-glow-cursed', staticGlow: 'static-glow-cursed' },
+                reiatsu: { name: 'Reiatsu', color: 'reiatsu', focus: 'reiatsu-focus', border: 'stats-border-reiatsu', header: 'stats-header-reiatsu', glow: 'animate-pulse-glow-reiatsu', staticGlow: 'static-glow-reiatsu' },
+                haki: { name: 'Haki', color: 'haki', focus: 'haki-focus', border: 'stats-border-haki', header: 'stats-header-haki', glow: 'animate-pulse-glow-haki', staticGlow: 'static-glow-haki' },
+                alchemy: { name: 'Alchemy', color: 'alchemy', focus: 'alchemy-focus', border: 'stats-border-alchemy', header: 'stats-header-alchemy', glow: 'animate-pulse-glow-alchemy', staticGlow: 'static-glow-alchemy' },
+                nature: { name: 'Nature Energy', color: 'nature', focus: 'nature-focus', border: 'stats-border-nature', header: 'stats-header-nature', glow: 'animate-pulse-glow-nature', staticGlow: 'static-glow-nature' }
             };
-        }
 
-         function updateSliderVisibility(type) {
-             const els = getEnergyElements(type);
-             if (els?.totalEnergyEl && els.sliderSection) {
-                 // Read textContent and parse, as it's now a span
-                 const totalEnergy = safeParseFloat(els.totalEnergyEl.textContent.replace(/[^0-9.e+-]/g, ''), 0);
-                 const shouldShow = totalEnergy > 0;
-                 els.sliderSection.classList.toggle('hidden', !shouldShow);
-                 if (!shouldShow && els.energySlider) {
-                     els.energySlider.value = 0;
-                     updateSingleSliderDisplay(type);
+            let modifierCount = 0; // Counter for dynamic modifiers
+
+            // --- Functions ---
+
+            function updateStatsPanelStyle(type) {
+                 const config = energyTypes[type];
+                 if (!config || !statsPanel || !statsPanelHeader || !statActiveEnergyType) return; // Add null checks
+
+                 // Robustly remove previous styles
+                 const classesToRemove = Object.values(energyTypes).flatMap(e => [
+                    `border-${e.color}`, `animate-${e.glow}`, e.staticGlow, `text-${e.color}-dark`
+                 ]);
+                 statsPanel.classList.remove(...classesToRemove.filter(c => c)); // Remove border, animation, glow
+                 statsPanelHeader.classList.remove(...Object.values(energyTypes).map(e => `text-${e.color}-dark`).filter(c => c)); // Remove text color
+
+                 // Add new styles
+                 statsPanel.classList.add(`border-${config.color}`);
+                 statsPanel.classList.add(config.staticGlow);
+                 statsPanelHeader.classList.add(`text-${config.color}-dark`);
+                 statActiveEnergyType.textContent = config.name;
+                 statActiveEnergyType.className = `font-medium text-${config.color}-dark capitalize`;
+            }
+
+            function addEnergyPool(type) {
+                 const config = energyTypes[type];
+                 if (!config || document.getElementById(`${type}-energy-pool`)) return; // Don't add if exists
+
+                 const poolDiv = document.createElement('div');
+                 poolDiv.id = `${type}-energy-pool`;
+                 poolDiv.className = `energy-pool energy-pool-${type} bg-white`;
+                 poolDiv.innerHTML = `
+                     <h3 class="text-xl font-semibold mb-4 flex items-center">${config.name} Pool<span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                         <div><label for="${type}-current-energy" class="lbl">Current Energy:</label><input type="text" id="${type}-current-energy" value="1000" placeholder="e.g., 1,000" class="inpt focus:ring-${config.focus}"></div>
+                         <div><label for="${type}-max-energy" class="lbl">Max Energy:</label><span id="${type}-max-energy-display" class="readonly-display">1000</span></div>
+                         <div><label for="${type}-regen-rate" class="lbl">Regen Rate (/sec):</label><input type="text" id="${type}-regen-rate" value="10" placeholder="e.g., 10" class="inpt focus:ring-${config.focus}"></div>
+                         <div><label for="${type}-conversion-ratio" class="lbl">Damage Conversion Ratio:</label><input type="text" id="${type}-conversion-ratio" value="0.1" placeholder="e.g., 0.1" class="inpt focus:ring-${config.focus}"></div>
+                     </div>
+                     <button id="regen-${type}-btn" class="regen-btn bg-${config.color} hover:bg-${config.color}-dark focus:ring-${config.focus} mt-4">Regenerate</button>
+                 `;
+                 energyPoolsContainer.appendChild(poolDiv);
+
+                 const currentEnergyInput = poolDiv.querySelector(`#${type}-current-energy`);
+                 if (currentEnergyInput && statCurrentEnergy) {
+                    currentEnergyInput.addEventListener('input', () => {
+                        if (type === energyTypeSelect.value) {
+                            // Update stat panel, removing commas for internal consistency if needed, but display might keep them
+                             statCurrentEnergy.textContent = currentEnergyInput.value || '0';
+                        }
+                        // Maybe update max energy display too if it's linked
+                        const maxDisplay = document.getElementById(`${type}-max-energy-display`);
+                        if(maxDisplay) maxDisplay.textContent = currentEnergyInput.value || '1000'; // Example: Link max to current for simplicity
+                    });
+                     if (type === energyTypeSelect.value) {
+                        statCurrentEnergy.textContent = currentEnergyInput.value || '0';
+                    }
                  }
-             }
-         }
 
-         // Updated to use textContent and formatStatNumber
-         function calculateAndResetEnergy(type) {
-             const els = getEnergyElements(type);
-             if (!els?.maxEnergyEl || !els?.maxMultiplierEl || !els?.totalEnergyEl || !els?.currentEnergyEl) { console.error(`Elements missing for reset: ${type}`); return 0; }
-             const maxEnergy = safeParseFloat(els.maxEnergyEl.value, 0);
-             const multiplier = safeParseFloat(els.maxMultiplierEl.value, 1);
-             const totalEnergy = maxEnergy * multiplier;
-             // Set textContent using formatStatNumber
-             els.totalEnergyEl.textContent = formatStatNumber(totalEnergy);
-             els.currentEnergyEl.textContent = formatStatNumber(totalEnergy);
-             updateSliderVisibility(type);
-             updateSingleSliderDisplay(type);
-             return totalEnergy;
-         }
-
-         // Updated to use textContent and formatStatNumber
-         function regenerateEnergy(type) {
-             const els = getEnergyElements(type);
-             if (!els?.totalEnergyEl || !els?.currentEnergyEl || !els?.regenPercentEl) { console.error(`Elements missing for regen: ${type}`); return; }
-             // Parse numbers from textContent
-             const totalEnergy = safeParseFloat(els.totalEnergyEl.textContent.replace(/[^0-9.e+-]/g, ''), 0);
-             let currentEnergy = safeParseFloat(els.currentEnergyEl.textContent.replace(/[^0-9.e+-]/g, ''), 0);
-             const regenPercent = safeParseFloat(els.regenPercentEl.value, 0); // Regen percent is still an input
-
-             if (totalEnergy <= 0) { showMessage('Max Energy must be positive to regenerate.', 'error'); return; }
-             if (regenPercent <= 0) { showMessage('Regen Rate must be positive.', 'error'); return; }
-             const regenAmount = totalEnergy * (regenPercent / 100);
-             let newEnergy = Math.min(currentEnergy + regenAmount, totalEnergy);
-             // Set textContent using formatStatNumber
-             els.currentEnergyEl.textContent = formatStatNumber(newEnergy);
-             showMessage(`${formatStatNumber(regenAmount)} ${type} regenerated. Current: ${formatStatNumber(newEnergy)}`, 'success');
-             triggerAnimation(els.currentEnergyEl, 'animate-flash-green');
-             updateSingleSliderDisplay(type);
-             updateStatsDisplay();
-         }
-
-
-        // --- Kaioken Styling ---
-        function applyKaiokenStyle() { if (!statsPanel || !statsPanelHeader) return; statsPanel.classList.remove('border-stats-border'); statsPanel.classList.add('border-kaioken-border', 'animate-kaioken-glow'); statsPanelHeader.classList.remove('text-stats-header'); statsPanelHeader.classList.add('text-kaioken-header'); }
-        function removeKaiokenStyle() { if (!statsPanel || !statsPanelHeader) return; statsPanel.classList.add('border-stats-border'); statsPanel.classList.remove('border-kaioken-border', 'animate-kaioken-glow'); statsPanelHeader.classList.add('text-stats-header'); statsPanelHeader.classList.remove('text-kaioken-header'); }
-
-        // --- Health Update ---
-        // Updated to use textContent for currentHealthEl
-         function updateCurrentHealthDisplay() {
-             if (!currentHealthEl) return; // Check if element exists
-             if (energyTypeSelect.value === 'ki' && kaiokenCheckbox.checked && maxHealthInput) {
-                 const maxHealth = safeParseFloat(maxHealthInput.value, 0);
-                 // Parse current health from textContent
-                 let currentHealth = safeParseFloat(currentHealthEl.textContent.replace(/[^0-9.e+-]/g, ''), -1);
-                 // Initialize or cap current health based on max health
-                 if (currentHealth === -1 || currentHealth > maxHealth || currentHealthEl.textContent.trim() === '' || currentHealthEl.textContent === '0') { // Also init if 0
-                     currentHealthEl.textContent = formatStatNumber(maxHealth);
+                 const regenBtn = poolDiv.querySelector(`#regen-${type}-btn`);
+                 if(regenBtn) {
+                     regenBtn.addEventListener('click', () => {
+                         console.log(`Regenerating ${config.name}...`);
+                         // Add actual regeneration logic here (e.g., increment current energy input value)
+                         showMessage(`${config.name} regeneration triggered (simulation).`, 'info');
+                     });
                  }
-             } else if (maxHealthInput && (currentHealthEl.textContent.trim() === '' || currentHealthEl.textContent === '0')) {
-                 // Initialize if Kaioken isn't active but field is empty or 0
-                 currentHealthEl.textContent = formatStatNumber(safeParseFloat(maxHealthInput.value, 0));
-             }
-         }
-         // Updated to use textContent
-         function regenerateHealth() {
-             if (!maxHealthInput || !currentHealthEl) { console.error("Health elements missing."); return; }
-             const maxHealth = safeParseFloat(maxHealthInput.value, 0);
-             currentHealthEl.textContent = formatStatNumber(maxHealth); // Use formatter
-             showMessage('Health fully regenerated!', 'success');
-             triggerAnimation(currentHealthEl, 'animate-flash-green');
-         }
+            }
 
+            function addEnergySlider(type) {
+                const config = energyTypes[type];
+                 if (!config || document.getElementById(`${type}-slider-container`)) return; // Don't add if exists
 
-        // --- Show/Hide Logic & Pool Animation ---
-        // Updated to use textContent for parsing energy values
-        function showSelectedEnergyPool() {
-            const selectedType = energyTypeSelect.value;
-            const details = ENERGY_TYPE_DETAILS[selectedType];
-            let newlyVisiblePool = null;
+                const sliderContainer = document.createElement('div');
+                sliderContainer.id = `${type}-slider-container`;
+                sliderContainer.className = 'mb-2';
+                sliderContainer.innerHTML = `
+                    <label for="${type}-energy-slider" class="lbl text-sm mb-1">${config.name} Usage (<span id="${type}-slider-value">0</span>%):</label>
+                    <input type="range" id="${type}-energy-slider" name="${type}-energy-slider" min="0" max="100" value="0" class="energy-slider">
+                `;
+                slidersGrid.appendChild(sliderContainer);
 
-            if (poolAnimationTimeoutId) { clearTimeout(poolAnimationTimeoutId); poolAnimationTimeoutId = null; }
-
-            // Hide all pools, remove glow/pulse classes
-            ALL_ENERGY_TYPES.forEach(type => {
-                const els = getEnergyElements(type);
-                const typeDetails = ENERGY_TYPE_DETAILS[type];
-                if (els?.poolDiv && typeDetails) {
-                    els.poolDiv.classList.remove(typeDetails.pulseGlow, typeDetails.staticGlow);
-                    if (type !== selectedType) { els.poolDiv.style.display = 'none'; }
+                const slider = sliderContainer.querySelector(`#${type}-energy-slider`);
+                const valueDisplay = sliderContainer.querySelector(`#${type}-slider-value`);
+                if(slider && valueDisplay) {
+                    slider.addEventListener('input', (e) => {
+                        valueDisplay.textContent = e.target.value;
+                    });
                 }
+            }
+
+            function setupInitialState() {
+                 // Example: Initially add a few pools/sliders or load from saved state
+                 ['ki', 'nen', 'chakra'].forEach(type => {
+                     addEnergyPool(type);
+                     addEnergySlider(type);
+                 });
+                 updateStatsPanelStyle(energyTypeSelect.value);
+                 // Trigger update for the initially selected energy type's current value stat
+                 const initialType = energyTypeSelect.value;
+                 const initialCurrentInput = document.getElementById(`${initialType}-current-energy`);
+                 if (initialCurrentInput && statCurrentEnergy) {
+                     statCurrentEnergy.textContent = initialCurrentInput.value || '0';
+                 }
+            }
+
+            // Helper to show messages
+            function showMessage(message, type = 'info') {
+                if (!messageArea) return;
+                messageArea.textContent = message;
+                let bgColor = 'bg-blue-100';
+                let textColor = 'text-blue-800';
+                let borderColor = 'border-blue-300';
+
+                if (type === 'success') {
+                    bgColor = 'bg-success-light'; textColor = 'text-success-dark'; borderColor = 'border-success';
+                } else if (type === 'error') {
+                    bgColor = 'bg-error-light'; textColor = 'text-error-dark'; borderColor = 'border-error';
+                } // Keep 'info' as default blue
+
+                messageArea.className = `mb-4 p-3 rounded-md text-sm ${bgColor} ${textColor} border ${borderColor}`;
+                messageArea.classList.remove('hidden');
+
+                setTimeout(() => {
+                    messageArea.classList.add('hidden');
+                }, 4000);
+            }
+
+
+            // --- Event Listeners ---
+
+            // Main energy type dropdown
+            energyTypeSelect.addEventListener('change', (e) => {
+                const selectedType = e.target.value;
+                updateStatsPanelStyle(selectedType);
+
+                const currentEnergyInput = document.getElementById(`${selectedType}-current-energy`);
+                 if (currentEnergyInput && statCurrentEnergy) {
+                     statCurrentEnergy.textContent = currentEnergyInput.value || '0';
+                 } else {
+                     statCurrentEnergy.textContent = 'N/A';
+                     // Optionally add the pool/slider if they don't exist on selection
+                     if (!document.getElementById(`${selectedType}-energy-pool`)) addEnergyPool(selectedType);
+                     if (!document.getElementById(`${selectedType}-slider-container`)) addEnergySlider(selectedType);
+                     // Re-check for input after adding
+                      const newlyAddedInput = document.getElementById(`${selectedType}-current-energy`);
+                      if(newlyAddedInput) statCurrentEnergy.textContent = newlyAddedInput.value || '0';
+
+                 }
             });
 
-            // Find the pool to show
-            const poolToShowEls = getEnergyElements(selectedType);
-            if (poolToShowEls?.poolDiv && details) {
-                poolToShowEls.poolDiv.style.display = 'block';
-                newlyVisiblePool = poolToShowEls.poolDiv;
-                poolToShowEls.poolDiv.classList.add(details.pulseGlow); // Apply pulse
+             // Calculate button
+             calculateBtn.addEventListener('click', () => {
+                 // Basic validation for Base Damage
+                 const baseDamageValue = baseDamageInput.value.replace(/,/g, ''); // Clean commas for validation too
+                 if (!baseDamageValue || isNaN(parseFloat(baseDamageValue))) {
+                     showMessage('Please enter a valid numeric Base Damage.', 'error');
+                     baseDamageInput.focus();
+                     baseDamageInput.classList.add('animate-flash-red');
+                     setTimeout(()=> baseDamageInput.classList.remove('animate-flash-red'), 500);
+                     return;
+                 }
 
-                poolAnimationTimeoutId = setTimeout(() => { // Switch to static glow
-                    const currentSelectedType = energyTypeSelect.value;
-                    const stillSelectedPoolEls = getEnergyElements(currentSelectedType);
-                    const stillSelectedDetails = ENERGY_TYPE_DETAILS[currentSelectedType];
-                    if (stillSelectedPoolEls?.poolDiv && stillSelectedDetails && currentSelectedType === selectedType) {
-                        stillSelectedPoolEls.poolDiv.classList.remove(stillSelectedDetails.pulseGlow);
-                        stillSelectedPoolEls.poolDiv.classList.add(stillSelectedDetails.staticGlow);
-                    }
-                    poolAnimationTimeoutId = null;
-                }, 5000);
-            }
+                 loadingDiv.classList.remove('hidden');
+                 resultDiv.classList.add('hidden');
+                 messageArea.classList.add('hidden'); // Hide previous messages
 
-            // Show/Hide Kaioken section
-             if (kaiokenSection) { if (selectedType === 'ki') { kaiokenSection.classList.remove('hidden'); if (kaiokenCheckbox.checked) { kaiokenDetails.classList.remove('hidden'); updateCurrentHealthDisplay(); } } else { kaiokenSection.classList.add('hidden'); if (kaiokenCheckbox.checked) { kaiokenCheckbox.checked = false; kaiokenDetails.classList.add('hidden'); removeKaiokenStyle(); } } }
+                 // Simulate calculation delay
+                 setTimeout(() => {
+                     try {
+                         // --- Calculation Logic with Comma Handling ---
+                         let baseDamage = parseFloat(baseDamageInput.value.replace(/,/g, '')) || 0;
+                         let baseMultiplier = parseFloat(document.getElementById('base-multiplier').value.replace(/,/g, '')) || 1;
+                         let formMultiplier = parseFloat(document.getElementById('form-multiplier').value.replace(/,/g, '')) || 1;
+                         let attackCompressionPoints = parseFloat(document.getElementById('attack-compression-points').value.replace(/,/g, '')) || 0;
+                         let totalEnergyUsed = 0;
+                         let totalExtraDamage = 0;
 
-            // --- Persist Current Energy Logic ---
-            // Updated to use textContent and formatStatNumber
-            const els = getEnergyElements(selectedType);
-            if (els?.maxEnergyEl && els?.maxMultiplierEl && els?.totalEnergyEl && els?.currentEnergyEl) {
-                const maxEnergy = safeParseFloat(els.maxEnergyEl.value, 0); // Read from input
-                const multiplier = safeParseFloat(els.maxMultiplierEl.value, 1); // Read from input
-                const totalEnergy = maxEnergy * multiplier;
-                els.totalEnergyEl.textContent = formatStatNumber(totalEnergy); // Update span
-
-                // Parse current energy from span's textContent
-                let currentEnergy = safeParseFloat(els.currentEnergyEl.textContent.replace(/[^0-9.e+-]/g, ''), -1);
-                // Initialize or Cap current energy
-                if (currentEnergy === -1 || currentEnergy > totalEnergy || els.currentEnergyEl.textContent.trim() === '' || els.currentEnergyEl.textContent === '0') {
-                    els.currentEnergyEl.textContent = formatStatNumber(totalEnergy); // Update span
-                } // Else: Preserve existing value in span
-
-                updateSliderVisibility(selectedType); // Update related UI
-                updateSingleSliderDisplay(selectedType);
-            }
-
-            updateStatsDisplay();
-        }
+                         // Process dynamic modifiers (handle commas)
+                         document.querySelectorAll('.dynamic-modifier-value').forEach(input => {
+                            let value = parseFloat(input.value.replace(/,/g, '')) || 0; // Assuming default 0, adjust if multiplicative logic added
+                            // Current simple logic: multiplies into baseMultiplier
+                            if (value !== 0) baseMultiplier *= value; // Be cautious if multiplier is intended and value is 0
+                         });
 
 
-        // --- Dynamic Modifiers Logic ---
-        function addDynamicModifier(modifierData = null) { dynamicModifierCount++; const modifierId = `dynamic-modifier-${dynamicModifierCount}`; const newModifierDiv = document.createElement('div'); const initialType = modifierData?.type || 'additive'; const initialValue = modifierData?.value || '0'; const initialName = modifierData?.name || ''; const isActiveAdditive = initialType === 'additive'; const boxClasses = `dynamic-box p-4 mt-3 border rounded-md border-l-4 relative transition-all duration-300 ease-in-out animate-fadeIn ${isActiveAdditive ? 'additive bg-success-light border-success' : 'multiplicative bg-ki/10 border-ki'}`; newModifierDiv.className = boxClasses; newModifierDiv.id = modifierId; newModifierDiv.innerHTML = ` <div class="absolute top-2 right-2"><button class="remove-dynamic-box bg-error text-white rounded-md shadow-sm w-6 h-6 flex items-center justify-center text-xs hover:bg-error-dark focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-1 transition-transform active:scale-95" aria-label="Remove this modifier" data-target="${modifierId}">×</button></div><div class="modifier-type-selector flex gap-2 mb-3 border-b pb-2"><div class="modifier-type-option additive ${isActiveAdditive ? 'active' : ''} flex-1 p-2 text-center border rounded-md cursor-pointer transition-all duration-300 ease-in-out text-sm" data-value="additive" tabindex="0" role="radio" aria-checked="${isActiveAdditive}"><input type="radio" name="modifier-type-${modifierId}" value="additive" class="sr-only" ${isActiveAdditive ? 'checked' : ''}> Additive (+)</div><div class="modifier-type-option multiplicative ${!isActiveAdditive ? 'active' : ''} flex-1 p-2 text-center border rounded-md cursor-pointer transition-all duration-300 ease-in-out text-sm" data-value="multiplicative" tabindex="0" role="radio" aria-checked="${!isActiveAdditive}"><input type="radio" name="modifier-type-${modifierId}" value="multiplicative" class="sr-only" ${!isActiveAdditive ? 'checked' : ''}> Multiplier (×)</div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label for="modifier-name-${modifierId}" class="lbl">Modifier Name:</label><input type="text" id="modifier-name-${modifierId}" placeholder="e.g., Buff" value="${initialName}" class="modifier-name-input w-full p-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-success focus:border-transparent text-sm"></div><div><label for="modifier-value-${modifierId}" class="lbl">Value:</label><input type="text" id="modifier-value-${modifierId}" placeholder="e.g., 50 or 1.2" value="${initialValue}" class="modifier-value-input w-full p-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-success focus:border-transparent text-sm"></div></div>`; dynamicModifiersContainer.appendChild(newModifierDiv); addListenersToModifierBox(newModifierDiv); }
-        function addListenersToModifierBox(modifierDiv) { modifierDiv.querySelector('.remove-dynamic-box').addEventListener('click', function() { document.getElementById(this.dataset.target)?.remove(); }); modifierDiv.querySelectorAll('.modifier-type-option').forEach(option => { option.addEventListener('click', function() { const box = this.closest('.dynamic-box'); const value = this.dataset.value; box.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = (radio.value === value)); box.querySelectorAll('.modifier-type-option').forEach(opt => { const isActive = opt.dataset.value === value; opt.classList.toggle('active', isActive); opt.setAttribute('aria-checked', isActive); }); box.classList.remove('additive', 'multiplicative', 'bg-success-light', 'border-success', 'bg-ki/10', 'border-ki'); box.classList.add(value === 'additive' ? 'additive' : 'multiplicative'); box.classList.add(value === 'additive' ? 'bg-success-light' : 'bg-ki/10'); box.classList.add(value === 'additive' ? 'border-success' : 'border-ki'); }); option.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); } }); }); }
+                         // Sum energy usage and calculate extra damage (handle commas)
+                         Object.keys(energyTypes).forEach(type => {
+                             const slider = document.getElementById(`${type}-energy-slider`);
+                             const currentEnergyInput = document.getElementById(`${type}-current-energy`);
+                             const conversionRatioInput = document.getElementById(`${type}-conversion-ratio`);
 
+                             if (slider && currentEnergyInput && conversionRatioInput) {
+                                 const percentage = parseFloat(slider.value) || 0; // Range slider value is typically safe
+                                 const currentEnergy = parseFloat(currentEnergyInput.value.replace(/,/g, '')) || 0;
+                                 const conversionRatio = parseFloat(conversionRatioInput.value.replace(/,/g, '')) || 0;
 
-        // --- Stats Update Logic ---
-        // UPDATED to use formatStatNumber and read textContent for current energy display
-        function updateStatsDisplay() {
-            if (statTotalDamageEl) statTotalDamageEl.textContent = formatStatNumber(totalDamageDealt);
-            if (statTotalEnergySpentEl) statTotalEnergySpentEl.textContent = formatStatNumber(totalEnergySpent);
-            if (statHighestDamageEl) statHighestDamageEl.textContent = formatStatNumber(highestDamage);
-            if (statAttackCountEl) statAttackCountEl.textContent = attackCount.toLocaleString();
+                                  // Add safety check for NaN values after parsing
+                                  if (!isNaN(percentage) && !isNaN(currentEnergy) && !isNaN(conversionRatio)) {
+                                     const energyToUse = (currentEnergy * percentage) / 100;
+                                     totalEnergyUsed += energyToUse;
+                                     totalExtraDamage += energyToUse * conversionRatio;
 
-            const selectedType = energyTypeSelect.value;
-            const els = getEnergyElements(selectedType);
-            // Display the already formatted value from the span
-            if (statCurrentEnergyEl && els?.currentEnergyEl) {
-                statCurrentEnergyEl.textContent = els.currentEnergyEl.textContent || '0';
-            } else if (statCurrentEnergyEl) {
-                statCurrentEnergyEl.textContent = 'N/A';
-            }
-        }
-
-        // --- Calculation Logic ---
-        // Updated slider display function
-         function updateSingleSliderDisplay(type) {
-             const els = getEnergyElements(type);
-             // Ensure sliderValueDisplay (the container) exists
-             if (!els?.energySlider || !els?.sliderValueDisplay || !els?.currentEnergyEl || !els?.damagePerPowerEl) { return; }
-
-             // Find the new spans within the display div
-             const percentSpan = els.sliderValueDisplay.querySelector('.slider-percent-value');
-             const detailsSpan = els.sliderValueDisplay.querySelector('.slider-details-value');
-             if (!percentSpan || !detailsSpan) { // Exit if spans not found
-                console.error("Slider display spans not found for", type);
-                return;
-             }
-
-             const sliderPercent = els.energySlider.value;
-             // Parse current energy from textContent
-             const currentEnergy = safeParseFloat(els.currentEnergyEl.textContent.replace(/[^0-9.e+-]/g, ''), 0);
-             const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1); // Read from input
-
-             const potentialEnergyUsed = currentEnergy * (sliderPercent / 100);
-             const actualEnergyUsed = Math.min(potentialEnergyUsed, currentEnergy);
-             const extraDamage = actualEnergyUsed * damagePerPower;
-
-             // Update the separate spans using formatStatNumber for details
-             percentSpan.textContent = `${sliderPercent}%`;
-             detailsSpan.textContent = `(E: ${formatStatNumber(actualEnergyUsed)}, D: ${formatStatNumber(extraDamage)})`;
-         }
-
-         // Updated performCalculation to use textContent, formatStatNumber, and formatSimpleNumber for result
-         function performCalculation() {
-             showLoading(true);
-             setTimeout(() => {
-                 try {
-                     const baseDamage = safeParseFloat(baseDamageInput.value, 0);
-                     const compressionPoints = safeParseFloat(attackCompressionPointsInput.value, 0);
-                     const baseMultiplier = safeParseFloat(baseMultiplierInput.value, 1);
-                     const formMultiplier = safeParseFloat(formMultiplierInput.value, 1);
-                     const energyType = energyTypeSelect.value;
-
-                     let effectiveBaseMultiplier = baseMultiplier;
-                      if (compressionPoints > 0) {
-                          effectiveBaseMultiplier *= (1 + (compressionPoints * 0.05) + (Math.floor(compressionPoints / 10) * 0.1));
-                      }
-                      let finalDamage = baseDamage * effectiveBaseMultiplier * formMultiplier;
-
-                     document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach(modifierDiv => {
-                         const valueInput = modifierDiv.querySelector('.modifier-value-input');
-                         const typeOption = modifierDiv.querySelector('.modifier-type-option.active');
-                         if (valueInput && typeOption) {
-                             const modifierValue = safeParseFloat(valueInput.value, 0);
-                             const modifierType = typeOption.dataset.value;
-                             if (modifierType === 'additive') { finalDamage += modifierValue; }
-                             else if (modifierType === 'multiplicative') { finalDamage *= ((modifierValue === 0) ? 1 : modifierValue); }
-                         }
-                     });
-
-                     let totalEnergyUsedFromSliders = 0;
-                     let totalExtraDamageFromEnergy = 0;
-                     ALL_ENERGY_TYPES.forEach(type => {
-                         const els = getEnergyElements(type);
-                         if (els?.energySlider && els.currentEnergyEl && els.damagePerPowerEl) {
-                             const sliderPercent = safeParseFloat(els.energySlider.value, 0);
-                             if (sliderPercent > 0) {
-                                 // Parse current energy from textContent
-                                 const currentEnergy = safeParseFloat(els.currentEnergyEl.textContent.replace(/[^0-9.e+-]/g, ''), 0);
-                                 const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1);
-                                 const energyUsedThisType = currentEnergy * (sliderPercent / 100);
-                                 const actualEnergyUsed = Math.min(energyUsedThisType, currentEnergy);
-                                 const extraDamageThisType = actualEnergyUsed * damagePerPower;
-                                 totalEnergyUsedFromSliders += actualEnergyUsed;
-                                 totalExtraDamageFromEnergy += extraDamageThisType;
-                                 let newCurrentEnergyThisType = Math.max(0, currentEnergy - actualEnergyUsed);
-                                 // Update textContent using formatStatNumber
-                                 els.currentEnergyEl.textContent = formatStatNumber(newCurrentEnergyThisType);
-                                 if (newCurrentEnergyThisType < currentEnergy) { triggerAnimation(els.currentEnergyEl, 'animate-flash-red'); }
-                                 updateSingleSliderDisplay(type);
+                                     // TODO: Implement energy deduction from the input field if desired
+                                     // Example: currentEnergyInput.value = (currentEnergy - energyToUse).toString();
+                                     // Need to handle formatting (adding commas back?) if updating input visually
+                                  } else {
+                                      console.warn(`Invalid number input for energy type ${type}. Skipping its contribution.`);
+                                      // Optionally, notify the user which input is bad
+                                      // showMessage(`Invalid number for ${energyTypes[type].name} inputs.`, 'error');
+                                  }
                              }
-                         }
-                     });
-                     finalDamage += totalExtraDamageFromEnergy;
+                         });
 
-                     let healthDepleted = false;
-                     if (energyType === 'ki' && kaiokenCheckbox.checked) {
-                         // Parse current health from textContent
-                         const currentHealthVal = safeParseFloat(currentHealthEl.textContent.replace(/[^0-9.e+-]/g, ''), 0);
-                         if (currentHealthVal > 0) {
-                             const maxHealth = safeParseFloat(maxHealthInput.value, 0);
-                             const kaiokenStrainPercent = safeParseFloat(kaiokenStrainInput.value, 0);
-                             if (maxHealth > 0 && kaiokenStrainPercent > 0) {
-                                 const strainCost = maxHealth * (kaiokenStrainPercent / 100);
-                                 let newHealth = Math.max(0, currentHealthVal - strainCost);
-                                 // Update textContent using formatStatNumber
-                                 currentHealthEl.textContent = formatStatNumber(newHealth);
-                                 if (newHealth < currentHealthVal) { triggerAnimation(currentHealthEl, 'animate-flash-red'); }
-                                 if (newHealth === 0) { healthDepleted = true; }
-                             }
-                         } else { /* Health already 0 */ }
+                         // --- Final Damage Calculation ---
+                         // Choose ONE of these lines based on how Attack Compression should work:
+                         // 1. Original (Compression ignored):
+                         // let finalDamage = (baseDamage + totalExtraDamage) * baseMultiplier * formMultiplier;
+                         // 2. Compression adds to base damage:
+                         let finalDamage = (baseDamage + attackCompressionPoints + totalExtraDamage) * baseMultiplier * formMultiplier;
+                         // 3. Compression is multiplicative (ensure default isn't 0 if unused):
+                         // let finalDamage = (baseDamage + totalExtraDamage) * baseMultiplier * formMultiplier * (attackCompressionPoints || 1); // Example default 1
+
+
+                         // --- Display Results ---
+                         resultValue.textContent = finalDamage.toLocaleString();
+                         document.getElementById('result-total-energy-used').textContent = totalEnergyUsed.toLocaleString();
+                         document.getElementById('result-total-extra-damage').textContent = totalExtraDamage.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                         document.getElementById('result-scientific').textContent = finalDamage.toExponential(2);
+                         document.getElementById('result-words').textContent = "Number to words conversion not implemented"; // Placeholder
+
+                         loadingDiv.classList.add('hidden');
+                         resultDiv.classList.remove('hidden');
+                         resultDiv.classList.add('animate-pulse-result');
+                         setTimeout(() => resultDiv.classList.remove('animate-pulse-result'), 300);
+
+                         // --- Update Stats Panel ---
+                         const totalDamageStat = document.getElementById('stat-total-damage');
+                         const calcCountStat = document.getElementById('stat-calculation-count');
+                          // Format stats with commas too for consistency
+                          let currentTotalDamage = parseFloat(totalDamageStat.textContent.replace(/,/g, '')) || 0;
+                          totalDamageStat.textContent = (currentTotalDamage + finalDamage).toLocaleString();
+                          calcCountStat.textContent = (parseInt(calcCountStat.textContent.replace(/,/g, '')) || 0) + 1;
+
+                     } catch (error) {
+                         console.error("Calculation error:", error);
+                         loadingDiv.classList.add('hidden');
+                         showMessage(`Calculation failed: ${error.message}`, 'error');
                      }
 
-                     // Update Stats
-                     totalDamageDealt += finalDamage;
-                     totalEnergySpent += totalEnergyUsedFromSliders;
-                     attackCount++;
-                     if (finalDamage > highestDamage) { highestDamage = finalDamage; }
-                     updateStatsDisplay();
+                 }, 500); // Slightly reduced delay
+             });
 
-                     // --- MODIFIED RESULT DISPLAY ---
-                     // Use formatSimpleNumber (or toLocaleString) for the main result to show full number
-                     resultValueEl.textContent = formatSimpleNumber(finalDamage);
-                     // --- END MODIFIED RESULT DISPLAY ---
 
-                     triggerAnimation(resultValueEl, 'animate-pulse-result', 300);
-                     // Use formatStatNumber for the details below the main result
-                     resultTotalEnergyUsedEl.textContent = formatStatNumber(totalEnergyUsedFromSliders);
-                     resultTotalExtraDamageEl.textContent = formatStatNumber(totalExtraDamageFromEnergy);
-                     displayAllFormats(finalDamage); // Scientific/Words handled separately
-                     resultDiv.classList.remove('hidden', 'bg-error-light', 'border-error', 'text-error-dark');
-                     resultDiv.classList.add('bg-success-light', 'border-success', 'text-success-dark');
-                     resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-success-dark';
-                     let successMsg = 'Calculation successful!';
-                     if (healthDepleted) { successMsg += ' Warning: Health depleted by Kaioken strain!'; }
-                     showMessage(successMsg, healthDepleted ? 'error' : 'success');
+             // Add Dynamic Modifier Box Functionality
+             addDynamicBoxBtn.addEventListener('click', () => {
+                 modifierCount++;
+                 const modifierDiv = document.createElement('div');
+                 modifierDiv.className = 'dynamic-modifier-box flex items-center gap-2 mb-2 animate-fadeIn';
+                 modifierDiv.innerHTML = `
+                     <input type="text" placeholder="Factor Name ${modifierCount}" class="inpt flex-grow focus:ring-chakra">
+                     <input type="text" placeholder="Value (e.g., 1.2 or 1,000)" class="inpt w-1/3 dynamic-modifier-value focus:ring-chakra">
+                     <button class="remove-modifier-btn px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 active:scale-95" aria-label="Remove factor ${modifierCount}">X</button>
+                 `;
+                 dynamicModifiersContainer.appendChild(modifierDiv);
 
-                 } catch (error) {
-                     console.error("Calculation Error:", error);
-                     resultValueEl.textContent = 'Error'; resultTotalEnergyUsedEl.textContent = 'N/A'; resultTotalExtraDamageEl.textContent = 'N/A'; resultScientificEl.textContent = 'N/A'; resultWordsEl.textContent = 'Error';
-                     resultDiv.classList.remove('hidden', 'bg-success-light', 'border-success', 'text-success-dark'); resultDiv.classList.add('bg-error-light', 'border-error', 'text-error-dark'); resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-error-dark';
-                     showMessage(`Calculation failed: ${error.message || 'Unknown error'}`, 'error');
-                 } finally {
-                     showLoading(false);
+                 modifierDiv.querySelector('.remove-modifier-btn').addEventListener('click', () => {
+                     modifierDiv.remove();
+                     // Optional: Renumber remaining factors if needed for labels
+                 });
+             });
+
+
+            // --- Save/Load/Clear Functionality ---
+            document.getElementById('save-state-btn')?.addEventListener('click', () => {
+                 try {
+                     const state = {
+                         baseDamage: document.getElementById('base-damage')?.value,
+                         baseMultiplier: document.getElementById('base-multiplier')?.value,
+                         formMultiplier: document.getElementById('form-multiplier')?.value,
+                         attackCompression: document.getElementById('attack-compression-points')?.value,
+                         selectedEnergyType: document.getElementById('energy-type')?.value,
+                         energyPools: {},
+                         energySliders: {},
+                         dynamicModifiers: []
+                     };
+
+                     // Save energy pool data (saves values as they are in inputs, commas included)
+                     document.querySelectorAll('[id$="-energy-pool"]').forEach(pool => {
+                         const type = pool.id.replace('-energy-pool', '');
+                         state.energyPools[type] = {
+                             current: document.getElementById(`${type}-current-energy`)?.value,
+                             regen: document.getElementById(`${type}-regen-rate`)?.value,
+                             ratio: document.getElementById(`${type}-conversion-ratio`)?.value
+                             // Max energy isn't saved, assumed linked to current or fixed
+                         };
+                     });
+
+                     // Save slider data
+                     document.querySelectorAll('.energy-slider').forEach(slider => {
+                          const type = slider.id.replace('-energy-slider', '');
+                          state.energySliders[type] = slider.value;
+                      });
+
+                     // Save dynamic modifiers
+                     document.querySelectorAll('.dynamic-modifier-box').forEach(box => {
+                         const nameInput = box.querySelector('input[type="text"]:first-of-type');
+                         const valueInput = box.querySelector('.dynamic-modifier-value');
+                         if (nameInput && valueInput) {
+                             state.dynamicModifiers.push({ name: nameInput.value, value: valueInput.value });
+                         }
+                     });
+
+                     localStorage.setItem('energyCalculatorStateV7', JSON.stringify(state));
+                     showMessage('State saved successfully!', 'success');
+                 } catch (e) {
+                     console.error("Error saving state:", e);
+                     showMessage('Error saving state.', 'error');
                  }
-             }, 50);
-         }
-
-
-        // --- Number Formatting ---
-         function displayAllFormats(damage) { try { resultScientificEl.textContent = damage.toExponential(2).replace(/e\+?(-?)/, ' x 10^$1'); } catch (e) { resultScientificEl.textContent = "Invalid"; console.error("Scientific notation error:", e); } try { resultWordsEl.textContent = convertNumberToWords(damage); } catch (e) { resultWordsEl.textContent = "Error: " + e.message; console.error("Number to words error:", e); } }
-         function convertNumberToWords(number) { const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen']; const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']; const scales = ['', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quattuordecillion', 'Quindecillion']; if (typeof number !== 'number' || !isFinite(number)) { return 'Invalid Number'; } if (number === 0) { return 'Zero'; } const MAX_SAFE_INTEGER_FOR_WORDS = BigInt("9".repeat((scales.length) * 3)); let numForCheck = number < 0 ? BigInt(Math.abs(Math.trunc(number))) : BigInt(Math.trunc(number)); if (numForCheck > MAX_SAFE_INTEGER_FOR_WORDS) { console.warn("Number too large for full word conversion, returning scientific."); return number.toExponential(2) + " (Too large for words)"; } let isNegative = number < 0; if (isNegative) number = -number; let integerPart; let fractionalPart = 0; try { const numStr = number.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 20 }); const parts = numStr.split('.'); integerPart = BigInt(parts[0]); if (parts.length > 1) { fractionalPart = parseFloat('0.' + parts[1]); } } catch (e) { console.error("Error processing number for words:", number, e); return "Number too large or invalid format"; } let words = isNegative ? 'Negative ' : ''; function convertHundreds(num) { let word = ''; const h = Math.floor(num / 100); const r = num % 100; if (h > 0) word += units[h] + ' Hundred'; if (r > 0) { if (word !== '') word += ' '; if (r < 20) { word += units[r]; } else { const t = Math.floor(r / 10); const o = r % 10; word += tens[t]; if (o > 0) word += '-' + units[o]; } } return word; } if (integerPart === 0n) { words += 'Zero'; } else { let scaleIndex = 0; let tempWords = []; let currentInt = integerPart; while (currentInt > 0n) { if (scaleIndex >= scales.length) { console.error("Number exceeds defined scales during conversion:", number); return number.toExponential(2) + " (Too large for words)"; } const chunk = Number(currentInt % 1000n); if (chunk !== 0) { const chunkWords = convertHundreds(chunk); tempWords.push(chunkWords + (scaleIndex > 0 ? ' ' + scales[scaleIndex] : '')); } currentInt /= 1000n; scaleIndex++; } words += tempWords.reverse().filter(w => w.trim()).join(', '); } if (fractionalPart > 1e-9) { words += ' Point'; let fractionalStr = fractionalPart.toFixed(6).substring(2).replace(/0+$/, ''); if (fractionalStr.length > 0) { for (const digit of fractionalStr) { words += ' ' + (units[parseInt(digit)] || 'Zero'); } } else { words = words.replace(/ Point$/, ''); } } return words.trim(); }
-
-        // --- State Management ---
-        // Updated to handle textContent for spans
-        function gatherState() {
-            const state = {
-                baseDamage: baseDamageInput.value, baseMultiplier: baseMultiplierInput.value, formMultiplier: formMultiplierInput.value, attackCompressionPoints: attackCompressionPointsInput.value,
-                selectedEnergyType: energyTypeSelect.value, sliderPercentages: {}, energyPools: {}, dynamicModifiers: [],
-                kaiokenActive: kaiokenCheckbox.checked, maxHealth: maxHealthInput.value, kaiokenStrain: kaiokenStrainInput.value,
-                // Read currentHealth from span's textContent
-                currentHealth: currentHealthEl?.textContent || '0',
-                totalDamageDealt: totalDamageDealt, totalEnergySpent: totalEnergySpent, attackCount: attackCount, highestDamage: highestDamage
-            };
-            ALL_ENERGY_TYPES.forEach(type => {
-                const els = getEnergyElements(type);
-                if (els) {
-                    state.energyPools[type] = {
-                        maxEnergy: els.maxEnergyEl?.value || '0', maxMultiplier: els.maxMultiplierEl?.value || '1',
-                        // Read energy values from spans' textContent
-                        currentEnergy: els.currentEnergyEl?.textContent || '0',
-                        totalEnergy: els.totalEnergyEl?.textContent || '0', // Also save total for consistency check maybe?
-                        damagePerPower: els.damagePerPowerEl?.value || '1', regenPercent: els.regenPercentEl?.value || ''
-                    };
-                    state.sliderPercentages[type] = els.energySlider?.value || '0';
-                }
             });
-            dynamicModifiersContainer.querySelectorAll('.dynamic-box').forEach(box => { const nameInput = box.querySelector('.modifier-name-input'); const valueInput = box.querySelector('.modifier-value-input'); const typeOption = box.querySelector('.modifier-type-option.active'); if (nameInput && valueInput && typeOption) { state.dynamicModifiers.push({ name: nameInput.value, value: valueInput.value, type: typeOption.dataset.value }); } });
-            return state;
-        }
-        // Updated to handle textContent for spans
-        function applyState(state) {
-            if (!state) return;
-            baseDamageInput.value = state.baseDamage || ''; baseMultiplierInput.value = state.baseMultiplier || '1'; formMultiplierInput.value = state.formMultiplier || '1'; attackCompressionPointsInput.value = state.attackCompressionPoints || '0';
-            energyTypeSelect.value = state.selectedEnergyType || 'ki';
 
-            if (state.energyPools) {
-                ALL_ENERGY_TYPES.forEach(type => {
-                    const els = getEnergyElements(type);
-                    const poolData = state.energyPools[type];
-                    // Ensure elements exist before trying to set values
-                    if (els && poolData && els.maxEnergyEl && els.totalEnergyEl && els.currentEnergyEl) {
-                        els.maxEnergyEl.value = poolData.maxEnergy || '';
-                        els.maxMultiplierEl.value = poolData.maxMultiplier || '1';
-                        els.damagePerPowerEl.value = poolData.damagePerPower || '1';
-                        els.regenPercentEl.value = poolData.regenPercent || '';
-                        // Recalculate total based on loaded max/multiplier and update span
-                        const loadedTotalNum = (safeParseFloat(poolData.maxEnergy, 0) * safeParseFloat(poolData.maxMultiplier, 1));
-                        els.totalEnergyEl.textContent = formatStatNumber(loadedTotalNum);
-                        // Restore current energy from saved text, parse it, cap it, format it, update span
-                        const savedCurrentNum = safeParseFloat(poolData.currentEnergy?.replace(/[^0-9.e+-]/g, ''), loadedTotalNum);
-                        els.currentEnergyEl.textContent = formatStatNumber(Math.min(savedCurrentNum, loadedTotalNum));
-                    }
-                });
-            }
-            if (state.sliderPercentages) { ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); if (els?.energySlider) { els.energySlider.value = state.sliderPercentages[type] || '0'; } /* Update display called later */ }); }
+            document.getElementById('load-state-btn')?.addEventListener('click', () => {
+                 const savedState = localStorage.getItem('energyCalculatorStateV7');
+                 if (savedState) {
+                     try {
+                         const state = JSON.parse(savedState);
 
-            dynamicModifiersContainer.innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>'; dynamicModifierCount = 0; if (state.dynamicModifiers && Array.isArray(state.dynamicModifiers)) { state.dynamicModifiers.forEach(modData => { addDynamicModifier(modData); }); }
+                         // Clear existing dynamic elements before loading
+                         energyPoolsContainer.innerHTML = '';
+                         slidersGrid.innerHTML = '';
+                         dynamicModifiersContainer.innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>';
+                         modifierCount = 0; // Reset counter
 
-            kaiokenCheckbox.checked = state.kaiokenActive || false; maxHealthInput.value = state.maxHealth || '1000'; kaiokenStrainInput.value = state.kaiokenStrain || '10';
-            // Restore current health to span, format it
-            if(currentHealthEl) {
-                // Parse saved health, default to max health if invalid/missing
-                const savedHealthNum = safeParseFloat(state.currentHealth?.replace(/[^0-9.e+-]/g, ''), safeParseFloat(maxHealthInput.value, 0));
-                 currentHealthEl.textContent = formatStatNumber(savedHealthNum);
-            }
+                         // Restore basic inputs
+                         document.getElementById('base-damage').value = state.baseDamage || '';
+                         document.getElementById('base-multiplier').value = state.baseMultiplier || '1';
+                         document.getElementById('form-multiplier').value = state.formMultiplier || '1';
+                         document.getElementById('attack-compression-points').value = state.attackCompression || '0';
+                         document.getElementById('energy-type').value = state.selectedEnergyType || 'ki';
 
-            totalDamageDealt = state.totalDamageDealt || 0; totalEnergySpent = state.totalEnergySpent || 0; attackCount = state.attackCount || 0; highestDamage = state.highestDamage || 0;
-            // Update displays after state applied
-            ALL_ENERGY_TYPES.forEach(type => { updateSliderVisibility(type); updateSingleSliderDisplay(type); });
-        }
+                         // Restore energy pools (calls addEnergyPool which sets up inputs)
+                         if (state.energyPools) {
+                             Object.keys(state.energyPools).forEach(type => {
+                                 addEnergyPool(type); // Create the structure
+                                 const poolData = state.energyPools[type];
+                                 // Now populate the created inputs
+                                 const currentInput = document.getElementById(`${type}-current-energy`);
+                                 const regenInput = document.getElementById(`${type}-regen-rate`);
+                                 const ratioInput = document.getElementById(`${type}-conversion-ratio`);
+                                 const maxDisplay = document.getElementById(`${type}-max-energy-display`);
 
-        function saveState() { try { const state = gatherState(); const stateString = JSON.stringify(state); localStorage.setItem(LOCAL_STORAGE_KEY, stateString); showMessage('State saved successfully!', 'success'); } catch (error) { console.error("Error saving state:", error); showMessage(`Failed to save state. ${error.message}`, 'error'); } }
-        function loadState() { const stateString = localStorage.getItem(LOCAL_STORAGE_KEY); if (stateString) { try { const state = JSON.parse(stateString); applyState(state); showMessage('State loaded successfully!', 'success'); return true; /* Indicate state was loaded */ } catch (error) { console.error("Error loading state:", error); showMessage(`Failed to load saved state. Data might be corrupted. ${error.message}`, 'error'); localStorage.removeItem(LOCAL_STORAGE_KEY); } } return false; /* Indicate no state loaded */ }
-        function clearState() { if (confirm('Are you sure you want to clear the saved state? This cannot be undone.')) { localStorage.removeItem(LOCAL_STORAGE_KEY); showMessage('Saved state cleared. Reloading.', 'success'); setTimeout(() => window.location.reload(), 1000); } }
+                                 if(currentInput) currentInput.value = poolData.current || '1000';
+                                 if(regenInput) regenInput.value = poolData.regen || '10';
+                                 if(ratioInput) ratioInput.value = poolData.ratio || '0.1';
+                                 if(maxDisplay && currentInput) maxDisplay.textContent = currentInput.value || '1000'; // Keep max display linked
 
+                             });
+                         }
 
-        // --- Generate Elements from Templates ---
-        function generateEnergySections() {
-            if (!energyPoolTemplate || !energySliderTemplate || !energyPoolsContainer || !slidersGrid) { console.error("Required templates or containers not found!"); return; }
-            energyPoolsContainer.innerHTML = ''; slidersGrid.innerHTML = ''; // Clear containers
-            ALL_ENERGY_TYPES.forEach(type => {
-                const details = ENERGY_TYPE_DETAILS[type]; if (!details) return;
-                // Generate Energy Pool
-                const poolClone = energyPoolTemplate.content.cloneNode(true);
-                const poolDiv = poolClone.querySelector('.energy-pool');
-                if (poolDiv) {
-                    poolDiv.id = `${type}-pool`; poolDiv.style.display = 'none';
-                    poolDiv.classList.add(details.border, details.gradientTo);
-                    const titleEl = poolDiv.querySelector('.pool-title');
-                    if (titleEl) titleEl.textContent = `${details.name} Energy Pool`;
-                    // Setup inputs and spans
-                    const setupElement = (selectorSuffix, isInput = true, focusClass = '') => {
-                        const el = poolDiv.querySelector(`.${selectorSuffix}`);
-                        const labelEl = poolDiv.querySelector(`.${selectorSuffix}-label`);
-                        if (el) {
-                            el.id = `${type}-${selectorSuffix}`; // Set ID
-                            if(labelEl) labelEl.htmlFor = el.id; // Link label
-                            if (isInput && focusClass) el.classList.add(focusClass); // Add focus ring only to inputs
-                        }
-                    };
-                    setupElement('max-energy', true, details.focusRing);
-                    setupElement('max-multiplier', true, details.focusRing);
-                    setupElement('total-energy', false); // It's a span
-                    setupElement('current-energy', false); // It's a span
-                    setupElement('damage-per-power', true, details.focusRing);
-                    setupElement('regen-percent', true, details.focusRing); // Input part
-                    const regenBtn = poolDiv.querySelector('.regen-btn'); if (regenBtn) { regenBtn.dataset.type = type; }
-                    energyPoolsContainer.appendChild(poolClone);
-                } else { console.error(`Could not find .energy-pool in template clone for ${type}`);}
-                // Generate Energy Slider
-                const sliderClone = energySliderTemplate.content.cloneNode(true);
-                const sliderSection = sliderClone.querySelector('.energy-slider-section');
-                if (sliderSection) {
-                     sliderSection.id = `${type}-slider-section`; sliderSection.dataset.type = type;
-                     const sliderLabel = sliderSection.querySelector('.slider-label'); const energySlider = sliderSection.querySelector('.energy-slider'); const valueDisplay = sliderSection.querySelector('.energy-slider-value-display');
-                     if (sliderLabel) { sliderLabel.htmlFor = `${type}-energy-slider`; sliderLabel.textContent = `${details.name} Energy Used (%):`; }
-                     if (energySlider) { energySlider.id = `${type}-energy-slider`; energySlider.dataset.type = type; }
-                     if (valueDisplay) { valueDisplay.id = `${type}-slider-value-display`; } // ID for the container div
-                     slidersGrid.appendChild(sliderClone);
-                } else { console.error(`Could not find .energy-slider-section in template clone for ${type}`);}
+                         // Restore sliders (calls addEnergySlider which sets up inputs)
+                         if (state.energySliders) {
+                               Object.keys(state.energySliders).forEach(type => {
+                                   addEnergySlider(type); // Create the structure
+                                   const slider = document.getElementById(`${type}-energy-slider`);
+                                   const valueDisplay = document.getElementById(`${type}-slider-value`);
+                                   if (slider) slider.value = state.energySliders[type] || '0';
+                                   if (valueDisplay && slider) valueDisplay.textContent = slider.value; // Update display
+                               });
+                           }
+
+                         // Restore dynamic modifiers
+                         if (state.dynamicModifiers && Array.isArray(state.dynamicModifiers)) {
+                             state.dynamicModifiers.forEach(mod => {
+                                  modifierCount++;
+                                  const modifierDiv = document.createElement('div');
+                                  modifierDiv.className = 'dynamic-modifier-box flex items-center gap-2 mb-2'; // No animation on load
+                                  modifierDiv.innerHTML = `
+                                      <input type="text" placeholder="Factor Name ${modifierCount}" value="${mod.name || ''}" class="inpt flex-grow focus:ring-chakra">
+                                      <input type="text" placeholder="Value (e.g., 1.2 or 1,000)" value="${mod.value || ''}" class="inpt w-1/3 dynamic-modifier-value focus:ring-chakra">
+                                      <button class="remove-modifier-btn px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 active:scale-95" aria-label="Remove factor ${modifierCount}">X</button>
+                                  `;
+                                  dynamicModifiersContainer.appendChild(modifierDiv);
+
+                                  modifierDiv.querySelector('.remove-modifier-btn').addEventListener('click', () => {
+                                      modifierDiv.remove();
+                                  });
+                             });
+                         }
+
+                         // Trigger updates after loading
+                         energyTypeSelect.dispatchEvent(new Event('change')); // Update stats panel style and current energy stat
+
+                         showMessage('State loaded successfully!', 'success');
+                     } catch (e) {
+                         console.error("Error loading state:", e);
+                         localStorage.removeItem('energyCalculatorStateV7');
+                         showMessage('Error loading state. Saved data might be corrupted and has been cleared.', 'error');
+                     }
+                 } else {
+                     showMessage('No saved state found.', 'info');
+                 }
             });
-            console.log("Energy sections generated.");
-        }
 
-
-        // --- Event Listeners Setup ---
-        function setupEventListeners() {
-            energyTypeSelect.addEventListener('change', showSelectedEnergyPool);
-            calculateBtn.addEventListener('click', performCalculation);
-            addDynamicBoxBtn.addEventListener('click', () => addDynamicModifier());
-            document.querySelectorAll('.energy-slider').forEach(slider => { slider.addEventListener('input', (event) => { updateSingleSliderDisplay(event.target.dataset.type); }); });
-            ALL_ENERGY_TYPES.forEach(type => {
-                const els = getEnergyElements(type);
-                if (els) {
-                    if (els.maxEnergyEl) els.maxEnergyEl.addEventListener('input', () => { calculateAndResetEnergy(type); updateStatsDisplay(); });
-                    if (els.maxMultiplierEl) els.maxMultiplierEl.addEventListener('input', () => { calculateAndResetEnergy(type); updateStatsDisplay(); });
-                    if (els.damagePerPowerEl) els.damagePerPowerEl.addEventListener('input', () => updateSingleSliderDisplay(type));
-                    const regenBtn = els.poolDiv?.querySelector('.regen-btn');
-                     if (regenBtn) { regenBtn.addEventListener('click', function() { regenerateEnergy(this.dataset.type); }); }
-                } else { console.warn(`Could not find elements for type ${type} to attach listeners.`); }
+            document.getElementById('clear-state-btn')?.addEventListener('click', () => {
+                 if (confirm('Are you sure you want to clear the saved state? This cannot be undone.')) {
+                     localStorage.removeItem('energyCalculatorStateV7');
+                     showMessage('Saved state cleared.', 'success');
+                     // Optional: Reset the form to default values here?
+                     // location.reload(); // Easiest way to reset form
+                 }
             });
-             if (kaiokenCheckbox) { kaiokenCheckbox.addEventListener('change', () => { const isChecked = kaiokenCheckbox.checked; kaiokenDetails.classList.toggle('hidden', !isChecked); if (isChecked) { applyKaiokenStyle(); updateCurrentHealthDisplay(); } else { removeKaiokenStyle(); } }); }
-             if (maxHealthInput) { maxHealthInput.addEventListener('input', updateCurrentHealthDisplay); }
-             if (regenHealthBtn) { regenHealthBtn.addEventListener('click', regenerateHealth); }
-             if (saveBtn) saveBtn.addEventListener('click', saveState);
-             if (loadBtn) loadBtn.addEventListener('click', loadState);
-             if (clearBtn) clearBtn.addEventListener('click', clearState);
-             console.log("Event listeners set up.");
-        }
 
+            // --- Initial Setup ---
+            setupInitialState(); // Add initial pools/sliders and set styles
 
-        // --- Initial Setup on Page Load ---
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOM Loaded. Initializing...");
-            generateEnergySections(); // 1. Generate HTML elements
-
-            // 2. Initialize energy values from defaults (needed before loadState)
-            ALL_ENERGY_TYPES.forEach(type => { calculateAndResetEnergy(type); });
-
-            const stateLoaded = loadState(); // 3. Try loading saved state
-
-            setupEventListeners(); // 4. Attach event listeners
-
-            // 5. Set initial UI state and update displays
-            showSelectedEnergyPool(); // Show the correct pool based on dropdown (which loadState might have set)
-            updateStatsDisplay(); // Update stats panel based on loaded or default data
-
-            console.log(`Initialization complete. ${stateLoaded ? '(State Loaded)' : '(No State Loaded)'}`);
-        });
-
+        }); // End DOMContentLoaded
     </script>
 
 </body>
