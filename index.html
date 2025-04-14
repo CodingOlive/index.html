@@ -162,8 +162,8 @@
             <div class="energy-pool bg-white p-5 mb-5 rounded-lg shadow-sm border-l-4 border-gray-400">
                  <h3 class="text-xl font-semibold mb-4 flex items-center"> Damage Modifiers <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                     <div><label for="base-damage" class="lbl">Base Damage:</label><input type="text" id="base-damage" placeholder="e.g., 100 or 1,000" aria-required="true" class="inpt focus:ring-success"></div>
-                     <div><label for="attack-compression-points" class="lbl">Attack Compression Points:</label><input type="text" id="attack-compression-points" placeholder="e.g., 10 or 1,000" value="0" class="inpt focus:ring-red-500"></div>
+                     <div><label for="base-damage" class="lbl">Base Damage:</label><input type="text" id="base-damage" placeholder="e.g., 100" aria-required="true" class="inpt focus:ring-success"></div>
+                     <div><label for="attack-compression-points" class="lbl">Attack Compression Points:</label><input type="text" id="attack-compression-points" placeholder="e.g., 10" value="0" class="inpt focus:ring-red-500"></div>
                      <div><label for="base-multiplier" class="lbl">Base Multiplier:</label><input type="text" id="base-multiplier" placeholder="e.g., 1.5" value="1" class="inpt focus:ring-success"></div>
                      <div><label for="form-multiplier" class="lbl">Form Multiplier:</label><input type="text" id="form-multiplier" placeholder="e.g., 2" value="1" class="inpt focus:ring-success"></div>
                  </div>
@@ -216,12 +216,11 @@
         </div> </div> <script>
         // Minimal JS to demonstrate interaction placeholders
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Element References ---
             const energyTypeSelect = document.getElementById('energy-type');
             const statsPanel = document.getElementById('stats-panel');
             const statsPanelHeader = document.getElementById('stats-panel-header');
             const statActiveEnergyType = document.getElementById('stat-active-energy-type');
-            const statCurrentEnergy = document.getElementById('stat-current-energy');
+            const statCurrentEnergy = document.getElementById('stat-current-energy'); // Assuming you have this element
             const energyPoolsContainer = document.getElementById('energy-pools-container');
             const slidersGrid = document.getElementById('sliders-grid');
             const baseDamageInput = document.getElementById('base-damage');
@@ -229,11 +228,7 @@
             const resultValue = document.getElementById('result-value');
             const calculateBtn = document.getElementById('calculate-btn');
             const loadingDiv = document.getElementById('loading');
-            const messageArea = document.getElementById('message-area'); // Added message area reference
-            const addDynamicBoxBtn = document.getElementById('add-dynamic-box');
-            const dynamicModifiersContainer = document.getElementById('dynamic-modifiers-container');
 
-            // --- Energy Type Configuration ---
             const energyTypes = {
                 ki: { name: 'Ki Energy', color: 'ki', focus: 'ki-focus', border: 'stats-border-ki', header: 'stats-header-ki', glow: 'animate-pulse-glow-ki', staticGlow: 'static-glow-ki' },
                 nen: { name: 'Nen Energy', color: 'nen', focus: 'nen-focus', border: 'stats-border-nen', header: 'stats-header-nen', glow: 'animate-pulse-glow-nen', staticGlow: 'static-glow-nen' },
@@ -246,87 +241,90 @@
                 nature: { name: 'Nature Energy', color: 'nature', focus: 'nature-focus', border: 'stats-border-nature', header: 'stats-header-nature', glow: 'animate-pulse-glow-nature', staticGlow: 'static-glow-nature' }
             };
 
-            let modifierCount = 0; // Counter for dynamic modifiers
-
-            // --- Functions ---
-
             function updateStatsPanelStyle(type) {
                  const config = energyTypes[type];
-                 if (!config || !statsPanel || !statsPanelHeader || !statActiveEnergyType) return; // Add null checks
+                 if (!config) return;
 
-                 // Robustly remove previous styles
-                 const classesToRemove = Object.values(energyTypes).flatMap(e => [
-                    `border-${e.color}`, `animate-${e.glow}`, e.staticGlow, `text-${e.color}-dark`
-                 ]);
-                 statsPanel.classList.remove(...classesToRemove.filter(c => c)); // Remove border, animation, glow
-                 statsPanelHeader.classList.remove(...Object.values(energyTypes).map(e => `text-${e.color}-dark`).filter(c => c)); // Remove text color
+                 // Remove previous styles - Use a more robust method in production
+                 statsPanel.classList.remove(...Object.values(energyTypes).map(e => `border-${e.color}`));
+                 statsPanel.classList.remove(...Object.values(energyTypes).map(e => `animate-${e.glow}`));
+                 statsPanel.classList.remove(...Object.values(energyTypes).map(e => e.staticGlow)); // Remove static glows
+                 statsPanelHeader.classList.remove(...Object.values(energyTypes).map(e => `text-${e.color}-dark`)); // Assuming dark text variant exists
 
                  // Add new styles
-                 statsPanel.classList.add(`border-${config.color}`);
-                 statsPanel.classList.add(config.staticGlow);
-                 statsPanelHeader.classList.add(`text-${config.color}-dark`);
+                 statsPanel.classList.add(`border-${config.color}`); // Use the border color defined in Tailwind config
+                 statsPanel.classList.add(config.staticGlow); // Add static glow class
+                 statsPanelHeader.classList.add(`text-${config.color}-dark`); // Use dark color variant for header
                  statActiveEnergyType.textContent = config.name;
-                 statActiveEnergyType.className = `font-medium text-${config.color}-dark capitalize`;
+                 statActiveEnergyType.className = `font-medium text-${config.color}-dark capitalize`; // Style the text itself
+             }
+
+            function setupInitialState() {
+                 // Initial setup: Add pools and sliders for all energy types (or based on saved state)
+                 // For demonstration, let's add Ki, Nen, Chakra initially
+                 ['ki', 'nen', 'chakra'].forEach(type => {
+                     addEnergyPool(type);
+                     addEnergySlider(type);
+                 });
+                 // Set initial style based on dropdown
+                 updateStatsPanelStyle(energyTypeSelect.value);
             }
 
             function addEnergyPool(type) {
                  const config = energyTypes[type];
-                 if (!config || document.getElementById(`${type}-energy-pool`)) return; // Don't add if exists
+                 if (!config) return;
 
                  const poolDiv = document.createElement('div');
                  poolDiv.id = `${type}-energy-pool`;
-                 poolDiv.className = `energy-pool energy-pool-${type} bg-white`;
+                 poolDiv.className = `energy-pool energy-pool-${type} bg-white`; // Added bg-white here
                  poolDiv.innerHTML = `
                      <h3 class="text-xl font-semibold mb-4 flex items-center">${config.name} Pool<span class="flex-grow h-px bg-gray-200 ml-3"></span></h3>
                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                         <div><label for="${type}-current-energy" class="lbl">Current Energy:</label><input type="text" id="${type}-current-energy" value="1000" placeholder="e.g., 1,000" class="inpt focus:ring-${config.focus}"></div>
+                         <div><label for="${type}-current-energy" class="lbl">Current Energy:</label><input type="text" id="${type}-current-energy" value="1000" class="inpt focus:ring-${config.focus}"></div>
                          <div><label for="${type}-max-energy" class="lbl">Max Energy:</label><span id="${type}-max-energy-display" class="readonly-display">1000</span></div>
-                         <div><label for="${type}-regen-rate" class="lbl">Regen Rate (/sec):</label><input type="text" id="${type}-regen-rate" value="10" placeholder="e.g., 10" class="inpt focus:ring-${config.focus}"></div>
-                         <div><label for="${type}-conversion-ratio" class="lbl">Damage Conversion Ratio:</label><input type="text" id="${type}-conversion-ratio" value="0.1" placeholder="e.g., 0.1" class="inpt focus:ring-${config.focus}"></div>
+                         <div><label for="${type}-regen-rate" class="lbl">Regen Rate (/sec):</label><input type="text" id="${type}-regen-rate" value="10" class="inpt focus:ring-${config.focus}"></div>
+                         <div><label for="${type}-conversion-ratio" class="lbl">Damage Conversion Ratio:</label><input type="text" id="${type}-conversion-ratio" value="0.1" class="inpt focus:ring-${config.focus}"></div>
                      </div>
                      <button id="regen-${type}-btn" class="regen-btn bg-${config.color} hover:bg-${config.color}-dark focus:ring-${config.focus} mt-4">Regenerate</button>
                  `;
                  energyPoolsContainer.appendChild(poolDiv);
 
+                 // Add event listener for input to update display if needed (e.g., max energy)
                  const currentEnergyInput = poolDiv.querySelector(`#${type}-current-energy`);
-                 if (currentEnergyInput && statCurrentEnergy) {
+                 if (currentEnergyInput && statCurrentEnergy && type === energyTypeSelect.value) {
                     currentEnergyInput.addEventListener('input', () => {
                         if (type === energyTypeSelect.value) {
-                            // Update stat panel, removing commas for internal consistency if needed, but display might keep them
-                             statCurrentEnergy.textContent = currentEnergyInput.value || '0';
+                            statCurrentEnergy.textContent = currentEnergyInput.value || '0';
                         }
-                        // Maybe update max energy display too if it's linked
-                        const maxDisplay = document.getElementById(`${type}-max-energy-display`);
-                        if(maxDisplay) maxDisplay.textContent = currentEnergyInput.value || '1000'; // Example: Link max to current for simplicity
                     });
-                     if (type === energyTypeSelect.value) {
-                        statCurrentEnergy.textContent = currentEnergyInput.value || '0';
-                    }
+                    // Initialize stat panel display
+                     statCurrentEnergy.textContent = currentEnergyInput.value || '0';
                  }
 
+                 // Example: Simulate regeneration on button click
                  const regenBtn = poolDiv.querySelector(`#regen-${type}-btn`);
                  if(regenBtn) {
                      regenBtn.addEventListener('click', () => {
                          console.log(`Regenerating ${config.name}...`);
-                         // Add actual regeneration logic here (e.g., increment current energy input value)
-                         showMessage(`${config.name} regeneration triggered (simulation).`, 'info');
+                         // Add actual regeneration logic here
                      });
                  }
             }
 
             function addEnergySlider(type) {
                 const config = energyTypes[type];
-                 if (!config || document.getElementById(`${type}-slider-container`)) return; // Don't add if exists
+                if (!config) return;
 
                 const sliderContainer = document.createElement('div');
                 sliderContainer.id = `${type}-slider-container`;
-                sliderContainer.className = 'mb-2';
+                sliderContainer.className = 'mb-2'; // Add some bottom margin
                 sliderContainer.innerHTML = `
                     <label for="${type}-energy-slider" class="lbl text-sm mb-1">${config.name} Usage (<span id="${type}-slider-value">0</span>%):</label>
                     <input type="range" id="${type}-energy-slider" name="${type}-energy-slider" min="0" max="100" value="0" class="energy-slider">
                 `;
                 slidersGrid.appendChild(sliderContainer);
 
+                // Add event listener to update the percentage display
                 const slider = sliderContainer.querySelector(`#${type}-energy-slider`);
                 const valueDisplay = sliderContainer.querySelector(`#${type}-slider-value`);
                 if(slider && valueDisplay) {
@@ -336,141 +334,85 @@
                 }
             }
 
-            function setupInitialState() {
-                 // Example: Initially add a few pools/sliders or load from saved state
-                 ['ki', 'nen', 'chakra'].forEach(type => {
-                     addEnergyPool(type);
-                     addEnergySlider(type);
-                 });
-                 updateStatsPanelStyle(energyTypeSelect.value);
-                 // Trigger update for the initially selected energy type's current value stat
-                 const initialType = energyTypeSelect.value;
-                 const initialCurrentInput = document.getElementById(`${initialType}-current-energy`);
-                 if (initialCurrentInput && statCurrentEnergy) {
-                     statCurrentEnergy.textContent = initialCurrentInput.value || '0';
-                 }
-            }
 
-            // Helper to show messages
-            function showMessage(message, type = 'info') {
-                if (!messageArea) return;
-                messageArea.textContent = message;
-                let bgColor = 'bg-blue-100';
-                let textColor = 'text-blue-800';
-                let borderColor = 'border-blue-300';
-
-                if (type === 'success') {
-                    bgColor = 'bg-success-light'; textColor = 'text-success-dark'; borderColor = 'border-success';
-                } else if (type === 'error') {
-                    bgColor = 'bg-error-light'; textColor = 'text-error-dark'; borderColor = 'border-error';
-                } // Keep 'info' as default blue
-
-                messageArea.className = `mb-4 p-3 rounded-md text-sm ${bgColor} ${textColor} border ${borderColor}`;
-                messageArea.classList.remove('hidden');
-
-                setTimeout(() => {
-                    messageArea.classList.add('hidden');
-                }, 4000);
-            }
-
-
-            // --- Event Listeners ---
-
-            // Main energy type dropdown
+            // Event listener for the main energy type dropdown
             energyTypeSelect.addEventListener('change', (e) => {
                 const selectedType = e.target.value;
                 updateStatsPanelStyle(selectedType);
 
+                // Update current energy stat display
                 const currentEnergyInput = document.getElementById(`${selectedType}-current-energy`);
                  if (currentEnergyInput && statCurrentEnergy) {
                      statCurrentEnergy.textContent = currentEnergyInput.value || '0';
                  } else {
-                     statCurrentEnergy.textContent = 'N/A';
-                     // Optionally add the pool/slider if they don't exist on selection
-                     if (!document.getElementById(`${selectedType}-energy-pool`)) addEnergyPool(selectedType);
-                     if (!document.getElementById(`${selectedType}-slider-container`)) addEnergySlider(selectedType);
-                     // Re-check for input after adding
-                      const newlyAddedInput = document.getElementById(`${selectedType}-current-energy`);
-                      if(newlyAddedInput) statCurrentEnergy.textContent = newlyAddedInput.value || '0';
+                     statCurrentEnergy.textContent = 'N/A'; // Handle case where pool doesn't exist yet
+                 }
 
+                // Optional: Logic to dynamically add/remove or highlight the selected energy pool/slider
+                console.log(`Selected energy type: ${selectedType}`);
+
+                // Example: Ensure the selected energy pool and slider exist
+                 if (!document.getElementById(`${selectedType}-energy-pool`)) {
+                     addEnergyPool(selectedType);
+                 }
+                 if (!document.getElementById(`${selectedType}-slider-container`)) {
+                     addEnergySlider(selectedType);
                  }
             });
 
-             // Calculate button
+             // Event listener for Calculate button
              calculateBtn.addEventListener('click', () => {
-                 // Basic validation for Base Damage
-                 const baseDamageValue = baseDamageInput.value.replace(/,/g, ''); // Clean commas for validation too
-                 if (!baseDamageValue || isNaN(parseFloat(baseDamageValue))) {
-                     showMessage('Please enter a valid numeric Base Damage.', 'error');
+                 // Basic validation
+                 if (!baseDamageInput.value || isNaN(parseFloat(baseDamageInput.value))) {
+                     alert('Please enter a valid Base Damage.');
                      baseDamageInput.focus();
-                     baseDamageInput.classList.add('animate-flash-red');
-                     setTimeout(()=> baseDamageInput.classList.remove('animate-flash-red'), 500);
                      return;
                  }
 
                  loadingDiv.classList.remove('hidden');
                  resultDiv.classList.add('hidden');
-                 messageArea.classList.add('hidden'); // Hide previous messages
 
                  // Simulate calculation delay
                  setTimeout(() => {
                      try {
-                         // --- Calculation Logic with Comma Handling ---
-                         let baseDamage = parseFloat(baseDamageInput.value.replace(/,/g, '')) || 0;
-                         let baseMultiplier = parseFloat(document.getElementById('base-multiplier').value.replace(/,/g, '')) || 1;
-                         let formMultiplier = parseFloat(document.getElementById('form-multiplier').value.replace(/,/g, '')) || 1;
-                         let attackCompressionPoints = parseFloat(document.getElementById('attack-compression-points').value.replace(/,/g, '')) || 0;
+                         // --- Placeholder Calculation Logic ---
+                         let baseDamage = parseFloat(baseDamageInput.value) || 0;
+                         let baseMultiplier = parseFloat(document.getElementById('base-multiplier').value) || 1;
+                         let formMultiplier = parseFloat(document.getElementById('form-multiplier').value) || 1;
                          let totalEnergyUsed = 0;
                          let totalExtraDamage = 0;
 
-                         // Process dynamic modifiers (handle commas)
+                         // Include dynamic modifiers (simplified example)
                          document.querySelectorAll('.dynamic-modifier-value').forEach(input => {
-                            let value = parseFloat(input.value.replace(/,/g, '')) || 0; // Assuming default 0, adjust if multiplicative logic added
-                            // Current simple logic: multiplies into baseMultiplier
-                            if (value !== 0) baseMultiplier *= value; // Be cautious if multiplier is intended and value is 0
+                            let value = parseFloat(input.value) || 0; // Default to 0 if not a number
+                            // Assume multiplicative for simplicity here, needs type handling
+                            if(value !== 0) baseMultiplier *= value;
                          });
 
 
-                         // Sum energy usage and calculate extra damage (handle commas)
+                         // Sum energy usage and calculate extra damage (very basic example)
                          Object.keys(energyTypes).forEach(type => {
                              const slider = document.getElementById(`${type}-energy-slider`);
                              const currentEnergyInput = document.getElementById(`${type}-current-energy`);
                              const conversionRatioInput = document.getElementById(`${type}-conversion-ratio`);
 
                              if (slider && currentEnergyInput && conversionRatioInput) {
-                                 const percentage = parseFloat(slider.value) || 0; // Range slider value is typically safe
-                                 const currentEnergy = parseFloat(currentEnergyInput.value.replace(/,/g, '')) || 0;
-                                 const conversionRatio = parseFloat(conversionRatioInput.value.replace(/,/g, '')) || 0;
+                                 const percentage = parseFloat(slider.value) || 0;
+                                 const currentEnergy = parseFloat(currentEnergyInput.value) || 0;
+                                 const conversionRatio = parseFloat(conversionRatioInput.value) || 0;
 
-                                  // Add safety check for NaN values after parsing
-                                  if (!isNaN(percentage) && !isNaN(currentEnergy) && !isNaN(conversionRatio)) {
-                                     const energyToUse = (currentEnergy * percentage) / 100;
-                                     totalEnergyUsed += energyToUse;
-                                     totalExtraDamage += energyToUse * conversionRatio;
+                                 const energyToUse = (currentEnergy * percentage) / 100;
+                                 totalEnergyUsed += energyToUse;
+                                 totalExtraDamage += energyToUse * conversionRatio;
 
-                                     // TODO: Implement energy deduction from the input field if desired
-                                     // Example: currentEnergyInput.value = (currentEnergy - energyToUse).toString();
-                                     // Need to handle formatting (adding commas back?) if updating input visually
-                                  } else {
-                                      console.warn(`Invalid number input for energy type ${type}. Skipping its contribution.`);
-                                      // Optionally, notify the user which input is bad
-                                      // showMessage(`Invalid number for ${energyTypes[type].name} inputs.`, 'error');
-                                  }
+                                 // TODO: Deduct energy used from current pool
                              }
                          });
 
-                         // --- Final Damage Calculation ---
-                         // Choose ONE of these lines based on how Attack Compression should work:
-                         // 1. Original (Compression ignored):
-                         // let finalDamage = (baseDamage + totalExtraDamage) * baseMultiplier * formMultiplier;
-                         // 2. Compression adds to base damage:
-                         let finalDamage = (baseDamage + attackCompressionPoints + totalExtraDamage) * baseMultiplier * formMultiplier;
-                         // 3. Compression is multiplicative (ensure default isn't 0 if unused):
-                         // let finalDamage = (baseDamage + totalExtraDamage) * baseMultiplier * formMultiplier * (attackCompressionPoints || 1); // Example default 1
+                         let finalDamage = (baseDamage + totalExtraDamage) * baseMultiplier * formMultiplier;
+                         // --- End Placeholder Calculation ---
 
-
-                         // --- Display Results ---
-                         resultValue.textContent = finalDamage.toLocaleString();
+                         resultValue.textContent = finalDamage.toLocaleString(); // Format with commas
                          document.getElementById('result-total-energy-used').textContent = totalEnergyUsed.toLocaleString();
                          document.getElementById('result-total-extra-damage').textContent = totalExtraDamage.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
                          document.getElementById('result-scientific').textContent = finalDamage.toExponential(2);
@@ -481,186 +423,223 @@
                          resultDiv.classList.add('animate-pulse-result');
                          setTimeout(() => resultDiv.classList.remove('animate-pulse-result'), 300);
 
-                         // --- Update Stats Panel ---
+                         // Update stats panel (example)
                          const totalDamageStat = document.getElementById('stat-total-damage');
                          const calcCountStat = document.getElementById('stat-calculation-count');
-                          // Format stats with commas too for consistency
-                          let currentTotalDamage = parseFloat(totalDamageStat.textContent.replace(/,/g, '')) || 0;
-                          totalDamageStat.textContent = (currentTotalDamage + finalDamage).toLocaleString();
-                          calcCountStat.textContent = (parseInt(calcCountStat.textContent.replace(/,/g, '')) || 0) + 1;
+                         totalDamageStat.textContent = (parseFloat(totalDamageStat.textContent.replace(/,/g, '')) || 0) + finalDamage; // Accumulate total damage
+                         calcCountStat.textContent = (parseInt(calcCountStat.textContent) || 0) + 1; // Increment calc count
 
                      } catch (error) {
                          console.error("Calculation error:", error);
                          loadingDiv.classList.add('hidden');
-                         showMessage(`Calculation failed: ${error.message}`, 'error');
+                         // Display error message to user
+                         const messageArea = document.getElementById('message-area');
+                         messageArea.textContent = `Calculation failed: ${error.message}`;
+                         messageArea.className = 'mb-4 p-3 rounded-md text-sm bg-error-light text-error-dark border border-error'; // Error styling
+                         messageArea.classList.remove('hidden');
                      }
 
-                 }, 500); // Slightly reduced delay
+                 }, 750); // Simulate network/compute time
              });
 
 
              // Add Dynamic Modifier Box Functionality
+             const addDynamicBoxBtn = document.getElementById('add-dynamic-box');
+             const dynamicModifiersContainer = document.getElementById('dynamic-modifiers-container');
+             let modifierCount = 0;
+
              addDynamicBoxBtn.addEventListener('click', () => {
                  modifierCount++;
                  const modifierDiv = document.createElement('div');
                  modifierDiv.className = 'dynamic-modifier-box flex items-center gap-2 mb-2 animate-fadeIn';
                  modifierDiv.innerHTML = `
                      <input type="text" placeholder="Factor Name ${modifierCount}" class="inpt flex-grow focus:ring-chakra">
-                     <input type="text" placeholder="Value (e.g., 1.2 or 1,000)" class="inpt w-1/3 dynamic-modifier-value focus:ring-chakra">
+                     <input type="text" placeholder="Value (e.g., 1.2)" class="inpt w-1/3 dynamic-modifier-value focus:ring-chakra">
                      <button class="remove-modifier-btn px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 active:scale-95" aria-label="Remove factor ${modifierCount}">X</button>
                  `;
                  dynamicModifiersContainer.appendChild(modifierDiv);
 
                  modifierDiv.querySelector('.remove-modifier-btn').addEventListener('click', () => {
                      modifierDiv.remove();
-                     // Optional: Renumber remaining factors if needed for labels
+                     // Optional: Renumber remaining factors if needed
                  });
              });
 
 
-            // --- Save/Load/Clear Functionality ---
-            document.getElementById('save-state-btn')?.addEventListener('click', () => {
-                 try {
-                     const state = {
-                         baseDamage: document.getElementById('base-damage')?.value,
-                         baseMultiplier: document.getElementById('base-multiplier')?.value,
-                         formMultiplier: document.getElementById('form-multiplier')?.value,
-                         attackCompression: document.getElementById('attack-compression-points')?.value,
-                         selectedEnergyType: document.getElementById('energy-type')?.value,
-                         energyPools: {},
-                         energySliders: {},
-                         dynamicModifiers: []
+             // Initial Setup Call
+             setupInitialState();
+        });
+
+        // Add Save/Load/Clear functionality (using localStorage example)
+        document.getElementById('save-state-btn')?.addEventListener('click', () => {
+             try {
+                 const state = {
+                     baseDamage: document.getElementById('base-damage')?.value,
+                     baseMultiplier: document.getElementById('base-multiplier')?.value,
+                     formMultiplier: document.getElementById('form-multiplier')?.value,
+                     attackCompression: document.getElementById('attack-compression-points')?.value,
+                     selectedEnergyType: document.getElementById('energy-type')?.value,
+                     energyPools: {},
+                     energySliders: {},
+                     dynamicModifiers: []
+                 };
+
+                 // Save energy pool data
+                 document.querySelectorAll('[id$="-energy-pool"]').forEach(pool => {
+                     const type = pool.id.replace('-energy-pool', '');
+                     state.energyPools[type] = {
+                         current: document.getElementById(`${type}-current-energy`)?.value,
+                         // Max energy is derived or fixed? Assuming fixed for now based on readonly span.
+                         regen: document.getElementById(`${type}-regen-rate`)?.value,
+                         ratio: document.getElementById(`${type}-conversion-ratio`)?.value
                      };
+                 });
 
-                     // Save energy pool data (saves values as they are in inputs, commas included)
-                     document.querySelectorAll('[id$="-energy-pool"]').forEach(pool => {
-                         const type = pool.id.replace('-energy-pool', '');
-                         state.energyPools[type] = {
-                             current: document.getElementById(`${type}-current-energy`)?.value,
-                             regen: document.getElementById(`${type}-regen-rate`)?.value,
-                             ratio: document.getElementById(`${type}-conversion-ratio`)?.value
-                             // Max energy isn't saved, assumed linked to current or fixed
-                         };
-                     });
+                 // Save slider data
+                 document.querySelectorAll('.energy-slider').forEach(slider => {
+                      const type = slider.id.replace('-energy-slider', '');
+                      state.energySliders[type] = slider.value;
+                  });
 
-                     // Save slider data
-                     document.querySelectorAll('.energy-slider').forEach(slider => {
-                          const type = slider.id.replace('-energy-slider', '');
-                          state.energySliders[type] = slider.value;
-                      });
-
-                     // Save dynamic modifiers
-                     document.querySelectorAll('.dynamic-modifier-box').forEach(box => {
-                         const nameInput = box.querySelector('input[type="text"]:first-of-type');
-                         const valueInput = box.querySelector('.dynamic-modifier-value');
-                         if (nameInput && valueInput) {
-                             state.dynamicModifiers.push({ name: nameInput.value, value: valueInput.value });
-                         }
-                     });
-
-                     localStorage.setItem('energyCalculatorStateV7', JSON.stringify(state));
-                     showMessage('State saved successfully!', 'success');
-                 } catch (e) {
-                     console.error("Error saving state:", e);
-                     showMessage('Error saving state.', 'error');
-                 }
-            });
-
-            document.getElementById('load-state-btn')?.addEventListener('click', () => {
-                 const savedState = localStorage.getItem('energyCalculatorStateV7');
-                 if (savedState) {
-                     try {
-                         const state = JSON.parse(savedState);
-
-                         // Clear existing dynamic elements before loading
-                         energyPoolsContainer.innerHTML = '';
-                         slidersGrid.innerHTML = '';
-                         dynamicModifiersContainer.innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>';
-                         modifierCount = 0; // Reset counter
-
-                         // Restore basic inputs
-                         document.getElementById('base-damage').value = state.baseDamage || '';
-                         document.getElementById('base-multiplier').value = state.baseMultiplier || '1';
-                         document.getElementById('form-multiplier').value = state.formMultiplier || '1';
-                         document.getElementById('attack-compression-points').value = state.attackCompression || '0';
-                         document.getElementById('energy-type').value = state.selectedEnergyType || 'ki';
-
-                         // Restore energy pools (calls addEnergyPool which sets up inputs)
-                         if (state.energyPools) {
-                             Object.keys(state.energyPools).forEach(type => {
-                                 addEnergyPool(type); // Create the structure
-                                 const poolData = state.energyPools[type];
-                                 // Now populate the created inputs
-                                 const currentInput = document.getElementById(`${type}-current-energy`);
-                                 const regenInput = document.getElementById(`${type}-regen-rate`);
-                                 const ratioInput = document.getElementById(`${type}-conversion-ratio`);
-                                 const maxDisplay = document.getElementById(`${type}-max-energy-display`);
-
-                                 if(currentInput) currentInput.value = poolData.current || '1000';
-                                 if(regenInput) regenInput.value = poolData.regen || '10';
-                                 if(ratioInput) ratioInput.value = poolData.ratio || '0.1';
-                                 if(maxDisplay && currentInput) maxDisplay.textContent = currentInput.value || '1000'; // Keep max display linked
-
-                             });
-                         }
-
-                         // Restore sliders (calls addEnergySlider which sets up inputs)
-                         if (state.energySliders) {
-                               Object.keys(state.energySliders).forEach(type => {
-                                   addEnergySlider(type); // Create the structure
-                                   const slider = document.getElementById(`${type}-energy-slider`);
-                                   const valueDisplay = document.getElementById(`${type}-slider-value`);
-                                   if (slider) slider.value = state.energySliders[type] || '0';
-                                   if (valueDisplay && slider) valueDisplay.textContent = slider.value; // Update display
-                               });
-                           }
-
-                         // Restore dynamic modifiers
-                         if (state.dynamicModifiers && Array.isArray(state.dynamicModifiers)) {
-                             state.dynamicModifiers.forEach(mod => {
-                                  modifierCount++;
-                                  const modifierDiv = document.createElement('div');
-                                  modifierDiv.className = 'dynamic-modifier-box flex items-center gap-2 mb-2'; // No animation on load
-                                  modifierDiv.innerHTML = `
-                                      <input type="text" placeholder="Factor Name ${modifierCount}" value="${mod.name || ''}" class="inpt flex-grow focus:ring-chakra">
-                                      <input type="text" placeholder="Value (e.g., 1.2 or 1,000)" value="${mod.value || ''}" class="inpt w-1/3 dynamic-modifier-value focus:ring-chakra">
-                                      <button class="remove-modifier-btn px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 active:scale-95" aria-label="Remove factor ${modifierCount}">X</button>
-                                  `;
-                                  dynamicModifiersContainer.appendChild(modifierDiv);
-
-                                  modifierDiv.querySelector('.remove-modifier-btn').addEventListener('click', () => {
-                                      modifierDiv.remove();
-                                  });
-                             });
-                         }
-
-                         // Trigger updates after loading
-                         energyTypeSelect.dispatchEvent(new Event('change')); // Update stats panel style and current energy stat
-
-                         showMessage('State loaded successfully!', 'success');
-                     } catch (e) {
-                         console.error("Error loading state:", e);
-                         localStorage.removeItem('energyCalculatorStateV7');
-                         showMessage('Error loading state. Saved data might be corrupted and has been cleared.', 'error');
+                 // Save dynamic modifiers
+                 document.querySelectorAll('.dynamic-modifier-box').forEach(box => {
+                     const nameInput = box.querySelector('input[type="text"]:first-of-type');
+                     const valueInput = box.querySelector('.dynamic-modifier-value');
+                     if (nameInput && valueInput) {
+                         state.dynamicModifiers.push({ name: nameInput.value, value: valueInput.value });
                      }
-                 } else {
-                     showMessage('No saved state found.', 'info');
+                 });
+
+
+                 localStorage.setItem('energyCalculatorStateV7', JSON.stringify(state));
+                 showMessage('State saved successfully!', 'success');
+             } catch (e) {
+                 console.error("Error saving state:", e);
+                 showMessage('Error saving state.', 'error');
+             }
+         });
+
+         document.getElementById('load-state-btn')?.addEventListener('click', () => {
+             const savedState = localStorage.getItem('energyCalculatorStateV7');
+             if (savedState) {
+                 try {
+                     const state = JSON.parse(savedState);
+
+                     // --- Clear existing dynamic elements ---
+                     document.getElementById('energy-pools-container').innerHTML = '';
+                     document.getElementById('sliders-grid').innerHTML = '';
+                     document.getElementById('dynamic-modifiers-container').innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>'; // Reset dynamic modifiers header
+
+
+                     // --- Restore basic inputs ---
+                     document.getElementById('base-damage').value = state.baseDamage || '';
+                     document.getElementById('base-multiplier').value = state.baseMultiplier || '1';
+                     document.getElementById('form-multiplier').value = state.formMultiplier || '1';
+                     document.getElementById('attack-compression-points').value = state.attackCompression || '0';
+                     document.getElementById('energy-type').value = state.selectedEnergyType || 'ki';
+
+
+                      // --- Restore energy pools and sliders ---
+                     // Need to call addEnergyPool and addEnergySlider first based on saved data
+                     if (state.energyPools) {
+                         Object.keys(state.energyPools).forEach(type => {
+                             if (!document.getElementById(`${type}-energy-pool`)) {
+                                 addEnergyPool(type); // Assumes addEnergyPool exists and works
+                             }
+                             const poolData = state.energyPools[type];
+                             document.getElementById(`${type}-current-energy`).value = poolData.current || '1000';
+                             document.getElementById(`${type}-regen-rate`).value = poolData.regen || '10';
+                             document.getElementById(`${type}-conversion-ratio`).value = poolData.ratio || '0.1';
+                             // Update max energy display if needed
+                         });
+                     }
+
+                     if (state.energySliders) {
+                           Object.keys(state.energySliders).forEach(type => {
+                               if (!document.getElementById(`${type}-slider-container`)) {
+                                   addEnergySlider(type); // Assumes addEnergySlider exists and works
+                               }
+                               const slider = document.getElementById(`${type}-energy-slider`);
+                               const valueDisplay = document.getElementById(`${type}-slider-value`);
+                               if (slider) slider.value = state.energySliders[type] || '0';
+                               if (valueDisplay) valueDisplay.textContent = slider.value; // Update display
+                           });
+                       }
+
+                      // --- Restore dynamic modifiers ---
+                     const dynamicModifiersContainer = document.getElementById('dynamic-modifiers-container');
+                     let modifierCount = 0; // Reset counter for IDs/labels if needed
+                     if (state.dynamicModifiers && Array.isArray(state.dynamicModifiers)) {
+                         state.dynamicModifiers.forEach(mod => {
+                              modifierCount++;
+                              const modifierDiv = document.createElement('div');
+                              modifierDiv.className = 'dynamic-modifier-box flex items-center gap-2 mb-2 animate-fadeIn'; // No animation on load?
+                              modifierDiv.innerHTML = `
+                                  <input type="text" placeholder="Factor Name ${modifierCount}" value="${mod.name || ''}" class="inpt flex-grow focus:ring-chakra">
+                                  <input type="text" placeholder="Value (e.g., 1.2)" value="${mod.value || ''}" class="inpt w-1/3 dynamic-modifier-value focus:ring-chakra">
+                                  <button class="remove-modifier-btn px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 active:scale-95" aria-label="Remove factor ${modifierCount}">X</button>
+                              `;
+                              dynamicModifiersContainer.appendChild(modifierDiv);
+
+                              modifierDiv.querySelector('.remove-modifier-btn').addEventListener('click', () => {
+                                  modifierDiv.remove();
+                              });
+                         });
+                     }
+
+
+                     // --- Trigger updates ---
+                     // Manually trigger change event on select to update styles etc.
+                     document.getElementById('energy-type').dispatchEvent(new Event('change'));
+                     // Update stat panel's current energy display
+                     const currentEnergyInput = document.getElementById(`${state.selectedEnergyType}-current-energy`);
+                     const statCurrentEnergy = document.getElementById('stat-current-energy');
+                     if(currentEnergyInput && statCurrentEnergy) {
+                        statCurrentEnergy.textContent = currentEnergyInput.value || '0';
+                     }
+
+
+                     showMessage('State loaded successfully!', 'success');
+                 } catch (e) {
+                     console.error("Error loading state:", e);
+                     localStorage.removeItem('energyCalculatorStateV7'); // Clear corrupted state
+                     showMessage('Error loading state. Saved data might be corrupted and has been cleared.', 'error');
                  }
-            });
+             } else {
+                 showMessage('No saved state found.', 'info'); // Use info style or similar
+             }
+         });
 
-            document.getElementById('clear-state-btn')?.addEventListener('click', () => {
-                 if (confirm('Are you sure you want to clear the saved state? This cannot be undone.')) {
-                     localStorage.removeItem('energyCalculatorStateV7');
-                     showMessage('Saved state cleared.', 'success');
-                     // Optional: Reset the form to default values here?
-                     // location.reload(); // Easiest way to reset form
-                 }
-            });
+         document.getElementById('clear-state-btn')?.addEventListener('click', () => {
+             if (confirm('Are you sure you want to clear the saved state? This cannot be undone.')) {
+                 localStorage.removeItem('energyCalculatorStateV7');
+                 showMessage('Saved state cleared.', 'success');
+             }
+         });
 
-            // --- Initial Setup ---
-            setupInitialState(); // Add initial pools/sliders and set styles
+         // Helper to show messages
+         function showMessage(message, type = 'info') {
+             const area = document.getElementById('message-area');
+             area.textContent = message;
+             let bgColor = 'bg-blue-100';
+             let textColor = 'text-blue-800';
+             let borderColor = 'border-blue-300';
 
-        }); // End DOMContentLoaded
+             if (type === 'success') {
+                 bgColor = 'bg-success-light'; textColor = 'text-success-dark'; borderColor = 'border-success';
+             } else if (type === 'error') {
+                 bgColor = 'bg-error-light'; textColor = 'text-error-dark'; borderColor = 'border-error';
+             }
+
+             area.className = `mb-4 p-3 rounded-md text-sm ${bgColor} ${textColor} border ${borderColor}`;
+             area.classList.remove('hidden');
+
+             // Optional: Hide message after a few seconds
+             setTimeout(() => {
+                 area.classList.add('hidden');
+             }, 4000);
+         }
+
     </script>
 
 </body>
