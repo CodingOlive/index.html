@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy Calculator - v10.7 (Evaluate Ryoko Equation)</title> <script src="https://cdn.tailwindcss.com"></script>
+    <title>Energy Calculator - v10.8 (Force Energy Formula Update)</title> <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
     <link
         rel="stylesheet"
@@ -523,7 +523,7 @@
         // --- Energy Pool Logic ---
 
         function getEnergyElements(type) { if (!ALL_ENERGY_TYPES.includes(type)) { console.error("Invalid energy type requested:", type); return null; } return { poolDiv: document.getElementById(`${type}-pool`), baseMaxEnergyEl: document.getElementById(`${type}-base-max-energy`), maxMultiplierEl: document.getElementById(`${type}-max-multiplier`), totalEnergyEl: document.getElementById(`${type}-total-energy`), currentEnergyEl: document.getElementById(`${type}-current-energy`), damagePerPowerEl: document.getElementById(`${type}-damage-per-power`), regenPercentEl: document.getElementById(`${type}-regen-percent`), sliderSection: document.getElementById(`${type}-slider-section`), energySlider: document.getElementById(`${type}-energy-slider`), sliderValueDisplay: document.getElementById(`${type}-slider-value-display`) }; }
-        function calculateBaseMaxEnergy(type) { const baseHp = safeParseFloat(charBaseHealthInput?.value, 0); const vitality = safeParseFloat(charVitalityInput?.value, 0); const soulPower = safeParseFloat(charSoulPowerInput?.value, 0); const soulHp = safeParseFloat(charSoulHpInput?.value, 0); let baseMax = 0; switch (type) { case 'nen': baseMax = vitality * soulHp; break; case 'chakra': baseMax = vitality * (0.5 * soulHp + 0.5 * soulPower); break; case 'reiatsu': baseMax = soulHp * vitality * soulPower; break; case 'cursed': baseMax = soulPower * soulHp; break; case 'ki': case 'haki': baseMax = vitality * (soulPower + soulHp); break; case 'alchemy': baseMax = soulPower * baseHp; break; case 'nature': baseMax = vitality * (soulHp + baseHp + soulPower); break; case 'magic': baseMax = soulPower * (soulHp + baseHp + vitality); break; case 'force': baseMax = (vitality + soulPower + soulHp + baseHp) / 4; console.warn(`Formula for 'force' energy not provided. Using placeholder calculation.`); break; default: console.warn(`Unknown energy type for base max calculation: ${type}`); baseMax = 0; } return Math.max(0, baseMax); }
+        function calculateBaseMaxEnergy(type) { const baseHp = safeParseFloat(charBaseHealthInput?.value, 0); const vitality = safeParseFloat(charVitalityInput?.value, 0); const soulPower = safeParseFloat(charSoulPowerInput?.value, 0); const soulHp = safeParseFloat(charSoulHpInput?.value, 0); let baseMax = 0; switch (type) { case 'nen': baseMax = vitality * soulHp; break; case 'chakra': baseMax = vitality * (0.5 * soulHp + 0.5 * soulPower); break; case 'reiatsu': baseMax = soulHp * vitality * soulPower; break; case 'cursed': baseMax = soulPower * soulHp; break; case 'ki': case 'haki': baseMax = vitality * (soulPower + soulHp); break; case 'alchemy': baseMax = soulPower * baseHp; break; case 'nature': baseMax = vitality * (soulHp + baseHp + soulPower); break; case 'magic': baseMax = soulPower * (soulHp + baseHp + vitality); break; case 'force': baseMax = soulHp + vitality; break; /* UPDATED */ default: console.warn(`Unknown energy type for base max calculation: ${type}`); baseMax = 0; } return Math.max(0, baseMax); }
         function updateSliderVisibility(type) { const els = getEnergyElements(type); if (els?.totalEnergyEl && els.sliderSection) { const totalEnergy = parseFormattedNumber(els.totalEnergyEl.textContent); const shouldShow = totalEnergy > 0; els.sliderSection.classList.toggle('hidden', !shouldShow); if (!shouldShow && els.energySlider) { els.energySlider.value = 0; updateSingleSliderDisplay(type); } } }
         function calculateAndResetEnergy(type) { const els = getEnergyElements(type); if (!els?.baseMaxEnergyEl || !els?.maxMultiplierEl || !els?.totalEnergyEl || !els?.currentEnergyEl) { console.error(`Elements missing for energy calculation/reset: ${type}`); return 0; } const baseMaxEnergy = calculateBaseMaxEnergy(type); els.baseMaxEnergyEl.textContent = formatStatNumber(baseMaxEnergy); const poolMultiplier = safeParseFloat(els.maxMultiplierEl.value, 1); const characterBaseMultiplier = safeParseFloat(charBaseMultiplierInput.value, 1); const totalEnergy = baseMaxEnergy * characterBaseMultiplier * poolMultiplier; els.totalEnergyEl.textContent = formatStatNumber(totalEnergy); els.currentEnergyEl.textContent = formatStatNumber(totalEnergy); updateSliderVisibility(type); updateSingleSliderDisplay(type); return totalEnergy; }
         function regenerateEnergy(type) { const els = getEnergyElements(type); if (!els?.totalEnergyEl || !els?.currentEnergyEl || !els?.regenPercentEl) { console.error(`Elements missing for energy regeneration: ${type}`); return; } const totalEnergy = parseFormattedNumber(els.totalEnergyEl.textContent); let currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent); const regenPercent = safeParseFloat(els.regenPercentEl.value, 0); if (totalEnergy <= 0) { showMessage('Total Energy must be positive (check character stats and multiplier) to regenerate.', 'error'); return; } if (regenPercent <= 0) { showMessage('Regen Rate must be positive.', 'error'); return; } const regenAmount = totalEnergy * (regenPercent / 100); let newEnergy = Math.min(currentEnergy + regenAmount, totalEnergy); els.currentEnergyEl.textContent = formatStatNumber(newEnergy); showMessage(`${formatStatNumber(regenAmount)} ${type} regenerated. Current: ${formatStatNumber(newEnergy)}`, 'success'); triggerAnimation(els.currentEnergyEl, 'flash-green'); updateSingleSliderDisplay(type); updateStatsDisplay(); }
@@ -637,7 +637,7 @@
         // --- Ryoko Mode Logic --- UPDATED
         /** Handles changes to the Ryoko checkbox */
         function handleRyokoCheckboxChange() {
-            if (!ryokoCheckbox || !ryokoEquationContainer || !charBaseMultiplierInput || !ryokoEquationInput) return; // Safety check
+            if (!ryokoCheckbox || !ryokoEquationContainer || !charBaseMultiplierInput || !ryokoEquationInput) return;
 
             const isChecked = ryokoCheckbox.checked;
             ryokoEquationContainer.classList.toggle('hidden', !isChecked);
@@ -656,9 +656,9 @@
                 ryokoEquationInput.focus();
             } else {
                 // When unchecked, just make base multiplier editable again.
-                // Clear error state from equation input
-                ryokoEquationInput.classList.remove('border-red-500');
-                // Value remains as it was (either user-entered or from Ryoko input).
+                // Clear error state from equation input if present
+                ryokoEquationInput.classList.remove('border-red-500', 'focus:ring-red-500');
+                ryokoEquationInput.classList.add('border-gray-300', 'focus:ring-teal-focus'); // Restore default border/focus
             }
             // Trigger recalculation as the effective base multiplier might have changed
             handleStatChange();
@@ -666,19 +666,19 @@
 
         /** Evaluates the Ryoko equation input and updates the base multiplier */
         function evaluateRyokoEquation() {
-            if (!ryokoCheckbox.checked || !ryokoEquationInput || !charBaseMultiplierInput) return;
+            // Ensure checkbox is checked and elements exist
+            if (!ryokoCheckbox || !ryokoCheckbox.checked || !ryokoEquationInput || !charBaseMultiplierInput) return;
 
             const expression = ryokoEquationInput.value.trim();
             let result = 1; // Default to 1 if empty or error
 
             // Clear previous error state
             ryokoEquationInput.classList.remove('border-red-500', 'focus:ring-red-500');
-            ryokoEquationInput.classList.add('focus:ring-teal-focus'); // Restore default focus
+            ryokoEquationInput.classList.add('border-gray-300', 'focus:ring-teal-focus'); // Use default border/focus
 
             if (expression) {
                 try {
                     // Use math.js to safely evaluate the expression
-                    // Create a limited scope for evaluation if needed, but math.js is generally safe
                     const evaluatedResult = math.evaluate(expression);
 
                     // Check if the result is a valid, finite number
@@ -688,23 +688,19 @@
                         console.error("Ryoko equation evaluated to non-finite number:", evaluatedResult);
                         throw new Error("Invalid result (NaN or Infinity)");
                     }
-                     // Remove error styling if successful
-                    ryokoEquationInput.classList.remove('border-red-500', 'focus:ring-red-500');
-                    ryokoEquationInput.classList.add('focus:ring-teal-focus'); // Ensure default focus restored
 
                 } catch (error) {
                     console.error("Error evaluating Ryoko equation:", error);
                     // Indicate error visually on the input
-                    ryokoEquationInput.classList.add('border-red-500', 'focus:ring-red-500');
                     ryokoEquationInput.classList.remove('focus:ring-teal-focus');
+                    ryokoEquationInput.classList.add('border-red-500', 'focus:ring-red-500');
                     showMessage(`Invalid Ryoko equation: ${error.message}`, 'error');
                     result = 1; // Reset multiplier to 1 on error
                 }
             }
 
             // Update the read-only base multiplier input with the formatted result
-            // Use formatSimpleNumber to keep it consistent with other displays if needed, or just use the number
-            charBaseMultiplierInput.value = formatSimpleNumber(result); // Or just result.toString() if no formatting needed
+            charBaseMultiplierInput.value = formatSimpleNumber(result);
 
             // Trigger recalculation since the effective multiplier might have changed
             handleStatChange();
@@ -728,9 +724,8 @@
             if (charBaseMultiplierInput) { charBaseMultiplierInput.addEventListener('input', () => { if (!charBaseMultiplierInput.readOnly) { handleStatChange(); } }); }
             if (ryokoCheckbox) { ryokoCheckbox.addEventListener('change', handleRyokoCheckboxChange); }
             if (ryokoEquationInput) {
-                // Evaluate on input change
+                // Evaluate on input change and blur
                 ryokoEquationInput.addEventListener('input', evaluateRyokoEquation);
-                // Also evaluate on losing focus (change event)
                 ryokoEquationInput.addEventListener('change', evaluateRyokoEquation);
             }
 
