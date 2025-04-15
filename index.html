@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy Calculator - v10.6 (Extended Number Words)</title> <script src="https://cdn.tailwindcss.com"></script>
+    <title>Energy Calculator - v10.7 (Evaluate Ryoko Equation)</title> <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
@@ -475,7 +476,7 @@
         const charVitalityInput = document.getElementById('char-vitality');
         const charSoulPowerInput = document.getElementById('char-soul-power');
         const charSoulHpInput = document.getElementById('char-soul-hp');
-        // NEW Ryoko Mode References
+        // Ryoko Mode References
         const ryokoCheckbox = document.getElementById('ryoko-checkbox');
         const ryokoEquationContainer = document.getElementById('ryoko-equation-input-container');
         const ryokoEquationInput = document.getElementById('ryoko-equation-input');
@@ -483,13 +484,16 @@
 
         // --- Global State & Constants ---
         let totalDamageDealt = 0, totalEnergySpent = 0, attackCount = 0, highestDamage = 0;
-        const LOCAL_STORAGE_KEY = 'energyCalculatorState_v1.2'; // Incremented version key
+        const LOCAL_STORAGE_KEY = 'energyCalculatorState_v1.2';
         let poolAnimationTimeoutId = null;
         const ALL_ENERGY_TYPES = ['ki', 'nen', 'chakra', 'magic', 'cursed', 'reiatsu', 'haki', 'alchemy', 'nature', 'force'];
         let dynamicModifierCount = 0;
         let activeAttacks = {};
         const ATTACK_RESERVE_COLOR = '#fed7aa';
         const SLIDER_TRACK_COLOR = '#e5e7eb';
+        // Default Ryoko Equation String (commas removed for math.js)
+        const DEFAULT_RYOKO_EQUATION = '((11250000 * 19 * 10 * 25 * 5 * 10 * 5 * 470) / 2) * 110';
+
 
         const ENERGY_TYPE_DETAILS = {
             ki:      { name: 'Ki',      color: 'ki',      colorDark: 'ki-dark',      gradientTo: 'to-orange-100', focusRing: 'focus:ring-ki-focus',      staticGlow: 'static-glow-ki',      pulseGlow: 'animate-pulse-glow-ki',      border: 'border-l-ki' },
@@ -506,269 +510,23 @@
 
         // --- Utility Functions ---
 
-        /**
-         * Safely parses a value to a float, handling potential errors and non-numeric inputs.
-         * Removes commas before parsing.
-         * @param {*} value - The value to parse.
-         * @param {number} [defaultValue=0] - The value to return on failure.
-         * @returns {number} The parsed float or the default value.
-         */
-        function safeParseFloat(value, defaultValue = 0) {
-            if (typeof value !== 'string' && typeof value !== 'number') return defaultValue;
-            const num = parseFloat(String(value).replace(/,/g, ''));
-            return isNaN(num) ? defaultValue : num;
-        }
-
-        /**
-         * Formats a number into a locale-aware string with commas and a maximum of 2 decimal places.
-         * Provides a fallback for extremely large numbers that might cause issues with toLocaleString.
-         * @param {number} num - The number to format.
-         * @returns {string} The formatted number string or '0'.
-         */
-        function formatSimpleNumber(num) {
-            if (typeof num !== 'number' || isNaN(num)) return '0';
-            try {
-                const options = { maximumFractionDigits: 2 };
-                return num.toLocaleString('en-US', options);
-            } catch (e) {
-                return num.toString();
-            }
-        }
-
-        /**
-         * Displays a temporary feedback message to the user.
-         * Applies appropriate styling (info, success, error) and animations.
-         * @param {string} text - The message text.
-         * @param {'info'|'success'|'error'} [type='info'] - The message type.
-         */
-        function showMessage(text, type = 'info') {
-            messageArea.textContent = text;
-            messageArea.className = 'mb-4 p-3 rounded-md text-sm border animate__animated';
-            messageArea.classList.remove('hidden', 'animate__fadeIn', 'animate__shakeX');
-            let animationClass = 'animate__fadeIn';
-            switch (type) {
-                case 'error':
-                    messageArea.classList.add('bg-error-light', 'text-error-dark', 'border-error');
-                    animationClass = 'animate__shakeX';
-                    break;
-                case 'success':
-                    messageArea.classList.add('bg-success-light', 'text-success-dark', 'border-success');
-                    break;
-                default:
-                    messageArea.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300');
-                    break;
-            }
-            messageArea.classList.add(animationClass);
-            messageArea.addEventListener('animationend', () => {
-                messageArea.classList.remove('animate__animated', animationClass);
-            }, { once: true });
-            setTimeout(() => {
-                messageArea.classList.add('hidden');
-            }, 5000);
-        }
-
-        /**
-         * Toggles the visibility of the loading indicator and enables/disables the calculate button.
-         * @param {boolean} isLoading - True to show loading, false to hide.
-         */
-        function showLoading(isLoading) {
-            loadingDiv.classList.toggle('hidden', !isLoading);
-            if(isLoading) resultDiv.classList.add('hidden');
-            calculateBtn.disabled = isLoading;
-            calculateBtn.classList.toggle('opacity-50', isLoading);
-            calculateBtn.classList.toggle('cursor-not-allowed', isLoading);
-        }
-
-        /**
-         * Applies a one-time CSS animation to an element using Animate.css classes.
-         * @param {HTMLElement} element - The DOM element to animate.
-         * @param {string} animationName - The Animate.css class name (e.g., 'animate__pulse').
-         * @param {number} [duration=800] - Optional duration (mainly for reference).
-         */
-        function triggerAnimation(element, animationName, duration = 800) {
-            if (!element || !animationName) return;
-            const animateCSSBase = 'animate__animated';
-            const animationClass = animationName.startsWith('animate__') ? animationName : `animate__${animationName}`;
-            const classesToAdd = [animateCSSBase, animationClass];
-            element.classList.remove(...classesToAdd);
-            void element.offsetWidth;
-            element.classList.add(...classesToAdd);
-            element.addEventListener('animationend', () => {
-                element.classList.remove(...classesToAdd);
-            }, { once: true });
-        }
-
-        /**
-         * Formats large numbers for display in the stats panel, using abbreviations (K, M)
-         * up to billions, and scientific notation for larger values. Handles decimals appropriately.
-         * @param {number} num - The number to format.
-         * @returns {string} The formatted number string.
-         */
-        function formatStatNumber(num) {
-            if (typeof num !== 'number' || isNaN(num)) return '0';
-            const absNum = Math.abs(num);
-            if (absNum >= 1e9) { return num.toExponential(2); }
-            if (absNum >= 1e6) { let shortNum = num / 1e6; let formatted = shortNum.toLocaleString('en-US', { minimumFractionDigits: absNum < 10e6 ? 2 : 1, maximumFractionDigits: absNum < 10e6 ? 2 : 1 }); formatted = formatted.replace(/\.0$/, ''); return formatted + 'M'; }
-            if (absNum >= 1e3) { let shortNum = num / 1e3; let formatted = shortNum.toLocaleString('en-US', { minimumFractionDigits: absNum < 10e3 ? 2 : 1, maximumFractionDigits: absNum < 10e3 ? 2 : 1 }); formatted = formatted.replace(/\.0$/, ''); return formatted + 'K'; }
-            if (absNum < 1000) { return num.toLocaleString('en-US', { maximumFractionDigits: 2 }); }
-            return num.toLocaleString('en-US');
-        }
-
-        /**
-         * Parses potentially formatted number strings (with commas, K/M/B/T/Q suffixes, or scientific notation)
-         * back into numerical values. Essential for reading values from inputs or display elements.
-         * @param {string|number} str - The formatted string or number to parse.
-         * @returns {number} The parsed number or 0 if invalid.
-         */
-        function parseFormattedNumber(str) {
-            if (typeof str !== 'string' && typeof str !== 'number') return 0;
-            if (typeof str === 'number') return isNaN(str) ? 0 : str;
-            str = str.trim().toUpperCase().replace(/,/g, '');
-            if (str.includes('E')) { const num = parseFloat(str); return isNaN(num) ? 0 : num; }
-            const lastChar = str.slice(-1);
-            const numPart = parseFloat(str.slice(0, -1));
-            const fullNum = parseFloat(str);
-            if (!isNaN(fullNum) && !['K', 'M', 'B', 'T', 'Q'].includes(lastChar)) { return fullNum; }
-            if (isNaN(numPart) && ['K', 'M', 'B', 'T', 'Q'].includes(lastChar)) return 0;
-            switch (lastChar) {
-                case 'K': return numPart * 1e3;
-                case 'M': return numPart * 1e6;
-                case 'B': return numPart * 1e9;
-                case 'T': return numPart * 1e12;
-                case 'Q': return numPart * 1e15;
-                default: return isNaN(fullNum) ? 0 : fullNum;
-            }
-        }
-
-         /**
-          * Escapes special HTML characters in a string to prevent XSS vulnerabilities
-          * when inserting user-provided text (like modifier names) into innerHTML.
-          * @param {string} unsafe - The potentially unsafe string.
-          * @returns {string} The HTML-escaped string.
-          */
-          function escapeHtml(unsafe) {
-               if (typeof unsafe !== 'string') return '';
-               return unsafe
-                   .replace(/&/g, "&amp;")
-                   .replace(/</g, "&lt;")
-                   .replace(/>/g, "&gt;")
-                   .replace(/"/g, "&quot;")
-                   .replace(/'/g, "&#039;");
-          }
+        function safeParseFloat(value, defaultValue = 0) { if (typeof value !== 'string' && typeof value !== 'number') return defaultValue; const num = parseFloat(String(value).replace(/,/g, '')); return isNaN(num) ? defaultValue : num; }
+        function formatSimpleNumber(num) { if (typeof num !== 'number' || isNaN(num)) return '0'; try { const options = { maximumFractionDigits: 2 }; return num.toLocaleString('en-US', options); } catch (e) { return num.toString(); } }
+        function showMessage(text, type = 'info') { messageArea.textContent = text; messageArea.className = 'mb-4 p-3 rounded-md text-sm border animate__animated'; messageArea.classList.remove('hidden', 'animate__fadeIn', 'animate__shakeX'); let animationClass = 'animate__fadeIn'; switch (type) { case 'error': messageArea.classList.add('bg-error-light', 'text-error-dark', 'border-error'); animationClass = 'animate__shakeX'; break; case 'success': messageArea.classList.add('bg-success-light', 'text-success-dark', 'border-success'); break; default: messageArea.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300'); break; } messageArea.classList.add(animationClass); messageArea.addEventListener('animationend', () => { messageArea.classList.remove('animate__animated', animationClass); }, { once: true }); setTimeout(() => { messageArea.classList.add('hidden'); }, 5000); }
+        function showLoading(isLoading) { loadingDiv.classList.toggle('hidden', !isLoading); if(isLoading) resultDiv.classList.add('hidden'); calculateBtn.disabled = isLoading; calculateBtn.classList.toggle('opacity-50', isLoading); calculateBtn.classList.toggle('cursor-not-allowed', isLoading); }
+        function triggerAnimation(element, animationName, duration = 800) { if (!element || !animationName) return; const animateCSSBase = 'animate__animated'; const animationClass = animationName.startsWith('animate__') ? animationName : `animate__${animationName}`; const classesToAdd = [animateCSSBase, animationClass]; element.classList.remove(...classesToAdd); void element.offsetWidth; element.classList.add(...classesToAdd); element.addEventListener('animationend', () => { element.classList.remove(...classesToAdd); }, { once: true }); }
+        function formatStatNumber(num) { if (typeof num !== 'number' || isNaN(num)) return '0'; const absNum = Math.abs(num); if (absNum >= 1e9) { return num.toExponential(2); } if (absNum >= 1e6) { let shortNum = num / 1e6; let formatted = shortNum.toLocaleString('en-US', { minimumFractionDigits: absNum < 10e6 ? 2 : 1, maximumFractionDigits: absNum < 10e6 ? 2 : 1 }); formatted = formatted.replace(/\.0$/, ''); return formatted + 'M'; } if (absNum >= 1e3) { let shortNum = num / 1e3; let formatted = shortNum.toLocaleString('en-US', { minimumFractionDigits: absNum < 10e3 ? 2 : 1, maximumFractionDigits: absNum < 10e3 ? 2 : 1 }); formatted = formatted.replace(/\.0$/, ''); return formatted + 'K'; } if (absNum < 1000) { return num.toLocaleString('en-US', { maximumFractionDigits: 2 }); } return num.toLocaleString('en-US'); }
+        function parseFormattedNumber(str) { if (typeof str !== 'string' && typeof str !== 'number') return 0; if (typeof str === 'number') return isNaN(str) ? 0 : str; str = str.trim().toUpperCase().replace(/,/g, ''); if (str.includes('E')) { const num = parseFloat(str); return isNaN(num) ? 0 : num; } const lastChar = str.slice(-1); const numPart = parseFloat(str.slice(0, -1)); const fullNum = parseFloat(str); if (!isNaN(fullNum) && !['K', 'M', 'B', 'T', 'Q'].includes(lastChar)) { return fullNum; } if (isNaN(numPart) && ['K', 'M', 'B', 'T', 'Q'].includes(lastChar)) return 0; switch (lastChar) { case 'K': return numPart * 1e3; case 'M': return numPart * 1e6; case 'B': return numPart * 1e9; case 'T': return numPart * 1e12; case 'Q': return numPart * 1e15; default: return isNaN(fullNum) ? 0 : fullNum; } }
+        function escapeHtml(unsafe) { if (typeof unsafe !== 'string') return ''; return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 
 
         // --- Energy Pool Logic ---
 
-        /**
-         * Retrieves references to all relevant DOM elements associated with a specific energy type.
-         * @param {string} type - The energy type key.
-         * @returns {object|null} An object containing references, or null if the type is invalid.
-         */
-        function getEnergyElements(type) {
-            if (!ALL_ENERGY_TYPES.includes(type)) { console.error("Invalid energy type requested:", type); return null; }
-            return {
-                poolDiv: document.getElementById(`${type}-pool`),
-                baseMaxEnergyEl: document.getElementById(`${type}-base-max-energy`),
-                maxMultiplierEl: document.getElementById(`${type}-max-multiplier`),
-                totalEnergyEl: document.getElementById(`${type}-total-energy`),
-                currentEnergyEl: document.getElementById(`${type}-current-energy`),
-                damagePerPowerEl: document.getElementById(`${type}-damage-per-power`),
-                regenPercentEl: document.getElementById(`${type}-regen-percent`),
-                sliderSection: document.getElementById(`${type}-slider-section`),
-                energySlider: document.getElementById(`${type}-energy-slider`),
-                sliderValueDisplay: document.getElementById(`${type}-slider-value-display`)
-            };
-        }
-
-        /**
-         * Calculates the base maximum energy for a given pool type based on character stats.
-         * @param {string} type - The energy type key.
-         * @returns {number} The calculated base maximum energy.
-         */
-        function calculateBaseMaxEnergy(type) {
-            const baseHp = safeParseFloat(charBaseHealthInput?.value, 0);
-            const vitality = safeParseFloat(charVitalityInput?.value, 0);
-            const soulPower = safeParseFloat(charSoulPowerInput?.value, 0);
-            const soulHp = safeParseFloat(charSoulHpInput?.value, 0);
-            let baseMax = 0;
-            switch (type) {
-                case 'nen': baseMax = vitality * soulHp; break;
-                case 'chakra': baseMax = vitality * (0.5 * soulHp + 0.5 * soulPower); break;
-                case 'reiatsu': baseMax = soulHp * vitality * soulPower; break;
-                case 'cursed': baseMax = soulPower * soulHp; break;
-                case 'ki': case 'haki': baseMax = vitality * (soulPower + soulHp); break;
-                case 'alchemy': baseMax = soulPower * baseHp; break;
-                case 'nature': baseMax = vitality * (soulHp + baseHp + soulPower); break;
-                case 'magic': baseMax = soulPower * (soulHp + baseHp + vitality); break;
-                case 'force': baseMax = (vitality + soulPower + soulHp + baseHp) / 4; console.warn(`Formula for 'force' energy not provided. Using placeholder calculation.`); break;
-                default: console.warn(`Unknown energy type for base max calculation: ${type}`); baseMax = 0;
-            }
-            return Math.max(0, baseMax);
-        }
-
-        /**
-         * Shows or hides the energy slider section for a given type based on whether
-         * the calculated total energy for that pool is greater than zero.
-         * Resets the slider value to 0 if the slider is hidden.
-         * @param {string} type - The energy type key.
-         */
-        function updateSliderVisibility(type) {
-            const els = getEnergyElements(type);
-            if (els?.totalEnergyEl && els.sliderSection) {
-                const totalEnergy = parseFormattedNumber(els.totalEnergyEl.textContent);
-                const shouldShow = totalEnergy > 0;
-                els.sliderSection.classList.toggle('hidden', !shouldShow);
-                if (!shouldShow && els.energySlider) {
-                    els.energySlider.value = 0;
-                    updateSingleSliderDisplay(type);
-                }
-            }
-        }
-
-         /**
-          * Recalculates the total energy for a pool based on calculated base max energy and the pool's multiplier.
-          * Updates the UI displays for base max, total, and current energy. **Resets current energy to the new total.**
-          * @param {string} type - The energy type key.
-          * @returns {number} The calculated total energy.
-          */
-          function calculateAndResetEnergy(type) {
-               const els = getEnergyElements(type);
-               if (!els?.baseMaxEnergyEl || !els?.maxMultiplierEl || !els?.totalEnergyEl || !els?.currentEnergyEl) { console.error(`Elements missing for energy calculation/reset: ${type}`); return 0; }
-               const baseMaxEnergy = calculateBaseMaxEnergy(type);
-               els.baseMaxEnergyEl.textContent = formatStatNumber(baseMaxEnergy);
-               // Use the character base multiplier if Ryoko mode is active, otherwise use pool multiplier
-               const poolMultiplier = safeParseFloat(els.maxMultiplierEl.value, 1);
-               const characterBaseMultiplier = safeParseFloat(charBaseMultiplierInput.value, 1); // Use value from char stats
-               const totalEnergy = baseMaxEnergy * characterBaseMultiplier * poolMultiplier; // Apply both multipliers
-
-               els.totalEnergyEl.textContent = formatStatNumber(totalEnergy);
-               // Set Current Energy to the NEW Total Energy
-               els.currentEnergyEl.textContent = formatStatNumber(totalEnergy);
-               updateSliderVisibility(type);
-               updateSingleSliderDisplay(type);
-               return totalEnergy;
-          }
-
-         /**
-          * Regenerates energy for a specific pool based on its regeneration percentage input.
-          * @param {string} type - The energy type key.
-          */
-          function regenerateEnergy(type) {
-               const els = getEnergyElements(type);
-               if (!els?.totalEnergyEl || !els?.currentEnergyEl || !els?.regenPercentEl) { console.error(`Elements missing for energy regeneration: ${type}`); return; }
-               const totalEnergy = parseFormattedNumber(els.totalEnergyEl.textContent);
-               let currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent);
-               const regenPercent = safeParseFloat(els.regenPercentEl.value, 0);
-               if (totalEnergy <= 0) { showMessage('Total Energy must be positive (check character stats and multiplier) to regenerate.', 'error'); return; }
-               if (regenPercent <= 0) { showMessage('Regen Rate must be positive.', 'error'); return; }
-               const regenAmount = totalEnergy * (regenPercent / 100);
-               let newEnergy = Math.min(currentEnergy + regenAmount, totalEnergy);
-               els.currentEnergyEl.textContent = formatStatNumber(newEnergy);
-               showMessage(`${formatStatNumber(regenAmount)} ${type} regenerated. Current: ${formatStatNumber(newEnergy)}`, 'success');
-               triggerAnimation(els.currentEnergyEl, 'flash-green');
-               updateSingleSliderDisplay(type);
-               updateStatsDisplay();
-          }
+        function getEnergyElements(type) { if (!ALL_ENERGY_TYPES.includes(type)) { console.error("Invalid energy type requested:", type); return null; } return { poolDiv: document.getElementById(`${type}-pool`), baseMaxEnergyEl: document.getElementById(`${type}-base-max-energy`), maxMultiplierEl: document.getElementById(`${type}-max-multiplier`), totalEnergyEl: document.getElementById(`${type}-total-energy`), currentEnergyEl: document.getElementById(`${type}-current-energy`), damagePerPowerEl: document.getElementById(`${type}-damage-per-power`), regenPercentEl: document.getElementById(`${type}-regen-percent`), sliderSection: document.getElementById(`${type}-slider-section`), energySlider: document.getElementById(`${type}-energy-slider`), sliderValueDisplay: document.getElementById(`${type}-slider-value-display`) }; }
+        function calculateBaseMaxEnergy(type) { const baseHp = safeParseFloat(charBaseHealthInput?.value, 0); const vitality = safeParseFloat(charVitalityInput?.value, 0); const soulPower = safeParseFloat(charSoulPowerInput?.value, 0); const soulHp = safeParseFloat(charSoulHpInput?.value, 0); let baseMax = 0; switch (type) { case 'nen': baseMax = vitality * soulHp; break; case 'chakra': baseMax = vitality * (0.5 * soulHp + 0.5 * soulPower); break; case 'reiatsu': baseMax = soulHp * vitality * soulPower; break; case 'cursed': baseMax = soulPower * soulHp; break; case 'ki': case 'haki': baseMax = vitality * (soulPower + soulHp); break; case 'alchemy': baseMax = soulPower * baseHp; break; case 'nature': baseMax = vitality * (soulHp + baseHp + soulPower); break; case 'magic': baseMax = soulPower * (soulHp + baseHp + vitality); break; case 'force': baseMax = (vitality + soulPower + soulHp + baseHp) / 4; console.warn(`Formula for 'force' energy not provided. Using placeholder calculation.`); break; default: console.warn(`Unknown energy type for base max calculation: ${type}`); baseMax = 0; } return Math.max(0, baseMax); }
+        function updateSliderVisibility(type) { const els = getEnergyElements(type); if (els?.totalEnergyEl && els.sliderSection) { const totalEnergy = parseFormattedNumber(els.totalEnergyEl.textContent); const shouldShow = totalEnergy > 0; els.sliderSection.classList.toggle('hidden', !shouldShow); if (!shouldShow && els.energySlider) { els.energySlider.value = 0; updateSingleSliderDisplay(type); } } }
+        function calculateAndResetEnergy(type) { const els = getEnergyElements(type); if (!els?.baseMaxEnergyEl || !els?.maxMultiplierEl || !els?.totalEnergyEl || !els?.currentEnergyEl) { console.error(`Elements missing for energy calculation/reset: ${type}`); return 0; } const baseMaxEnergy = calculateBaseMaxEnergy(type); els.baseMaxEnergyEl.textContent = formatStatNumber(baseMaxEnergy); const poolMultiplier = safeParseFloat(els.maxMultiplierEl.value, 1); const characterBaseMultiplier = safeParseFloat(charBaseMultiplierInput.value, 1); const totalEnergy = baseMaxEnergy * characterBaseMultiplier * poolMultiplier; els.totalEnergyEl.textContent = formatStatNumber(totalEnergy); els.currentEnergyEl.textContent = formatStatNumber(totalEnergy); updateSliderVisibility(type); updateSingleSliderDisplay(type); return totalEnergy; }
+        function regenerateEnergy(type) { const els = getEnergyElements(type); if (!els?.totalEnergyEl || !els?.currentEnergyEl || !els?.regenPercentEl) { console.error(`Elements missing for energy regeneration: ${type}`); return; } const totalEnergy = parseFormattedNumber(els.totalEnergyEl.textContent); let currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent); const regenPercent = safeParseFloat(els.regenPercentEl.value, 0); if (totalEnergy <= 0) { showMessage('Total Energy must be positive (check character stats and multiplier) to regenerate.', 'error'); return; } if (regenPercent <= 0) { showMessage('Regen Rate must be positive.', 'error'); return; } const regenAmount = totalEnergy * (regenPercent / 100); let newEnergy = Math.min(currentEnergy + regenAmount, totalEnergy); els.currentEnergyEl.textContent = formatStatNumber(newEnergy); showMessage(`${formatStatNumber(regenAmount)} ${type} regenerated. Current: ${formatStatNumber(newEnergy)}`, 'success'); triggerAnimation(els.currentEnergyEl, 'flash-green'); updateSingleSliderDisplay(type); updateStatsDisplay(); }
 
 
         // --- Kaioken Styling --- (Unchanged)
@@ -781,76 +539,11 @@
 
 
         // --- Show/Hide Logic & Pool Animation --- (Unchanged)
-        function showSelectedEnergyPool() {
-            const selectedType = energyTypeSelect.value;
-            const details = ENERGY_TYPE_DETAILS[selectedType];
-            let newlyVisiblePool = null;
-
-            if (poolAnimationTimeoutId) { clearTimeout(poolAnimationTimeoutId); poolAnimationTimeoutId = null; }
-
-            ALL_ENERGY_TYPES.forEach(type => {
-                const els = getEnergyElements(type);
-                const typeDetails = ENERGY_TYPE_DETAILS[type];
-                if (els?.poolDiv && typeDetails) {
-                    els.poolDiv.classList.remove(typeDetails.pulseGlow, typeDetails.staticGlow, 'animate__animated', 'animate__fadeIn');
-                    if (type !== selectedType) { els.poolDiv.style.display = 'none'; }
-                }
-            });
-
-            calculateAndResetEnergy(selectedType); // Recalculate energy for the selected pool
-
-            const poolToShowEls = getEnergyElements(selectedType);
-            if (poolToShowEls?.poolDiv && details) {
-                poolToShowEls.poolDiv.style.display = 'block';
-                newlyVisiblePool = poolToShowEls.poolDiv;
-                poolToShowEls.poolDiv.classList.add('animate__animated', 'animate__fadeIn');
-                poolToShowEls.poolDiv.classList.add(details.pulseGlow);
-                 poolToShowEls.poolDiv.addEventListener('animationend', (e) => { if (e.animationName === 'fadeIn') { poolToShowEls.poolDiv.classList.remove('animate__animated', 'animate__fadeIn'); } } , { once: true });
-                poolAnimationTimeoutId = setTimeout(() => {
-                    const currentSelectedType = energyTypeSelect.value;
-                    const stillSelectedPoolEls = getEnergyElements(currentSelectedType);
-                    const stillSelectedDetails = ENERGY_TYPE_DETAILS[currentSelectedType];
-                    if (stillSelectedPoolEls?.poolDiv && stillSelectedDetails && currentSelectedType === selectedType) {
-                        stillSelectedPoolEls.poolDiv.classList.remove(stillSelectedDetails.pulseGlow);
-                        stillSelectedPoolEls.poolDiv.classList.add(stillSelectedDetails.staticGlow);
-                    }
-                    poolAnimationTimeoutId = null;
-                }, 5000);
-            }
-
-             if (kaiokenSection) {
-                 if (selectedType === 'ki') {
-                     kaiokenSection.classList.remove('hidden');
-                     if (kaiokenCheckbox.checked) { kaiokenDetails.classList.remove('hidden'); updateCurrentHealthDisplay(); }
-                 } else {
-                     kaiokenSection.classList.add('hidden');
-                     if (kaiokenCheckbox.checked) { kaiokenCheckbox.checked = false; kaiokenDetails.classList.add('hidden'); removeKaiokenStyle(); }
-                 }
-             }
-
-            updateAttackButtonStates(selectedType);
-            updateSliderLimitAndStyle(selectedType);
-            updateStatsDisplay();
-        }
+        function showSelectedEnergyPool() { const selectedType = energyTypeSelect.value; const details = ENERGY_TYPE_DETAILS[selectedType]; let newlyVisiblePool = null; if (poolAnimationTimeoutId) { clearTimeout(poolAnimationTimeoutId); poolAnimationTimeoutId = null; } ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); const typeDetails = ENERGY_TYPE_DETAILS[type]; if (els?.poolDiv && typeDetails) { els.poolDiv.classList.remove(typeDetails.pulseGlow, typeDetails.staticGlow, 'animate__animated', 'animate__fadeIn'); if (type !== selectedType) { els.poolDiv.style.display = 'none'; } } }); calculateAndResetEnergy(selectedType); const poolToShowEls = getEnergyElements(selectedType); if (poolToShowEls?.poolDiv && details) { poolToShowEls.poolDiv.style.display = 'block'; newlyVisiblePool = poolToShowEls.poolDiv; poolToShowEls.poolDiv.classList.add('animate__animated', 'animate__fadeIn'); poolToShowEls.poolDiv.classList.add(details.pulseGlow); poolToShowEls.poolDiv.addEventListener('animationend', (e) => { if (e.animationName === 'fadeIn') { poolToShowEls.poolDiv.classList.remove('animate__animated', 'animate__fadeIn'); } } , { once: true }); poolAnimationTimeoutId = setTimeout(() => { const currentSelectedType = energyTypeSelect.value; const stillSelectedPoolEls = getEnergyElements(currentSelectedType); const stillSelectedDetails = ENERGY_TYPE_DETAILS[currentSelectedType]; if (stillSelectedPoolEls?.poolDiv && stillSelectedDetails && currentSelectedType === selectedType) { stillSelectedPoolEls.poolDiv.classList.remove(stillSelectedDetails.pulseGlow); stillSelectedPoolEls.poolDiv.classList.add(stillSelectedDetails.staticGlow); } poolAnimationTimeoutId = null; }, 5000); } if (kaiokenSection) { if (selectedType === 'ki') { kaiokenSection.classList.remove('hidden'); if (kaiokenCheckbox.checked) { kaiokenDetails.classList.remove('hidden'); updateCurrentHealthDisplay(); } } else { kaiokenSection.classList.add('hidden'); if (kaiokenCheckbox.checked) { kaiokenCheckbox.checked = false; kaiokenDetails.classList.add('hidden'); removeKaiokenStyle(); } } } updateAttackButtonStates(selectedType); updateSliderLimitAndStyle(selectedType); updateStatsDisplay(); }
 
 
          // --- Attack Logic --- (Unchanged)
-          function updateAttackButtonStates(type) {
-              const currentAttack = activeAttacks[type] || null;
-              superAttackBtn.classList.toggle('active', currentAttack === 'super');
-              ultimateAttackBtn.classList.toggle('active', currentAttack === 'ultimate');
-              let statusClasses = 'text-xs mt-2 min-h-[1.25rem]';
-              if (currentAttack === 'super') {
-                  attackStatusMessage.textContent = `Super Attack active for ${ENERGY_TYPE_DETAILS[type]?.name || type}. Slider limited to 95%.`;
-                  attackStatusMessage.className = `${statusClasses} text-blue-600`;
-              } else if (currentAttack === 'ultimate') {
-                  attackStatusMessage.textContent = `Ultimate Attack active for ${ENERGY_TYPE_DETAILS[type]?.name || type}. Slider limited to 90%.`;
-                   attackStatusMessage.className = `${statusClasses} text-purple-600`;
-              } else {
-                  attackStatusMessage.textContent = '';
-                   attackStatusMessage.className = `${statusClasses} text-gray-500`;
-              }
-          }
+          function updateAttackButtonStates(type) { const currentAttack = activeAttacks[type] || null; superAttackBtn.classList.toggle('active', currentAttack === 'super'); ultimateAttackBtn.classList.toggle('active', currentAttack === 'ultimate'); let statusClasses = 'text-xs mt-2 min-h-[1.25rem]'; if (currentAttack === 'super') { attackStatusMessage.textContent = `Super Attack active for ${ENERGY_TYPE_DETAILS[type]?.name || type}. Slider limited to 95%.`; attackStatusMessage.className = `${statusClasses} text-blue-600`; } else if (currentAttack === 'ultimate') { attackStatusMessage.textContent = `Ultimate Attack active for ${ENERGY_TYPE_DETAILS[type]?.name || type}. Slider limited to 90%.`; attackStatusMessage.className = `${statusClasses} text-purple-600`; } else { attackStatusMessage.textContent = ''; attackStatusMessage.className = `${statusClasses} text-gray-500`; } }
           function updateSliderLimitAndStyle(type) { const els = getEnergyElements(type); if (!els?.energySlider) return; const slider = els.energySlider; const activeAttack = activeAttacks[type] || null; let limitPercent = 100; let gradientStyle = `linear-gradient(to right, ${SLIDER_TRACK_COLOR} 100%, ${ATTACK_RESERVE_COLOR} 100%)`; if (activeAttack === 'super') { limitPercent = 95; gradientStyle = `linear-gradient(to right, ${SLIDER_TRACK_COLOR} ${limitPercent}%, ${ATTACK_RESERVE_COLOR} ${limitPercent}%)`; } else if (activeAttack === 'ultimate') { limitPercent = 90; gradientStyle = `linear-gradient(to right, ${SLIDER_TRACK_COLOR} ${limitPercent}%, ${ATTACK_RESERVE_COLOR} ${limitPercent}%)`; } slider.style.background = gradientStyle; if (parseInt(slider.value) > limitPercent) { slider.value = limitPercent; } updateSingleSliderDisplay(type); }
           function handleAttackButtonClick(event) { const button = event.currentTarget; const attackType = button.dataset.attackType; const selectedEnergyType = energyTypeSelect.value; const currentAttackForType = activeAttacks[selectedEnergyType] || null; const newAttackState = (currentAttackForType === attackType) ? null : attackType; activeAttacks[selectedEnergyType] = newAttackState; updateAttackButtonStates(selectedEnergyType); updateSliderLimitAndStyle(selectedEnergyType); triggerAnimation(button, 'pulse'); }
 
@@ -868,135 +561,9 @@
         function performCalculation() { showLoading(true); setTimeout(() => { let finalDamage = 0; let healthDepleted = false; try { const baseDamage = safeParseFloat(baseDamageInput.value, 0); const compressionPoints = safeParseFloat(attackCompressionPointsInput.value, 0); const baseMultiplier = safeParseFloat(baseMultiplierInput.value, 1); const formMultiplier = safeParseFloat(formMultiplierInput.value, 1); const energyType = energyTypeSelect.value; let baseDamagePart = baseDamage * baseMultiplier * formMultiplier; let compressionMultiplierValue = 1; if (compressionPoints > 0) { compressionMultiplierValue = Math.max(1, (compressionPoints * 1.5) + (Math.floor(compressionPoints / 10) * 3)); } finalDamage = baseDamagePart * compressionMultiplierValue; document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach(modifierDiv => { const valueInput = modifierDiv.querySelector('.modifier-value-input'); const typeOption = modifierDiv.querySelector('.modifier-type-option.active'); if (valueInput && typeOption && typeOption.dataset.value === 'multiplicative') { const modifierValue = safeParseFloat(valueInput.value, 1); finalDamage *= modifierValue; } }); let totalEnergyUsedFromSliders = 0; let totalExtraDamageFromEnergy = 0; ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); if (els?.energySlider && els.currentEnergyEl && els.damagePerPowerEl) { const sliderPercent = safeParseFloat(els.energySlider.value, 0); const activeAttack = activeAttacks[type] || null; let limitPercent = 100; if (activeAttack === 'super') limitPercent = 95; else if (activeAttack === 'ultimate') limitPercent = 90; const effectivePercent = Math.min(sliderPercent, limitPercent); if (effectivePercent > 0) { const currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent); const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1); const energyUsedThisType = currentEnergy * (effectivePercent / 100); const actualEnergyUsed = Math.min(energyUsedThisType, currentEnergy); const extraDamageThisType = actualEnergyUsed * damagePerPower; totalEnergyUsedFromSliders += actualEnergyUsed; totalExtraDamageFromEnergy += extraDamageThisType; let newCurrentEnergyThisType = Math.max(0, currentEnergy - actualEnergyUsed); els.currentEnergyEl.textContent = formatStatNumber(newCurrentEnergyThisType); if (newCurrentEnergyThisType < currentEnergy) { triggerAnimation(els.currentEnergyEl, 'flash-red'); } updateSingleSliderDisplay(type); } } }); finalDamage += totalExtraDamageFromEnergy; document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach(modifierDiv => { const valueInput = modifierDiv.querySelector('.modifier-value-input'); const typeOption = modifierDiv.querySelector('.modifier-type-option.active'); if (valueInput && typeOption && typeOption.dataset.value === 'additive') { const modifierValue = safeParseFloat(valueInput.value, 0); finalDamage += modifierValue; } }); healthDepleted = false; if (energyType === 'ki' && kaiokenCheckbox.checked) { const currentHealthVal = parseFormattedNumber(currentHealthEl.textContent); if (currentHealthVal > 0) { const maxHealth = safeParseFloat(maxHealthInput.value, 0); const kaiokenStrainPercent = safeParseFloat(kaiokenStrainInput.value, 0); if (maxHealth > 0 && kaiokenStrainPercent > 0) { const strainCost = maxHealth * (kaiokenStrainPercent / 100); let newHealth = Math.max(0, currentHealthVal - strainCost); currentHealthEl.textContent = formatStatNumber(newHealth); if (newHealth < currentHealthVal) { triggerAnimation(currentHealthEl, 'flash-red'); } if (newHealth === 0) { healthDepleted = true; } } } } totalDamageDealt += finalDamage; totalEnergySpent += totalEnergyUsedFromSliders; attackCount++; if (finalDamage > highestDamage) { highestDamage = finalDamage; } updateStatsDisplay(); resultValueEl.textContent = formatSimpleNumber(finalDamage); resultTotalEnergyUsedEl.textContent = formatStatNumber(totalEnergyUsedFromSliders); resultTotalExtraDamageEl.textContent = formatStatNumber(totalExtraDamageFromEnergy); displayAllFormats(finalDamage); updateEquationDisplay(); resultDiv.classList.remove('hidden', 'bg-error-light', 'border-error', 'text-error-dark'); resultDiv.classList.add('bg-success-light', 'border-success', 'text-success-dark'); resultDiv.classList.remove('animate__animated', 'animate__fadeInUp'); void resultDiv.offsetWidth; resultDiv.classList.add('animate__animated', 'animate__fadeInUp'); resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-success-dark'; let successMsg = 'Calculation successful!'; if (healthDepleted) { successMsg += ' Warning: Health depleted by Kaioken strain!'; } showMessage(successMsg, healthDepleted ? 'error' : 'success'); } catch (error) { console.error("Calculation Error:", error); resultValueEl.textContent = 'Error'; resultTotalEnergyUsedEl.textContent = 'N/A'; resultTotalExtraDamageEl.textContent = 'N/A'; resultScientificEl.textContent = 'N/A'; resultWordsEl.textContent = 'Error'; equationDisplayEl.innerHTML = '<span class="text-error-dark">Error calculating equation.</span>'; resultDiv.classList.remove('hidden', 'bg-success-light', 'border-success', 'text-success-dark'); resultDiv.classList.add('bg-error-light', 'border-error', 'text-error-dark'); resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-error-dark'; showMessage(`Calculation failed: ${error.message || 'Unknown error'}`, 'error'); } finally { showLoading(false); } }, 50); }
 
 
-        // --- Number Formatting ---
-
-        /**
-         * Updates the display elements for scientific notation and number-to-words conversion
-         * based on the final calculated damage.
-         * @param {number} damage - The calculated damage value.
-         */
-        function displayAllFormats(damage) {
-            try {
-                resultScientificEl.textContent = damage.toExponential(2).replace(/e\+?(-?)/, ' x 10^$1');
-            } catch (e) {
-                resultScientificEl.textContent = "Invalid";
-                console.error("Scientific notation error:", e);
-            }
-            try {
-                resultWordsEl.textContent = convertNumberToWords(damage);
-            } catch (e) {
-                resultWordsEl.textContent = "Error: " + e.message;
-                console.error("Number to words error:", e);
-            }
-        }
-
-        /**
-         * Converts a number into its English word representation.
-         * Handles large integers using BigInt, decimals, negative numbers.
-         * Uses extended scales up to Centillion (10^303). Returns scientific notation for larger numbers.
-         * @param {number} number - The number to convert.
-         * @returns {string} The number in words or an error/fallback string.
-         */
-        function convertNumberToWords(number) {
-            const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-            const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-            // EXTENDED Scales array up to Centillion (10^303)
-            const scales = [
-                '', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion',
-                'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quattuordecillion', 'Quindecillion', 'Sexdecillion', 'Septendecillion', 'Octodecillion', 'Novemdecillion',
-                'Vigintillion', 'Unvigintillion', 'Duovigintillion', 'Tresvigintillion', 'Quattuorvigintillion', 'Quinvigintillion', 'Sesvigintillion', 'Septemvigintillion', 'Octovigintillion', 'Novemvigintillion',
-                'Trigintillion', 'Untrigintillion', 'Duotrigintillion', 'Trestrigintillion', 'Quattuortrigintillion', 'Quintrigintillion', 'Sestrigintillion', 'Septentrigintillion', 'Octotrigintillion', 'Noventrigintillion',
-                'Quadragintillion', 'Unquadragintillion', 'Duoquadragintillion', 'Tresquadragintillion', 'Quattuorquadragintillion', 'Quinquadragintillion', 'Sesquadragintillion', 'Septenquadragintillion', 'Octoquadragintillion', 'Novemquadragintillion',
-                'Quinquagintillion', 'Unquinquagintillion', 'Duoquinquagintillion', 'Tresquinquagintillion', 'Quattuorquinquagintillion', 'Quinquinquagintillion', 'Sesquinquagintillion', 'Septenquinquagintillion', 'Octoquinquagintillion', 'Novemquinquagintillion',
-                'Sexagintillion', 'Unsexagintillion', 'Duosexagintillion', 'Tresexagintillion', 'Quattuorsexagintillion', 'Quinsexagintillion', 'Sesexagintillion', 'Septensexagintillion', 'Octosexagintillion', 'Novemsexagintillion',
-                'Septuagintillion', 'Unseptuagintillion', 'Duoseptuagintillion', 'Tresseptuagintillion', 'Quattuorseptuagintillion', 'Quinseptuagintillion', 'Seseptuagintillion', 'Septenseptuagintillion', 'Octoseptuagintillion', 'Novemseptuagintillion',
-                'Octogintillion', 'Unoctogintillion', 'Duooctogintillion', 'Tresoctogintillion', 'Quattuoroctogintillion', 'Quinoctogintillion', 'Sexoctogintillion', 'Septemoctogintillion', 'Octooctogintillion', 'Novemoctogintillion',
-                'Nonagintillion', 'Unnonagintillion', 'Duononagintillion', 'Tresnonagintillion', 'Quattuornonagintillion', 'Quinnonagintillion', 'Senonagintillion', 'Septenonagintillion', 'Octononagintillion', 'Novenonagintillion',
-                'Centillion' // 10^303
-            ];
-
-            if (typeof number !== 'number' || !isFinite(number)) { return 'Invalid Number'; }
-            if (number === 0) { return 'Zero'; }
-
-            // Adjusted MAX_SAFE check based on the extended scales array length
-            const MAX_SAFE_INTEGER_FOR_WORDS = BigInt("9".repeat((scales.length) * 3));
-            let numForCheck;
-             try {
-                 // Use Math.trunc before BigInt conversion for potentially very large numbers
-                 numForCheck = number < 0 ? BigInt(Math.abs(Math.trunc(number))) : BigInt(Math.trunc(number));
-             } catch (e) {
-                 console.error("Error converting number to BigInt for size check:", number, e);
-                 // Fallback for numbers too large even for initial BigInt conversion (extremely rare)
-                 return number.toExponential(2) + " (Extremely large)";
-             }
-
-            if (numForCheck > MAX_SAFE_INTEGER_FOR_WORDS) {
-                console.warn("Number too large for full word conversion, returning scientific.");
-                return number.toExponential(2) + " (Too large for words)";
-            }
-
-            let isNegative = number < 0;
-            if (isNegative) number = -number;
-
-            let integerPart;
-            let fractionalPart = 0;
-            try {
-                const numStr = number.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 20 });
-                const parts = numStr.split('.');
-                integerPart = BigInt(parts[0]);
-                if (parts.length > 1) { fractionalPart = parseFloat('0.' + parts[1]); }
-            } catch (e) {
-                 console.error("Error processing number for words:", number, e);
-                 return "Number too large or invalid format";
-            }
-
-            let words = isNegative ? 'Negative ' : '';
-
-            function convertHundreds(num) {
-                let word = '';
-                const h = Math.floor(num / 100);
-                const r = num % 100;
-                if (h > 0) { word += units[h] + ' Hundred'; }
-                if (r > 0) {
-                    if (word !== '') word += ' ';
-                    if (r < 20) { word += units[r]; }
-                    else { const t = Math.floor(r / 10); const o = r % 10; word += tens[t]; if (o > 0) { word += '-' + units[o]; } }
-                }
-                return word;
-            }
-
-            if (integerPart === 0n) {
-                 if (fractionalPart === 0) words += 'Zero';
-            } else {
-                let scaleIndex = 0;
-                let tempWords = [];
-                let currentInt = integerPart;
-                while (currentInt > 0n) {
-                     if (scaleIndex >= scales.length) {
-                         console.error("Number exceeds defined scales during conversion:", number);
-                         return number.toExponential(2) + " (Too large for words)";
-                     }
-                    const chunk = Number(currentInt % 1000n);
-                    if (chunk !== 0) {
-                        const chunkWords = convertHundreds(chunk);
-                        tempWords.push(chunkWords + (scaleIndex > 0 ? ' ' + scales[scaleIndex] : ''));
-                    }
-                    currentInt /= 1000n;
-                    scaleIndex++;
-                }
-                words += tempWords.reverse().filter(w => w.trim()).join(', ');
-            }
-
-            if (fractionalPart > 1e-9) {
-                words += ' Point';
-                let fractionalStr = fractionalPart.toFixed(6).substring(2).replace(/0+$/, '');
-                if (fractionalStr.length > 0) {
-                    for (const digit of fractionalStr) { words += ' ' + (units[parseInt(digit)] || 'Zero'); }
-                } else { words = words.replace(/ Point$/, ''); }
-            }
-
-            return words.trim();
-        }
+        // --- Number Formatting --- (Unchanged)
+        function displayAllFormats(damage) { try { resultScientificEl.textContent = damage.toExponential(2).replace(/e\+?(-?)/, ' x 10^$1'); } catch (e) { resultScientificEl.textContent = "Invalid"; console.error("Scientific notation error:", e); } try { resultWordsEl.textContent = convertNumberToWords(damage); } catch (e) { resultWordsEl.textContent = "Error: " + e.message; console.error("Number to words error:", e); } }
+        function convertNumberToWords(number) { const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen']; const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']; const scales = [ '', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quattuordecillion', 'Quindecillion', 'Sexdecillion', 'Septendecillion', 'Octodecillion', 'Novemdecillion', 'Vigintillion', 'Unvigintillion', 'Duovigintillion', 'Tresvigintillion', 'Quattuorvigintillion', 'Quinvigintillion', 'Sesvigintillion', 'Septemvigintillion', 'Octovigintillion', 'Novemvigintillion', 'Trigintillion', 'Untrigintillion', 'Duotrigintillion', 'Trestrigintillion', 'Quattuortrigintillion', 'Quintrigintillion', 'Sestrigintillion', 'Septentrigintillion', 'Octotrigintillion', 'Noventrigintillion', 'Quadragintillion', 'Unquadragintillion', 'Duoquadragintillion', 'Tresquadragintillion', 'Quattuorquadragintillion', 'Quinquadragintillion', 'Sesquadragintillion', 'Septenquadragintillion', 'Octoquadragintillion', 'Novemquadragintillion', 'Quinquagintillion', 'Unquinquagintillion', 'Duoquinquagintillion', 'Tresquinquagintillion', 'Quattuorquinquagintillion', 'Quinquinquagintillion', 'Sesquinquagintillion', 'Septenquinquagintillion', 'Octoquinquagintillion', 'Novemquinquagintillion', 'Sexagintillion', 'Unsexagintillion', 'Duosexagintillion', 'Tresexagintillion', 'Quattuorsexagintillion', 'Quinsexagintillion', 'Sesexagintillion', 'Septensexagintillion', 'Octosexagintillion', 'Novemsexagintillion', 'Septuagintillion', 'Unseptuagintillion', 'Duoseptuagintillion', 'Tresseptuagintillion', 'Quattuorseptuagintillion', 'Quinseptuagintillion', 'Seseptuagintillion', 'Septenseptuagintillion', 'Octoseptuagintillion', 'Novemseptuagintillion', 'Octogintillion', 'Unoctogintillion', 'Duooctogintillion', 'Tresoctogintillion', 'Quattuoroctogintillion', 'Quinoctogintillion', 'Sexoctogintillion', 'Septemoctogintillion', 'Octooctogintillion', 'Novemoctogintillion', 'Nonagintillion', 'Unnonagintillion', 'Duononagintillion', 'Tresnonagintillion', 'Quattuornonagintillion', 'Quinnonagintillion', 'Senonagintillion', 'Septenonagintillion', 'Octononagintillion', 'Novenonagintillion', 'Centillion' ]; if (typeof number !== 'number' || !isFinite(number)) { return 'Invalid Number'; } if (number === 0) { return 'Zero'; } const MAX_SAFE_INTEGER_FOR_WORDS = BigInt("9".repeat((scales.length) * 3)); let numForCheck; try { numForCheck = number < 0 ? BigInt(Math.abs(Math.trunc(number))) : BigInt(Math.trunc(number)); } catch (e) { console.error("Error converting number to BigInt for size check:", number, e); return number.toExponential(2) + " (Extremely large)"; } if (numForCheck > MAX_SAFE_INTEGER_FOR_WORDS) { console.warn("Number too large for full word conversion, returning scientific."); return number.toExponential(2) + " (Too large for words)"; } let isNegative = number < 0; if (isNegative) number = -number; let integerPart; let fractionalPart = 0; try { const numStr = number.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 20 }); const parts = numStr.split('.'); integerPart = BigInt(parts[0]); if (parts.length > 1) { fractionalPart = parseFloat('0.' + parts[1]); } } catch (e) { console.error("Error processing number for words:", number, e); return "Number too large or invalid format"; } let words = isNegative ? 'Negative ' : ''; function convertHundreds(num) { let word = ''; const h = Math.floor(num / 100); const r = num % 100; if (h > 0) { word += units[h] + ' Hundred'; } if (r > 0) { if (word !== '') word += ' '; if (r < 20) { word += units[r]; } else { const t = Math.floor(r / 10); const o = r % 10; word += tens[t]; if (o > 0) { word += '-' + units[o]; } } } return word; } if (integerPart === 0n) { if (fractionalPart === 0) words += 'Zero'; } else { let scaleIndex = 0; let tempWords = []; let currentInt = integerPart; while (currentInt > 0n) { if (scaleIndex >= scales.length) { console.error("Number exceeds defined scales during conversion:", number); return number.toExponential(2) + " (Too large for words)"; } const chunk = Number(currentInt % 1000n); if (chunk !== 0) { const chunkWords = convertHundreds(chunk); tempWords.push(chunkWords + (scaleIndex > 0 ? ' ' + scales[scaleIndex] : '')); } currentInt /= 1000n; scaleIndex++; } words += tempWords.reverse().filter(w => w.trim()).join(', '); } if (fractionalPart > 1e-9) { words += ' Point'; let fractionalStr = fractionalPart.toFixed(6).substring(2).replace(/0+$/, ''); if (fractionalStr.length > 0) { for (const digit of fractionalStr) { words += ' ' + (units[parseInt(digit)] || 'Zero'); } } else { words = words.replace(/ Point$/, ''); } } return words.trim(); }
 
 
         // --- State Management --- (Unchanged)
@@ -1067,19 +634,79 @@
             updateEquationDisplay();
         }
 
-        // --- Ryoko Mode Logic --- (Unchanged)
+        // --- Ryoko Mode Logic --- UPDATED
+        /** Handles changes to the Ryoko checkbox */
         function handleRyokoCheckboxChange() {
-            if (!ryokoCheckbox || !ryokoEquationContainer || !charBaseMultiplierInput || !ryokoEquationInput) return;
+            if (!ryokoCheckbox || !ryokoEquationContainer || !charBaseMultiplierInput || !ryokoEquationInput) return; // Safety check
+
             const isChecked = ryokoCheckbox.checked;
             ryokoEquationContainer.classList.toggle('hidden', !isChecked);
             charBaseMultiplierInput.readOnly = isChecked;
             charBaseMultiplierInput.classList.toggle('bg-gray-100', isChecked);
             charBaseMultiplierInput.classList.toggle('cursor-not-allowed', isChecked);
             charBaseMultiplierInput.classList.toggle('opacity-70', isChecked);
+
             if (isChecked) {
-                charBaseMultiplierInput.value = ryokoEquationInput.value || '1';
+                // Populate with default if the equation input is currently empty
+                if (ryokoEquationInput.value.trim() === '') {
+                    ryokoEquationInput.value = DEFAULT_RYOKO_EQUATION;
+                }
+                // Evaluate the equation and update the base multiplier
+                evaluateRyokoEquation(); // Call the evaluation function
                 ryokoEquationInput.focus();
+            } else {
+                // When unchecked, just make base multiplier editable again.
+                // Clear error state from equation input
+                ryokoEquationInput.classList.remove('border-red-500');
+                // Value remains as it was (either user-entered or from Ryoko input).
             }
+            // Trigger recalculation as the effective base multiplier might have changed
+            handleStatChange();
+        }
+
+        /** Evaluates the Ryoko equation input and updates the base multiplier */
+        function evaluateRyokoEquation() {
+            if (!ryokoCheckbox.checked || !ryokoEquationInput || !charBaseMultiplierInput) return;
+
+            const expression = ryokoEquationInput.value.trim();
+            let result = 1; // Default to 1 if empty or error
+
+            // Clear previous error state
+            ryokoEquationInput.classList.remove('border-red-500', 'focus:ring-red-500');
+            ryokoEquationInput.classList.add('focus:ring-teal-focus'); // Restore default focus
+
+            if (expression) {
+                try {
+                    // Use math.js to safely evaluate the expression
+                    // Create a limited scope for evaluation if needed, but math.js is generally safe
+                    const evaluatedResult = math.evaluate(expression);
+
+                    // Check if the result is a valid, finite number
+                    if (typeof evaluatedResult === 'number' && isFinite(evaluatedResult)) {
+                        result = evaluatedResult;
+                    } else {
+                        console.error("Ryoko equation evaluated to non-finite number:", evaluatedResult);
+                        throw new Error("Invalid result (NaN or Infinity)");
+                    }
+                     // Remove error styling if successful
+                    ryokoEquationInput.classList.remove('border-red-500', 'focus:ring-red-500');
+                    ryokoEquationInput.classList.add('focus:ring-teal-focus'); // Ensure default focus restored
+
+                } catch (error) {
+                    console.error("Error evaluating Ryoko equation:", error);
+                    // Indicate error visually on the input
+                    ryokoEquationInput.classList.add('border-red-500', 'focus:ring-red-500');
+                    ryokoEquationInput.classList.remove('focus:ring-teal-focus');
+                    showMessage(`Invalid Ryoko equation: ${error.message}`, 'error');
+                    result = 1; // Reset multiplier to 1 on error
+                }
+            }
+
+            // Update the read-only base multiplier input with the formatted result
+            // Use formatSimpleNumber to keep it consistent with other displays if needed, or just use the number
+            charBaseMultiplierInput.value = formatSimpleNumber(result); // Or just result.toString() if no formatting needed
+
+            // Trigger recalculation since the effective multiplier might have changed
             handleStatChange();
         }
 
@@ -1093,14 +720,19 @@
             addDynamicBoxBtn.addEventListener('click', () => { triggerAnimation(addDynamicBoxBtn, 'pulse'); addDynamicModifier(); updateEquationDisplay(); });
             [baseDamageInput, attackCompressionPointsInput, baseMultiplierInput, formMultiplierInput].forEach(input => { if(input) { input.addEventListener('input', updateEquationDisplay); input.addEventListener('change', updateEquationDisplay); } });
 
-            // Character Stat inputs listener
+            // Character Stat inputs listener (excluding Base Multiplier)
             const characterStatInputs = [ charBaseHealthInput, charVitalityInput, charSoulPowerInput, charSoulHpInput ];
             characterStatInputs.forEach(input => { if (input) { input.addEventListener('input', handleStatChange); } });
 
             // Specific handling for Character Base Multiplier and Ryoko Mode
             if (charBaseMultiplierInput) { charBaseMultiplierInput.addEventListener('input', () => { if (!charBaseMultiplierInput.readOnly) { handleStatChange(); } }); }
             if (ryokoCheckbox) { ryokoCheckbox.addEventListener('change', handleRyokoCheckboxChange); }
-            if (ryokoEquationInput) { ryokoEquationInput.addEventListener('input', () => { if (ryokoCheckbox.checked) { charBaseMultiplierInput.value = ryokoEquationInput.value || '1'; handleStatChange(); } }); }
+            if (ryokoEquationInput) {
+                // Evaluate on input change
+                ryokoEquationInput.addEventListener('input', evaluateRyokoEquation);
+                // Also evaluate on losing focus (change event)
+                ryokoEquationInput.addEventListener('change', evaluateRyokoEquation);
+            }
 
             // Dynamically generated energy pool inputs and sliders
             ALL_ENERGY_TYPES.forEach(type => {
@@ -1149,7 +781,7 @@
 
         // --- Initial Setup on Page Load ---
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOM Loaded. Initializing Energy Calculator v10.5 (Ryoko Mode)...");
+            console.log("DOM Loaded. Initializing Energy Calculator v10.7 (Evaluate Ryoko Equation)..."); // Updated version
 
             activeAttacks = {};
             ALL_ENERGY_TYPES.forEach(type => { activeAttacks[type] = null; });
@@ -1168,12 +800,13 @@
                  updateStatsDisplay();
                  updateEquationDisplay();
             } else {
-                 // applyState handles restoring Ryoko state and view
+                 // applyState already restored Ryoko state and view
                  // Ensure all pools are calculated based on loaded stats
                  ALL_ENERGY_TYPES.forEach(type => { calculateAndResetEnergy(type); });
                  updateStatsDisplay();
                  updateEquationDisplay();
             }
+
 
             console.log(`Initialization complete. ${stateLoaded ? '(Saved state loaded)' : '(Using default state)'}`);
         });
