@@ -3,24 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy Calculator - v10.9 (Form Creator Integration)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Energy Calculator - v10.8 (Force Energy Formula Update)</title> <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
     />
     <script>
-        // --- Tailwind CSS Configuration (FROM ORIGINAL CODE) ---
-        tailwind.config = { /* ... Keep your existing config ... */ };
+        // Tailwind CSS Configuration
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // Energy types
+                        ki: '#FF9800', nen: '#2196F3', chakra: '#9C27B0', magic: '#26a69a', cursed: '#dc2626',
+                        reiatsu: '#475569', haki: '#1f2937', alchemy: '#f59e0b', nature: '#84cc16',
+                        force: '#d946ef',
+                        // Darker variants
+                        'ki-dark': '#e65100', 'nen-dark': '#0d47a1', 'chakra-dark': '#4a148c', 'magic-dark': '#00796b', 'cursed-dark': '#b91c1c',
+                        'reiatsu-dark': '#1e293b', 'haki-dark': '#000000', 'alchemy-dark': '#b45309', 'nature-dark': '#4d7c0f',
+                        'force-dark': '#a21caf',
+                        // UI feedback colors
+                        'success-light': '#e8f5e9', 'success': '#4CAF50', 'success-dark': '#2e7d32',
+                        'error-light': '#ffebee', 'error': '#f44336', 'error-dark': '#c62828',
+                        // Stats panel specific colors
+                        'stats-border': '#60a5fa', 'stats-header': '#1e3a8a',
+                        // Kaioken active state colors
+                        'kaioken-border': '#f87171', 'kaioken-header': '#b91c1c', 'kaioken-focus': '#ef4444',
+                        // Focus Rings
+                        'magic-focus': '#26a69a', 'cursed-focus': '#dc2626', 'reiatsu-focus': '#475569',
+                        'haki-focus': '#1f2937', 'alchemy-focus': '#f59e0b', 'nature-focus': '#84cc16',
+                        'ki-focus': '#FF9800', 'nen-focus': '#2196F3', 'chakra-focus': '#9C27B0',
+                        'force-focus': '#d946ef',
+                        'teal-focus': '#2dd4bf', // Teal focus for character stats
+                    },
+                    // Animations
+                    animation: {
+                        spin: 'spin 1s linear infinite', shake: 'shake 0.5s ease-in-out', fadeIn: 'fadeIn 0.3s ease-in', pulse: 'pulse 1.5s infinite',
+                        'pulse-additive': 'pulse-additive 0.5s', 'pulse-multiplicative': 'pulse-multiplicative 0.5s', 'pulse-result': 'pulse-result 0.3s ease-in-out',
+                        'flash-red': 'flash-red-bg 0.5s ease-out', 'flash-green': 'flash-green-bg 0.5s ease-out', 'kaioken-glow': 'kaioken-glow 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-ki': 'pulse-glow-ki 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-nen': 'pulse-glow-nen 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-chakra': 'pulse-glow-chakra 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-magic': 'pulse-glow-magic 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-cursed': 'pulse-glow-cursed 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-reiatsu': 'pulse-glow-reiatsu 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-haki': 'pulse-glow-haki 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-alchemy': 'pulse-glow-alchemy 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-nature': 'pulse-glow-nature 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-force': 'pulse-glow-force 1.5s infinite ease-in-out',
+                        'animate-pulse-source': 'pulse-source-input 0.8s ease-out',
+                        'bounceIn': 'bounceIn 0.75s', 'bounceOut': 'bounceOut 0.75s', 'fadeInUp': 'fadeInUp 0.5s',
+                    },
+                    // Keyframes
+                    keyframes: {
+                        spin: { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' }, },
+                        shake: { '0%, 100%': { transform: 'translateX(0)' }, '25%, 75%': { transform: 'translateX(-5px)' }, '50%': { transform: 'translateX(5px)' }, },
+                        fadeIn: { from: { opacity: 0, transform: 'translateY(10px)' }, to: { opacity: 1, transform: 'translateY(0)' }, },
+                        pulse: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.05)' }, },
+                        'pulse-additive': { '0%, 100%': { color: '#558b2f' }, '50%': { color: '#8BC34A' }, },
+                        'pulse-multiplicative': { '0%, 100%': { color: '#e65100' }, '50%': { color: '#FF9800' }, },
+                        'pulse-result': { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.05)' }, },
+                        'flash-red-bg': { '50%': { backgroundColor: '#ffebee', borderColor: '#f44336' } },
+                        'flash-green-bg': { '50%': { backgroundColor: '#e8f5e9', borderColor: '#4CAF50' } },
+                        'kaioken-glow': { '0%, 100%': { boxShadow: `0 0 10px #f8717180` }, '50%': { boxShadow: `0 0 20px #f87171CC` } },
+                         'pulse-glow-ki': { '0%, 100%': { boxShadow: `0 0 8px #FF980066` }, '50%': { boxShadow: `0 0 16px #FF9800B3` } },
+                         'pulse-glow-nen': { '0%, 100%': { boxShadow: `0 0 8px #2196F366` }, '50%': { boxShadow: `0 0 16px #2196F3B3` } },
+                         'pulse-glow-chakra': { '0%, 100%': { boxShadow: `0 0 8px #9C27B066` }, '50%': { boxShadow: `0 0 16px #9C27B0B3` } },
+                         'pulse-glow-magic': { '0%, 100%': { boxShadow: `0 0 8px #26a69a66` }, '50%': { boxShadow: `0 0 16px #26a69aB3` } },
+                         'pulse-glow-cursed': { '0%, 100%': { boxShadow: `0 0 8px #dc262666` }, '50%': { boxShadow: `0 0 16px #dc2626B3` } },
+                         'pulse-glow-reiatsu': { '0%, 100%': { boxShadow: `0 0 8px #47556966` }, '50%': { boxShadow: `0 0 16px #475569B3` } },
+                         'pulse-glow-haki': { '0%, 100%': { boxShadow: `0 0 8px #1f293766` }, '50%': { boxShadow: `0 0 16px #1f2937B3` } },
+                         'pulse-glow-alchemy': { '0%, 100%': { boxShadow: `0 0 8px #f59e0b66` }, '50%': { boxShadow: `0 0 16px #f59e0bB3` } },
+                         'pulse-glow-nature': { '0%, 100%': { boxShadow: `0 0 8px #84cc1666` }, '50%': { boxShadow: `0 0 16px #84cc16B3` } },
+                         'pulse-glow-force': { '0%, 100%': { boxShadow: `0 0 8px #d946ef66` }, '50%': { boxShadow: `0 0 16px #d946efB3` } },
+                         'pulse-source-input': { '0%, 100%': { boxShadow: 'none' }, '50%': { boxShadow: '0 0 12px theme("colors.blue.400")' } },
+                         'shakeX': { /* Uses animate.css definition */ },
+                         'bounceIn': { /* Uses animate.css definition */ },
+                         'bounceOut': { /* Uses animate.css definition */ },
+                         'fadeInUp': { /* Uses animate.css definition */ },
+                    }
+                }
+            }
+        }
     </script>
     <link rel="preconnect" href="https://rsms.me/">
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <style>
-        /* --- Base Styles & Tailwind @apply rules (FROM ORIGINAL CODE) --- */
+        /* Base Styles */
         body { font-family: 'Inter', sans-serif; background-color: #f9f9f9; color: #333; }
         /* Base style for energy pool sections */
         .energy-pool { @apply p-5 mb-5 rounded-lg shadow-sm border-l-4; transition: box-shadow 0.3s ease-in-out, opacity 0.3s ease-in-out; }
+
         /* Dynamic Pool Styles */
         .energy-pool-ki { border-left-color: #FF9800; } .energy-pool-ki h3 { color: #e65100; }
         .energy-pool-nen { border-left-color: #2196F3; } .energy-pool-nen h3 { color: #0d47a1; }
@@ -32,11 +106,16 @@
         .energy-pool-alchemy { border-left-color: #f59e0b; } .energy-pool-alchemy h3 { color: #b45309; }
         .energy-pool-nature { border-left-color: #84cc16; } .energy-pool-nature h3 { color: #4d7c0f; }
         .energy-pool-force { border-left-color: #d946ef; } .energy-pool-force h3 { color: #a21caf; }
+
         /* Base Slider Track Style */
-        .energy-slider { @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer; transition: background 0.2s ease-in-out; }
+        .energy-slider {
+            @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer;
+            transition: background 0.2s ease-in-out;
+         }
         /* Base Slider Thumb Style */
         .energy-slider::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: background 0.3s; border: none; background: #9ca3af; }
         .energy-slider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: background 0.3s; border: none; background: #9ca3af; }
+
         /* Slider Thumb Colors */
         #ki-energy-slider::-webkit-slider-thumb { background: #FF9800; } #ki-energy-slider::-moz-range-thumb { background: #FF9800; }
         #nen-energy-slider::-webkit-slider-thumb { background: #2196F3; } #nen-energy-slider::-moz-range-thumb { background: #2196F3; }
@@ -48,6 +127,7 @@
         #alchemy-energy-slider::-webkit-slider-thumb { background: #f59e0b; } #alchemy-energy-slider::-moz-range-thumb { background: #f59e0b; }
         #nature-energy-slider::-webkit-slider-thumb { background: #84cc16; } #nature-energy-slider::-moz-range-thumb { background: #84cc16; }
         #force-energy-slider::-webkit-slider-thumb { background: #d946ef; } #force-energy-slider::-moz-range-thumb { background: #d946ef; }
+
         /* Slider Thumb Hover Colors */
         #ki-energy-slider:hover::-webkit-slider-thumb { background: #e65100; } #ki-energy-slider:hover::-moz-range-thumb { background: #e65100; }
         #nen-energy-slider:hover::-webkit-slider-thumb { background: #0d47a1; } #nen-energy-slider:hover::-moz-range-thumb { background: #0d47a1; }
@@ -59,19 +139,24 @@
         #alchemy-energy-slider:hover::-webkit-slider-thumb { background: #b45309; } #alchemy-energy-slider:hover::-moz-range-thumb { background: #b45309; }
         #nature-energy-slider:hover::-webkit-slider-thumb { background: #4d7c0f; } #nature-energy-slider:hover::-moz-range-thumb { background: #4d7c0f; }
         #force-energy-slider:hover::-webkit-slider-thumb { background: #a21caf; } #force-energy-slider:hover::-moz-range-thumb { background: #a21caf; }
+
         /* Dynamic Modifier Box Styles */
         .modifier-type-option.additive { border-color: theme('colors.success'); color: theme('colors.success-dark'); }
         .modifier-type-option.additive.active { background-color: theme('colors.success-light'); box-shadow: 0 1px 5px rgba(76, 175, 80, 0.3); animation: pulse-additive 0.5s; color: theme('colors.success'); }
         .modifier-type-option.multiplicative { border-color: theme('colors.ki'); color: theme('colors.ki-dark'); }
         .modifier-type-option.multiplicative.active { background-color: theme('colors.ki / 0.1'); box-shadow: 0 1px 5px rgba(255, 152, 0, 0.3); animation: pulse-multiplicative 0.5s; color: theme('colors.ki'); }
+
         /* Custom Animation Classes */
         .animate-pulse-result { animation: pulse-result 0.3s ease-in-out; }
         .animate-flash-red { animation: flash-red-bg 0.5s ease-out; }
         .animate-flash-green { animation: flash-green-bg 0.5s ease-out; }
         .animate-kaioken-glow { animation: kaioken-glow 1.5s infinite ease-in-out; }
-        /* Static Glow classes */
-        .static-glow-ki { box-shadow: 0 0 10px #FF980080; } .static-glow-nen { box-shadow: 0 0 10px #2196F380; } .static-glow-chakra { box-shadow: 0 0 10px #9C27B080; } .static-glow-magic { box-shadow: 0 0 10px #26a69a80; } .static-glow-cursed { box-shadow: 0 0 10px #dc262680; } .static-glow-reiatsu { box-shadow: 0 0 10px #47556980; } .static-glow-haki { box-shadow: 0 0 10px #1f293780; } .static-glow-alchemy { box-shadow: 0 0 10px #f59e0b80; } .static-glow-nature { box-shadow: 0 0 10px #84cc1680; } .static-glow-force { box-shadow: 0 0 10px #d946ef80; }
-        /* Accessibility utility */
+
+        /* Static Glow classes for energy pools */
+        .static-glow-ki { box-shadow: 0 0 10px #FF980080; } .static-glow-nen { box-shadow: 0 0 10px #2196F380; } .static-glow-chakra { box-shadow: 0 0 10px #9C27B080; } .static-glow-magic { box-shadow: 0 0 10px #26a69a80; } .static-glow-cursed { box-shadow: 0 0 10px #dc262680; } .static-glow-reiatsu { box-shadow: 0 0 10px #47556980; } .static-glow-haki { box-shadow: 0 0 10px #1f293780; } .static-glow-alchemy { box-shadow: 0 0 10px #f59e0b80; } .static-glow-nature { box-shadow: 0 0 10px #84cc1680; }
+        .static-glow-force { box-shadow: 0 0 10px #d946ef80; }
+
+        /* Accessibility utility class */
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
         /* Stats Panel Styling */
         .stats-panel { border-left-width: 4px; transition: border-color 0.3s ease-in-out, box-shadow 1.5s ease-in-out; }
@@ -86,40 +171,41 @@
         .regen-btn { @apply px-3 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95; }
         /* Save/Load Button Style */
         .save-load-btn { @apply px-3 py-1 text-sm text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all duration-150 ease-in-out active:scale-95; }
-        /* Readonly display style */
-        .readonly-display { @apply inline-block font-medium text-gray-800 min-h-[42px] px-2 py-2 w-full bg-gray-50 rounded-md border border-gray-200; line-height: 1.5; word-break: break-all; }
+
+        /* Style for span elements used as read-only displays */
+        .readonly-display {
+            @apply inline-block font-medium text-gray-800 min-h-[42px] px-2 py-2 w-full bg-gray-50 rounded-md border border-gray-200;
+            line-height: 1.5; /* Vertically center text */
+            word-break: break-all; /* Prevent layout breaks */
+        }
+
         /* Equation Display Styles */
-        .equation-number { @apply font-semibold text-blue-600 hover:text-blue-800 underline transition-colors duration-150; cursor: pointer; }
-        .equation-number:hover { text-shadow: 0 0 8px rgba(147, 197, 253, 0.8); }
+        .equation-number {
+            @apply font-semibold text-blue-600 hover:text-blue-800 underline transition-colors duration-150;
+            cursor: pointer;
+        }
+        .equation-number:hover {
+             text-shadow: 0 0 8px rgba(147, 197, 253, 0.8); /* blue-300 with alpha */
+        }
         .equation-operator { @apply text-gray-600 mx-1; }
         .equation-group { @apply mx-0.5; }
-        /* Animation for source input pulse */
-        .animate-pulse-source { animation: pulse-source-input 0.8s ease-out; }
+
+        /* Animation for pulsing the source input linked from equation */
+        .animate-pulse-source {
+            animation: pulse-source-input 0.8s ease-out;
+        }
+
         /* Attack Button Active State */
-        .attack-btn.active { @apply ring-2 ring-offset-2 scale-105 brightness-110; }
-        #super-attack-btn.active { @apply ring-blue-600 bg-blue-700; }
-        #ultimate-attack-btn.active { @apply ring-purple-600 bg-purple-700; }
-        /* Form list item */
-        .form-list-item { @apply p-3 bg-gray-100 rounded-md shadow-sm text-sm border border-gray-200; }
-        /* Form dropdown */
-        .form-dropdown { @apply inpt mt-2 bg-white; } /* Reuse inpt style and add margin */
-        /* Specific styles for Form Creator Section */
-        #form-creator-section { @apply border border-teal-200; }
-        #form-creator-section h3 { @apply text-teal-700 border-b border-teal-200 pb-2; }
-        #add-form-btn { @apply mt-4; } /* Use regen-btn structure for styling */
+        .attack-btn.active {
+            @apply ring-2 ring-offset-2 scale-105 brightness-110; /* Add ring, slightly enlarge, and brighten */
+        }
+        #super-attack-btn.active {
+            @apply ring-blue-600 bg-blue-700; /* Specific active style for super */
+        }
+        #ultimate-attack-btn.active {
+            @apply ring-purple-600 bg-purple-700; /* Specific active style for ultimate */
+        }
 
-        /* Style for the Form List Display in Character Stats */
-        #form-list-display-container { /* Add specific styles if needed */}
-        #form-list-display { /* Styles for the list itself */}
-        .displayed-form-item { /* Styles for each item in the list */ }
-
-        /* Style for Form Dropdown in Energy Pool Template */
-        .energy-pool .form-selection-area { /* Container for label and dropdown */ }
-        .energy-pool .form-dropdown-label { /* Style for the dropdown label */ }
-        .energy-pool .form-dropdown { /* Specific dropdown styling within the pool */ }
-
-
-        /* --- Keep the rest of your existing styles --- */
     </style>
 </head>
 <body class="p-4 md:p-6">
@@ -140,227 +226,349 @@
                 <div id="message-area" class="mb-4 p-3 rounded-md text-sm hidden" role="alert"></div>
 
                 <div class="energy-pool bg-white p-5 mb-5 rounded-lg shadow-sm border-l-4 border-gray-400">
-                    <h3 class="text-xl font-semibold mb-4 flex items-center">
-                        Damage Modifiers
-                        <span class="flex-grow h-px bg-gray-200 ml-3"></span>
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div><label for="base-damage" class="lbl">Base Damage:</label><input type="text" id="base-damage" placeholder="e.g., 100" aria-required="true" class="inpt focus:ring-success"></div>
-                        <div><label for="attack-compression-points" class="lbl">Attack Compression Points:</label><input type="text" id="attack-compression-points" placeholder="e.g., 10" value="0" class="inpt focus:ring-red-500"></div>
-                        <div><label for="base-multiplier" class="lbl">Base Multiplier:</label><input type="text" id="base-multiplier" placeholder="e.g., 1.5" value="1" class="inpt focus:ring-success"></div>
-                        <div><label for="form-multiplier" class="lbl">Global Form Multiplier:</label><input type="text" id="form-multiplier" placeholder="e.g., 2" value="1" class="inpt focus:ring-success"></div>
-                    </div>
-                    <div id="dynamic-modifiers-container" class="mb-4"><h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4></div>
-                    <button id="add-dynamic-box" aria-label="Add modifier factor" class="px-4 py-2 bg-chakra text-white rounded-md hover:bg-chakra-dark focus:outline-none focus:ring-2 focus:ring-chakra focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
-                        Add Factor
-                    </button>
-                </div>
+                     <h3 class="text-xl font-semibold mb-4 flex items-center">
+                         Damage Modifiers
+                         <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                         <div><label for="base-damage" class="lbl">Base Damage:</label><input type="text" id="base-damage" placeholder="e.g., 100" aria-required="true" class="inpt focus:ring-success"></div>
+                         <div><label for="attack-compression-points" class="lbl">Attack Compression Points:</label><input type="text" id="attack-compression-points" placeholder="e.g., 10" value="0" class="inpt focus:ring-red-500"></div>
+                         <div><label for="base-multiplier" class="lbl">Base Multiplier:</label><input type="text" id="base-multiplier" placeholder="e.g., 1.5" value="1" class="inpt focus:ring-success"></div>
+                         <div><label for="form-multiplier" class="lbl">Form Multiplier:</label><input type="text" id="form-multiplier" placeholder="e.g., 2" value="1" class="inpt focus:ring-success"></div>
+                     </div>
+                     <div id="dynamic-modifiers-container" class="mb-4"><h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4></div>
+                     <button id="add-dynamic-box" aria-label="Add modifier factor" class="px-4 py-2 bg-chakra text-white rounded-md hover:bg-chakra-dark focus:outline-none focus:ring-2 focus:ring-chakra focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
+                         Add Factor
+                     </button>
+                 </div>
 
-                <div class="form-group mb-5">
-                    <label for="energy-type" class="lbl">Energy Type:</label>
-                    <select id="energy-type" aria-label="Select energy type" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-success focus:border-transparent text-sm bg-white">
-                        <option value="ki">Ki Energy</option>
-                        <option value="nen">Nen Energy</option>
-                        <option value="chakra">Chakra Energy</option>
-                        <option value="magic">Magic Energy</option>
-                        <option value="cursed">Cursed Energy</option>
-                        <option value="reiatsu">Reiatsu</option>
-                        <option value="haki">Haki</option>
-                        <option value="alchemy">Alchemy</option>
-                        <option value="nature">Nature Energy</option>
-                        <option value="force">Force Energy</option>
-                    </select>
-                </div>
+                 <div class="form-group mb-5">
+                     <label for="energy-type" class="lbl">Energy Type:</label>
+                     <select id="energy-type" aria-label="Select energy type" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-success focus:border-transparent text-sm bg-white">
+                         <option value="ki">Ki Energy</option>
+                         <option value="nen">Nen Energy</option>
+                         <option value="chakra">Chakra Energy</option>
+                         <option value="magic">Magic Energy</option>
+                         <option value="cursed">Cursed Energy</option>
+                         <option value="reiatsu">Reiatsu</option>
+                         <option value="haki">Haki</option>
+                         <option value="alchemy">Alchemy</option>
+                         <option value="nature">Nature Energy</option>
+                         <option value="force">Force Energy</option>
+                     </select>
+                 </div>
 
-                <div id="energy-pools-container" class="mb-5">
-                    </div>
-
-                <div id="form-creator-section" class="bg-white p-5 mb-5 rounded-lg shadow-sm border border-teal-200">
-                    <h3 class="text-xl font-semibold mb-4 text-teal-700 border-b border-teal-200 pb-2">Form Creator</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="form-name-input" class="lbl">Form Name:</label>
-                            <input type="text" id="form-name-input" placeholder="e.g., Super Saiyan" class="inpt focus:ring-teal-500">
-                        </div>
-                        <div>
-                            <label for="form-multiplier-input" class="lbl">Form Damage Multiplier:</label>
-                            <input type="text" id="form-multiplier-input" placeholder="e.g., 50" value="1" class="inpt focus:ring-teal-500">
-                        </div>
-                        <div>
-                            <label for="pool-max-multiplier-input" class="lbl">Pool Max Multiplier:</label>
-                            <input type="text" id="pool-max-multiplier-input" placeholder="e.g., 1.5" value="1" class="inpt focus:ring-teal-500">
-                        </div>
-                        <div class="md:col-span-2">
-                           <label for="form-energy-type" class="lbl">Assign to Energy Type:</label>
-                            <select id="form-energy-type" class="inpt focus:ring-teal-500 bg-white">
-                                <option value="ki">Ki</option>
-                                <option value="nen">Nen</option>
-                                <option value="chakra">Chakra</option>
-                                <option value="magic">Magic</option>
-                                <option value="cursed">Cursed</option>
-                                <option value="reiatsu">Reiatsu</option>
-                                <option value="haki">Haki</option>
-                                <option value="alchemy">Alchemy</option>
-                                <option value="nature">Nature</option>
-                                <option value="force">Force</option>
-                            </select>
-                        </div>
-                         <div class="md:col-span-2 flex items-center gap-2 mt-2">
-                            <input type="checkbox" id="resistance-checkbox" class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500">
-                            <label for="resistance-checkbox" class="text-sm text-gray-700 select-none">Does this form affect Resistances?</label>
-                        </div>
-                        <div id="resistance-values" class="hidden md:col-span-2 mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-teal-50 border border-teal-200 rounded-md">
-                            <div>
-                                <label for="ac-value" class="lbl">AC Add/Multiplier:</label>
-                                <input type="text" id="ac-value" placeholder="e.g., +5 or *1.1" class="inpt focus:ring-teal-500">
-                            </div>
-                            <div>
-                                <label for="true-resistance-value" class="lbl">True Resistance Add/Multiplier:</label>
-                                <input type="text" id="true-resistance-value" placeholder="e.g., +10 or *1.2" class="inpt focus:ring-teal-500">
-                            </div>
-                            <p class="sm:col-span-2 text-xs text-gray-500 mt-1">Enter value starting with '+' for additive, '*' for multiplicative (e.g., +10, *1.5). Default is additive if symbol omitted.</p>
-                        </div>
-                    </div>
-                    <button id="add-form-btn" class="regen-btn bg-teal-500 hover:bg-teal-600 focus:ring-teal-400 mt-4">
-                        Add Form to List
-                    </button>
-                </div>
-                <div id="attacks-section" class="bg-white p-5 mb-5 rounded-lg shadow-sm">
+                 <div id="energy-pools-container" class="mb-5">
                      </div>
 
-                <div id="all-sliders-container" class="bg-white p-5 mb-5 rounded-lg shadow-sm">
+                 <div id="attacks-section" class="bg-white p-5 mb-5 rounded-lg shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Attacks</h3>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                         <button id="super-attack-btn" data-attack-type="super" data-reserve-percent="5" class="attack-btn flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
+                             Super Attack (Reserves 5%)
+                         </button>
+                         <button id="ultimate-attack-btn" data-attack-type="ultimate" data-reserve-percent="10" class="attack-btn flex-1 px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
+                             Ultimate Attack (Reserves 10%)
+                         </button>
                     </div>
+                    <p id="attack-status-message" class="text-xs text-gray-500 mt-2 min-h-[1.25rem]"></p>
+                 </div>
 
-                <button id="calculate-btn" aria-label="Calculate final damage value" class="w-full px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 ease-in-out text-lg font-semibold shadow-md mb-5 active:scale-95">
+                 <div id="all-sliders-container" class="bg-white p-5 mb-5 rounded-lg shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Energy Usage Sliders</h3>
+                    <div id="sliders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                         </div>
+                 </div>
+
+                 <button id="calculate-btn" aria-label="Calculate final damage value" class="w-full px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 ease-in-out text-lg font-semibold shadow-md mb-5 active:scale-95">
                     Calculate Damage
                 </button>
 
                 <div id="loading" class="loading text-center p-5 hidden">
-                    </div>
-                <div id="result" class="result bg-success-light p-5 rounded-lg border-l-4 border-success shadow-sm hidden" aria-live="polite">
-                    </div>
+                     <div class="loading-spinner inline-block w-8 h-8 border-4 border-t-success border-gray-200 rounded-full animate-spin" aria-hidden="true"></div>
+                     <div class="loading-text mt-2 text-gray-600">Calculating...</div><span class="sr-only">Loading, please wait</span>
+                 </div>
+
+                 <div id="result" class="result bg-success-light p-5 rounded-lg border-l-4 border-success shadow-sm hidden" aria-live="polite">
+                    <div class="result-title text-lg font-semibold mb-2 text-success-dark">Calculated Damage:</div>
+                    <div id="result-value" class="result-value text-3xl font-bold mb-3 break-words">0</div>
+                    <div id="result-details" class="result-details text-sm text-gray-700 mt-3 border-t border-success/30 pt-3">
+                         <p><strong>Total Energy Used:</strong> <span id="result-total-energy-used">0</span></p>
+                         <p><strong>Total Extra Damage from Energy:</strong> <span id="result-total-extra-damage">0.00</span></p>
+                         <div class="mt-3 pt-3 border-t border-success/20">
+                             <p class="font-semibold mb-1">Calculation:</p>
+                             <div id="equation-display" class="text-sm bg-gray-50 p-2 rounded border border-gray-200 break-words leading-relaxed">
+                                 Equation not yet calculated.
+                             </div>
+                         </div>
+                         <hr class="my-2 border-success/20"> <p><strong>Scientific Notation:</strong> <span id="result-scientific">0</span></p>
+                         <p><strong>In Words:</strong> <span id="result-words">Zero</span></p>
+                     </div>
+                 </div>
 
             </div> <div id="stats-panel" class="stats-panel md:w-1/4 lg:w-1/5 p-5 bg-white rounded-lg shadow-sm self-start sticky top-6 border-stats-border">
-                 </div> </div> </div> <div id="character-stats-screen" class="hidden bg-white p-6 rounded-lg shadow-md max-w-7xl mx-auto mt-6 border border-gray-200">
-         <div class="flex justify-between items-center mb-4 border-b pb-2">
+                 <h3 id="stats-panel-header" class="stats-panel-header text-xl font-semibold mb-4 flex items-center text-stats-header">
+                     Stats
+                     <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
+                 <div class="space-y-3">
+                     <p class="text-sm text-gray-600">Selected Current Energy: <span id="stat-current-energy" class="font-medium text-gray-800 break-words">0</span></p>
+                     <hr class="border-gray-200">
+                     <p class="text-sm text-gray-600">Total Damage Dealt: <span id="stat-total-damage" class="font-medium text-gray-800 break-words">0</span></p>
+                     <p class="text-sm text-gray-600">Total Energy Spent: <span id="stat-total-energy-spent" class="font-medium text-gray-800 break-words">0</span></p>
+                     <p class="text-sm text-gray-600">Highest Damage: <span id="stat-highest-damage" class="font-medium text-gray-800 break-words">0</span></p>
+                     <div class="flex items-center justify-between text-sm text-gray-600">
+                         <span>Number of Attacks: <span id="stat-attack-count" class="font-medium text-gray-800 break-words">0</span></span>
+                         <button id="reset-attack-count-btn" title="Reset Attack Count" class="px-2 py-0.5 text-xs bg-gray-200 hover:bg-red-200 text-gray-600 hover:text-red-700 rounded focus:outline-none focus:ring-1 focus:ring-red-400 focus:ring-offset-1 transition-colors duration-150 active:scale-95">
+                             Reset?
+                         </button>
+                     </div>
+                     <div id="kaioken-section" class="hidden pt-3 border-t border-gray-200">
+                         <div class="flex items-center gap-2 mb-3">
+                             <input type="checkbox" id="kaioken-checkbox" class="rounded border-gray-300 text-red-600 shadow-sm focus:ring-kaioken-focus">
+                             <label for="kaioken-checkbox" class="text-sm font-medium text-kaioken-header">Kaioken?</label>
+                         </div>
+                         <div id="kaioken-details" class="hidden space-y-2">
+                             <div class="flex items-center gap-2">
+                                 <div class="flex-grow">
+                                     <label for="max-health" class="lbl">Max Health:</label>
+                                     <input type="text" id="max-health" placeholder="e.g., 1000" value="1000" class="inpt focus:ring-kaioken-focus">
+                                 </div>
+                                 <button id="regen-health-btn" title="Regenerate Health to Max" class="px-2 py-1 text-xs bg-success hover:bg-success-dark text-white rounded-md focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-1 self-end mb-1 transition-transform active:scale-95">Regen Health</button>
+                             </div>
+                             <div><label for="kaioken-strain" class="lbl">Kaioken Strain (% Max HP):</label><input type="text" id="kaioken-strain" placeholder="e.g., 10" value="10" class="inpt focus:ring-kaioken-focus"></div>
+                             <div>
+                                 <label class="lbl">Current Health:</label>
+                                 <span id="current-health" class="readonly-display current-health">1000</span>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             </div> </div> </div> <div id="character-stats-screen" class="hidden bg-white p-6 rounded-lg shadow-md max-w-7xl mx-auto mt-6 border border-gray-200">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
             <h2 class="text-2xl font-bold text-gray-700">Character Stats</h2>
             </div>
-         <div id="form-list-display-container" class="mt-6 pt-4 border-t border-gray-200">
-             <h3 class="text-xl font-semibold mb-4 text-gray-700">Created Forms</h3>
-             <div id="form-list-display" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-60 overflow-y-auto">
-                 <p id="no-forms-message" class="text-gray-500 text-sm italic md:col-span-2 lg:col-span-3">No forms created yet.</p>
+        <div class="flex justify-center items-center flex-col mt-8">
+            <label for="character-name" class="lbl text-lg mb-2">Character Name:</label>
+            <input type="text" id="character-name" placeholder="Enter character name" class="inpt w-full md:w-1/2 lg:w-1/3 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-focus focus:border-transparent text-center">
+        </div>
+        <div id="character-stats-inputs" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            <div>
+                <label for="char-base-health" class="lbl">Base Health:</label>
+                <input type="text" id="char-base-health" placeholder="e.g., 1000" class="inpt focus:ring-teal-focus">
+            </div>
+            <div>
+                <label for="char-base-multiplier" class="lbl">Base Multiplier:</label>
+                <input type="text" id="char-base-multiplier" placeholder="e.g., 1" value="1" class="inpt focus:ring-teal-focus"> </div>
+            <div class="md:col-span-2 flex items-center gap-2 mt-1 -mb-2"> <input type="checkbox" id="ryoko-checkbox" class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500">
+                <label for="ryoko-checkbox" class="text-sm text-gray-700 select-none">Are you Ryoko?</label>
+            </div>
+             <div id="ryoko-equation-input-container" class="hidden md:col-span-2 mt-2"> <label for="ryoko-equation-input" class="lbl text-red-600">Type out your shit equation:</label> <input type="text" id="ryoko-equation-input" placeholder="Enter equation value..." class="inpt focus:ring-red-500 border-red-300"> </div>
+            <div>
+                <label for="char-vitality" class="lbl">Vitality:</label>
+                <input type="text" id="char-vitality" placeholder="e.g., 50" class="inpt focus:ring-teal-focus">
+            </div>
+            <div>
+                <label for="char-soul-power" class="lbl">Soul Power:</label>
+                <input type="text" id="char-soul-power" placeholder="e.g., 100" class="inpt focus:ring-teal-focus">
+            </div>
+            <div>
+                <label for="char-soul-hp" class="lbl">Soul HP:</label>
+                <input type="text" id="char-soul-hp" placeholder="e.g., 200" class="inpt focus:ring-teal-focus">
+            </div>
+        </div>
+    </div>
+
+
+    <template id="energy-pool-template">
+        <div class="energy-pool bg-gradient-to-br from-white p-5 mb-5 rounded-lg shadow-sm border-l-4" style="display: none;">
+             <h3 class="text-xl font-semibold mb-4 flex items-center">
+                 <span class="pool-title">Energy Pool Title</span>
+                 <span class="flex-grow h-px bg-gray-200 ml-3"></span>
+             </h3>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div>
+                     <label class="lbl base-max-energy-label">Base Max Energy (Calculated):</label>
+                     <span id="" class="readonly-display base-max-energy">0</span> </div>
+                 <div><label class="lbl max-multiplier-label" for="">Pool Max Multiplier:</label><input type="text" value="1" class="inpt max-multiplier"></div>
+                 <div>
+                     <label class="lbl total-energy-label">Total Energy (Calculated):</label>
+                     <span id="" class="readonly-display total-energy">0</span> </div>
+                 <div>
+                     <label class="lbl current-energy-label">Current Energy:</label>
+                     <span id="" class="readonly-display current-energy">0</span> </div>
+                 <div><label class="lbl damage-per-power-label" for="">Damage per Energy Point:</label><input type="text" value="1" class="inpt damage-per-power"></div>
+                 <div>
+                     <label class="lbl regen-percent-label" for="">Regeneration Rate (% of Total):</label>
+                     <div class="flex items-center gap-2">
+                         <input type="text" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:border-transparent text-sm regen-percent">
+                         <button class="regen-btn bg-success hover:bg-success-dark focus:ring-success px-3 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">Regen</button>
+                     </div>
+                 </div>
              </div>
          </div>
-         </div> <template id="energy-pool-template">
-        <div class="energy-pool bg-gradient-to-br from-white p-5 mb-5 rounded-lg shadow-sm border-l-4" style="display: none;">
-            <h3 class="text-xl font-semibold mb-4 flex items-center">
-                <span class="pool-title">Energy Pool Title</span>
-                <span class="flex-grow h-px bg-gray-200 ml-3"></span>
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="lbl base-max-energy-label">Base Max Energy (Calculated):</label>
-                    <span id="" class="readonly-display base-max-energy">0</span>
-                </div>
-                <div><label class="lbl max-multiplier-label" for="">Pool Max Multiplier:</label><input type="text" value="1" class="inpt max-multiplier"></div>
-                <div>
-                    <label class="lbl total-energy-label">Total Energy (Calculated):</label>
-                    <span id="" class="readonly-display total-energy">0</span>
-                </div>
-                <div>
-                    <label class="lbl current-energy-label">Current Energy:</label>
-                    <span id="" class="readonly-display current-energy">0</span>
-                </div>
-                <div><label class="lbl damage-per-power-label" for="">Damage per Energy Point:</label><input type="text" value="1" class="inpt damage-per-power"></div>
-                <div>
-                    <label class="lbl regen-percent-label" for="">Regeneration Rate (% of Total):</label>
-                    <div class="flex items-center gap-2">
-                        <input type="text" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:border-transparent text-sm regen-percent">
-                        <button class="regen-btn bg-success hover:bg-success-dark focus:ring-success px-3 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">Regen</button>
-                    </div>
-                </div>
+     </template>
 
-                <div class="md:col-span-2 mt-3 pt-3 border-t border-gray-200 form-selection-area hidden"> <label class="lbl form-dropdown-label" for="">Select Active Form:</label>
-                     <select class="form-dropdown inpt bg-white">
-                         <option value="1" data-pool-max="1" data-ac="0" data-true-resistance="0" data-form-name="Base Form">Base Form (No Multiplier)</option>
-                         </select>
-                </div>
-                 </div>
-        </div>
-    </template>
-
-    <template id="energy-slider-template">
-       </template>
+     <template id="energy-slider-template">
+         <div class="energy-slider-section hidden">
+             <label class="lbl text-sm slider-label" for="">Energy Used (%):</label>
+             <input type="range" class="energy-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" min="0" max="100" value="0">
+             <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div>
+             <div class="energy-slider-value-display flex justify-between items-center text-xs bg-gray-100 text-gray-700 p-1 rounded-md min-h-[2.5rem]">
+                 <span class="slider-percent-value">0%</span>
+                 <span class="slider-details-value text-right">(E: 0, D: 0.00)</span>
+             </div>
+         </div>
+     </template>
 
 
     <script>
-        // --- Original DOM Element References & Global State (Keep these) ---
+        // --- DOM Element References ---
         const energyTypeSelect = document.getElementById('energy-type');
         const energyPoolsContainer = document.getElementById('energy-pools-container');
-        // ... (keep all other original const declarations)
+        const slidersGrid = document.getElementById('sliders-grid');
+        const energyPoolTemplate = document.getElementById('energy-pool-template');
+        const energySliderTemplate = document.getElementById('energy-slider-template');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const resultDiv = document.getElementById('result');
+        const resultValueEl = document.getElementById('result-value');
+        const resultTotalEnergyUsedEl = document.getElementById('result-total-energy-used');
+        const resultTotalExtraDamageEl = document.getElementById('result-total-extra-damage');
+        const resultScientificEl = document.getElementById('result-scientific');
+        const resultWordsEl = document.getElementById('result-words');
+        const equationDisplayEl = document.getElementById('equation-display');
+        const loadingDiv = document.getElementById('loading');
+        const messageArea = document.getElementById('message-area');
+        const dynamicModifiersContainer = document.getElementById('dynamic-modifiers-container');
+        const addDynamicBoxBtn = document.getElementById('add-dynamic-box');
+        const baseDamageInput = document.getElementById('base-damage');
+        const baseMultiplierInput = document.getElementById('base-multiplier');
+        const formMultiplierInput = document.getElementById('form-multiplier');
+        const attackCompressionPointsInput = document.getElementById('attack-compression-points');
+        const statsPanel = document.getElementById('stats-panel');
+        const statsPanelHeader = document.getElementById('stats-panel-header');
+        const statCurrentEnergyEl = document.getElementById('stat-current-energy');
+        const statTotalDamageEl = document.getElementById('stat-total-damage');
+        const statTotalEnergySpentEl = document.getElementById('stat-total-energy-spent');
+        const statAttackCountEl = document.getElementById('stat-attack-count');
+        const statHighestDamageEl = document.getElementById('stat-highest-damage');
+        const resetAttackCountBtn = document.getElementById('reset-attack-count-btn');
+        const kaiokenSection = document.getElementById('kaioken-section');
+        const kaiokenCheckbox = document.getElementById('kaioken-checkbox');
+        const kaiokenDetails = document.getElementById('kaioken-details');
+        const maxHealthInput = document.getElementById('max-health');
+        const kaiokenStrainInput = document.getElementById('kaioken-strain');
+        const currentHealthEl = document.getElementById('current-health');
+        const regenHealthBtn = document.getElementById('regen-health-btn');
+        const saveBtn = document.getElementById('save-state-btn');
+        const loadBtn = document.getElementById('load-state-btn');
+        const clearBtn = document.getElementById('clear-state-btn');
+        const superAttackBtn = document.getElementById('super-attack-btn');
+        const ultimateAttackBtn = document.getElementById('ultimate-attack-btn');
+        const attackStatusMessage = document.getElementById('attack-status-message');
+        // Tab Switching References
+        const showCharacterStatsBtn = document.getElementById('show-character-stats-btn');
+        const characterStatsScreen = document.getElementById('character-stats-screen');
+        const mainCalculatorContent = document.getElementById('main-calculator-content');
+        const mainTitle = document.querySelector('h1.text-3xl');
+        // Character Stats Input References
+        const characterNameInput = document.getElementById('character-name');
+        const charBaseHealthInput = document.getElementById('char-base-health');
+        const charBaseMultiplierInput = document.getElementById('char-base-multiplier');
+        const charVitalityInput = document.getElementById('char-vitality');
+        const charSoulPowerInput = document.getElementById('char-soul-power');
+        const charSoulHpInput = document.getElementById('char-soul-hp');
+        // Ryoko Mode References
+        const ryokoCheckbox = document.getElementById('ryoko-checkbox');
+        const ryokoEquationContainer = document.getElementById('ryoko-equation-input-container');
         const ryokoEquationInput = document.getElementById('ryoko-equation-input');
 
-        // --- NEW: Form Creator/List Element References ---
-        const formCreatorSection = document.getElementById('form-creator-section');
-        const formNameInput = document.getElementById('form-name-input'); // Added name input
-        const formMultiplierInput_creator = document.getElementById('form-multiplier-input'); // Renamed to avoid conflict
-        const poolMaxMultiplierInput_creator = document.getElementById('pool-max-multiplier-input');
-        const resistanceCheckbox = document.getElementById('resistance-checkbox');
-        const resistanceValues = document.getElementById('resistance-values');
-        const acValueInput = document.getElementById('ac-value');
-        const trueResistanceValueInput = document.getElementById('true-resistance-value');
-        const formEnergyTypeSelect = document.getElementById('form-energy-type');
-        const addFormBtn = document.getElementById('add-form-btn');
-        const formListDisplay = document.getElementById('form-list-display'); // Display area in Character Stats
-        const noFormsMessage = document.getElementById('no-forms-message');
 
-        // --- Global State (Keep original + add forms) ---
+        // --- Global State & Constants ---
         let totalDamageDealt = 0, totalEnergySpent = 0, attackCount = 0, highestDamage = 0;
-        const LOCAL_STORAGE_KEY = 'energyCalculatorState_v1.3'; // Incremented version for state
+        const LOCAL_STORAGE_KEY = 'energyCalculatorState_v1.2';
         let poolAnimationTimeoutId = null;
         const ALL_ENERGY_TYPES = ['ki', 'nen', 'chakra', 'magic', 'cursed', 'reiatsu', 'haki', 'alchemy', 'nature', 'force'];
         let dynamicModifierCount = 0;
         let activeAttacks = {};
-        let characterForms = {}; // NEW: Store created forms { energyType: [formObj, ...], ... }
         const ATTACK_RESERVE_COLOR = '#fed7aa';
         const SLIDER_TRACK_COLOR = '#e5e7eb';
+        // Default Ryoko Equation String (commas removed for math.js)
         const DEFAULT_RYOKO_EQUATION = '((11250000 * 19 * 10 * 25 * 5 * 10 * 5 * 470) / 2) * 110';
 
-        const ENERGY_TYPE_DETAILS = { /* ... Keep your existing details object ... */ };
 
-        // --- Utility Functions (Keep all original functions) ---
-        // safeParseFloat, formatSimpleNumber, showMessage, showLoading, triggerAnimation,
-        // formatStatNumber, parseFormattedNumber, escapeHtml
+        const ENERGY_TYPE_DETAILS = {
+            ki:      { name: 'Ki',      color: 'ki',      colorDark: 'ki-dark',      gradientTo: 'to-orange-100', focusRing: 'focus:ring-ki-focus',      staticGlow: 'static-glow-ki',      pulseGlow: 'animate-pulse-glow-ki',      border: 'border-l-ki' },
+            nen:      { name: 'Nen',     color: 'nen',     colorDark: 'nen-dark',     gradientTo: 'to-blue-100',   focusRing: 'focus:ring-nen-focus',     staticGlow: 'static-glow-nen',     pulseGlow: 'animate-pulse-glow-nen',     border: 'border-l-nen' },
+            chakra:   { name: 'Chakra',  color: 'chakra',  colorDark: 'chakra-dark',  gradientTo: 'to-purple-100', focusRing: 'focus:ring-chakra-focus',  staticGlow: 'static-glow-chakra',  pulseGlow: 'animate-pulse-glow-chakra',  border: 'border-l-chakra' },
+            magic:    { name: 'Magic',   color: 'magic',   colorDark: 'magic-dark',   gradientTo: 'to-teal-100',   focusRing: 'focus:ring-magic-focus',   staticGlow: 'static-glow-magic',   pulseGlow: 'animate-pulse-glow-magic',   border: 'border-l-magic' },
+            cursed:   { name: 'Cursed',  color: 'cursed',  colorDark: 'cursed-dark',  gradientTo: 'to-red-100',    focusRing: 'focus:ring-cursed-focus',  staticGlow: 'static-glow-cursed',  pulseGlow: 'animate-pulse-glow-cursed',  border: 'border-l-cursed' },
+            reiatsu: { name: 'Reiatsu', color: 'reiatsu', colorDark: 'reiatsu-dark', gradientTo: 'to-slate-100',  focusRing: 'focus:ring-reiatsu-focus', staticGlow: 'static-glow-reiatsu', pulseGlow: 'animate-pulse-glow-reiatsu', border: 'border-l-reiatsu' },
+            haki:     { name: 'Haki',    color: 'haki',    colorDark: 'haki-dark',    gradientTo: 'to-gray-100',   focusRing: 'focus:ring-haki-focus',    staticGlow: 'static-glow-haki',    pulseGlow: 'animate-pulse-glow-haki',    border: 'border-l-haki' },
+            alchemy: { name: 'Alchemy', color: 'alchemy', colorDark: 'alchemy-dark', gradientTo: 'to-amber-100',  focusRing: 'focus:ring-alchemy-focus', staticGlow: 'static-glow-alchemy', pulseGlow: 'animate-pulse-glow-alchemy', border: 'border-l-alchemy' },
+            nature:   { name: 'Nature',  color: 'nature',  colorDark: 'nature-dark',  gradientTo: 'to-lime-100',   focusRing: 'focus:ring-nature-focus',  staticGlow: 'static-glow-nature',  pulseGlow: 'animate-pulse-glow-nature',  border: 'border-l-nature' },
+            force:    { name: 'Force',   color: 'force',   colorDark: 'force-dark',   gradientTo: 'to-fuchsia-100',focusRing: 'focus:ring-force-focus',   staticGlow: 'static-glow-force',   pulseGlow: 'animate-pulse-glow-force',   border: 'border-l-force' },
+        };
 
-        // --- Energy Pool Logic (Keep original functions, MAY NEED MODIFICATION LATER) ---
-        // getEnergyElements, calculateBaseMaxEnergy, updateSliderVisibility,
-        // calculateAndResetEnergy, regenerateEnergy
+        // --- Utility Functions ---
 
-        // --- Kaioken Styling & Health Update (Keep original functions) ---
-        // applyKaiokenStyle, removeKaiokenStyle, updateCurrentHealthDisplay, regenerateHealth
+        function safeParseFloat(value, defaultValue = 0) { if (typeof value !== 'string' && typeof value !== 'number') return defaultValue; const num = parseFloat(String(value).replace(/,/g, '')); return isNaN(num) ? defaultValue : num; }
+        function formatSimpleNumber(num) { if (typeof num !== 'number' || isNaN(num)) return '0'; try { const options = { maximumFractionDigits: 2 }; return num.toLocaleString('en-US', options); } catch (e) { return num.toString(); } }
+        function showMessage(text, type = 'info') { messageArea.textContent = text; messageArea.className = 'mb-4 p-3 rounded-md text-sm border animate__animated'; messageArea.classList.remove('hidden', 'animate__fadeIn', 'animate__shakeX'); let animationClass = 'animate__fadeIn'; switch (type) { case 'error': messageArea.classList.add('bg-error-light', 'text-error-dark', 'border-error'); animationClass = 'animate__shakeX'; break; case 'success': messageArea.classList.add('bg-success-light', 'text-success-dark', 'border-success'); break; default: messageArea.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300'); break; } messageArea.classList.add(animationClass); messageArea.addEventListener('animationend', () => { messageArea.classList.remove('animate__animated', animationClass); }, { once: true }); setTimeout(() => { messageArea.classList.add('hidden'); }, 5000); }
+        function showLoading(isLoading) { loadingDiv.classList.toggle('hidden', !isLoading); if(isLoading) resultDiv.classList.add('hidden'); calculateBtn.disabled = isLoading; calculateBtn.classList.toggle('opacity-50', isLoading); calculateBtn.classList.toggle('cursor-not-allowed', isLoading); }
+        function triggerAnimation(element, animationName, duration = 800) { if (!element || !animationName) return; const animateCSSBase = 'animate__animated'; const animationClass = animationName.startsWith('animate__') ? animationName : `animate__${animationName}`; const classesToAdd = [animateCSSBase, animationClass]; element.classList.remove(...classesToAdd); void element.offsetWidth; element.classList.add(...classesToAdd); element.addEventListener('animationend', () => { element.classList.remove(...classesToAdd); }, { once: true }); }
+        function formatStatNumber(num) { if (typeof num !== 'number' || isNaN(num)) return '0'; const absNum = Math.abs(num); if (absNum >= 1e9) { return num.toExponential(2); } if (absNum >= 1e6) { let shortNum = num / 1e6; let formatted = shortNum.toLocaleString('en-US', { minimumFractionDigits: absNum < 10e6 ? 2 : 1, maximumFractionDigits: absNum < 10e6 ? 2 : 1 }); formatted = formatted.replace(/\.0$/, ''); return formatted + 'M'; } if (absNum >= 1e3) { let shortNum = num / 1e3; let formatted = shortNum.toLocaleString('en-US', { minimumFractionDigits: absNum < 10e3 ? 2 : 1, maximumFractionDigits: absNum < 10e3 ? 2 : 1 }); formatted = formatted.replace(/\.0$/, ''); return formatted + 'K'; } if (absNum < 1000) { return num.toLocaleString('en-US', { maximumFractionDigits: 2 }); } return num.toLocaleString('en-US'); }
+        function parseFormattedNumber(str) { if (typeof str !== 'string' && typeof str !== 'number') return 0; if (typeof str === 'number') return isNaN(str) ? 0 : str; str = str.trim().toUpperCase().replace(/,/g, ''); if (str.includes('E')) { const num = parseFloat(str); return isNaN(num) ? 0 : num; } const lastChar = str.slice(-1); const numPart = parseFloat(str.slice(0, -1)); const fullNum = parseFloat(str); if (!isNaN(fullNum) && !['K', 'M', 'B', 'T', 'Q'].includes(lastChar)) { return fullNum; } if (isNaN(numPart) && ['K', 'M', 'B', 'T', 'Q'].includes(lastChar)) return 0; switch (lastChar) { case 'K': return numPart * 1e3; case 'M': return numPart * 1e6; case 'B': return numPart * 1e9; case 'T': return numPart * 1e12; case 'Q': return numPart * 1e15; default: return isNaN(fullNum) ? 0 : fullNum; } }
+        function escapeHtml(unsafe) { if (typeof unsafe !== 'string') return ''; return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 
-        // --- Show/Hide Logic & Pool Animation (Keep original functions) ---
-        // showSelectedEnergyPool
 
-        // --- Attack Logic (Keep original functions) ---
-        // updateAttackButtonStates, updateSliderLimitAndStyle, handleAttackButtonClick
+        // --- Energy Pool Logic ---
 
-        // --- Dynamic Modifiers Logic (Keep original functions) ---
-        // addDynamicModifier, addListenersToModifierBox
+        function getEnergyElements(type) { if (!ALL_ENERGY_TYPES.includes(type)) { console.error("Invalid energy type requested:", type); return null; } return { poolDiv: document.getElementById(`${type}-pool`), baseMaxEnergyEl: document.getElementById(`${type}-base-max-energy`), maxMultiplierEl: document.getElementById(`${type}-max-multiplier`), totalEnergyEl: document.getElementById(`${type}-total-energy`), currentEnergyEl: document.getElementById(`${type}-current-energy`), damagePerPowerEl: document.getElementById(`${type}-damage-per-power`), regenPercentEl: document.getElementById(`${type}-regen-percent`), sliderSection: document.getElementById(`${type}-slider-section`), energySlider: document.getElementById(`${type}-energy-slider`), sliderValueDisplay: document.getElementById(`${type}-slider-value-display`) }; }
+        function calculateBaseMaxEnergy(type) { const baseHp = safeParseFloat(charBaseHealthInput?.value, 0); const vitality = safeParseFloat(charVitalityInput?.value, 0); const soulPower = safeParseFloat(charSoulPowerInput?.value, 0); const soulHp = safeParseFloat(charSoulHpInput?.value, 0); let baseMax = 0; switch (type) { case 'nen': baseMax = vitality * soulHp; break; case 'chakra': baseMax = vitality * (0.5 * soulHp + 0.5 * soulPower); break; case 'reiatsu': baseMax = soulHp * vitality * soulPower; break; case 'cursed': baseMax = soulPower * soulHp; break; case 'ki': case 'haki': baseMax = vitality * (soulPower + soulHp); break; case 'alchemy': baseMax = soulPower * baseHp; break; case 'nature': baseMax = vitality * (soulHp + baseHp + soulPower); break; case 'magic': baseMax = soulPower * (soulHp + baseHp + vitality); break; case 'force': baseMax = soulHp + vitality; break; /* UPDATED */ default: console.warn(`Unknown energy type for base max calculation: ${type}`); baseMax = 0; } return Math.max(0, baseMax); }
+        function updateSliderVisibility(type) { const els = getEnergyElements(type); if (els?.totalEnergyEl && els.sliderSection) { const totalEnergy = parseFormattedNumber(els.totalEnergyEl.textContent); const shouldShow = totalEnergy > 0; els.sliderSection.classList.toggle('hidden', !shouldShow); if (!shouldShow && els.energySlider) { els.energySlider.value = 0; updateSingleSliderDisplay(type); } } }
+        function calculateAndResetEnergy(type) { const els = getEnergyElements(type); if (!els?.baseMaxEnergyEl || !els?.maxMultiplierEl || !els?.totalEnergyEl || !els?.currentEnergyEl) { console.error(`Elements missing for energy calculation/reset: ${type}`); return 0; } const baseMaxEnergy = calculateBaseMaxEnergy(type); els.baseMaxEnergyEl.textContent = formatStatNumber(baseMaxEnergy); const poolMultiplier = safeParseFloat(els.maxMultiplierEl.value, 1); const characterBaseMultiplier = safeParseFloat(charBaseMultiplierInput.value, 1); const totalEnergy = baseMaxEnergy * characterBaseMultiplier * poolMultiplier; els.totalEnergyEl.textContent = formatStatNumber(totalEnergy); els.currentEnergyEl.textContent = formatStatNumber(totalEnergy); updateSliderVisibility(type); updateSingleSliderDisplay(type); return totalEnergy; }
+        function regenerateEnergy(type) { const els = getEnergyElements(type); if (!els?.totalEnergyEl || !els?.currentEnergyEl || !els?.regenPercentEl) { console.error(`Elements missing for energy regeneration: ${type}`); return; } const totalEnergy = parseFormattedNumber(els.totalEnergyEl.textContent); let currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent); const regenPercent = safeParseFloat(els.regenPercentEl.value, 0); if (totalEnergy <= 0) { showMessage('Total Energy must be positive (check character stats and multiplier) to regenerate.', 'error'); return; } if (regenPercent <= 0) { showMessage('Regen Rate must be positive.', 'error'); return; } const regenAmount = totalEnergy * (regenPercent / 100); let newEnergy = Math.min(currentEnergy + regenAmount, totalEnergy); els.currentEnergyEl.textContent = formatStatNumber(newEnergy); showMessage(`${formatStatNumber(regenAmount)} ${type} regenerated. Current: ${formatStatNumber(newEnergy)}`, 'success'); triggerAnimation(els.currentEnergyEl, 'flash-green'); updateSingleSliderDisplay(type); updateStatsDisplay(); }
 
-        // --- Stats Update Logic (Keep original functions) ---
-        // updateStatsDisplay
 
-        // --- Calculation Logic (Keep original functions, NEEDS MODIFICATION FOR FORMS/RESISTANCES) ---
-        // updateSingleSliderDisplay, performCalculation
+        // --- Kaioken Styling --- (Unchanged)
+        function applyKaiokenStyle() { if (!statsPanel || !statsPanelHeader) return; statsPanel.classList.remove('border-stats-border'); statsPanel.classList.add('border-kaioken-border', 'animate-kaioken-glow'); statsPanelHeader.classList.remove('text-stats-header'); statsPanelHeader.classList.add('text-kaioken-header'); }
+        function removeKaiokenStyle() { if (!statsPanel || !statsPanelHeader) return; statsPanel.classList.add('border-stats-border'); statsPanel.classList.remove('border-kaioken-border', 'animate-kaioken-glow'); statsPanelHeader.classList.add('text-stats-header'); statsPanelHeader.classList.remove('text-kaioken-header'); }
 
-        // --- Number Formatting (Keep original functions) ---
-        // displayAllFormats, convertNumberToWords
+        // --- Health Update --- (Unchanged)
+        function updateCurrentHealthDisplay() { if (!currentHealthEl || !maxHealthInput) return; const maxHealth = safeParseFloat(maxHealthInput.value, 0); let currentHealth = parseFormattedNumber(currentHealthEl.textContent); if ((energyTypeSelect.value === 'ki' && kaiokenCheckbox.checked) || currentHealth === -1 || currentHealth > maxHealth || currentHealthEl.textContent.trim() === '' || currentHealthEl.textContent === '0') { currentHealthEl.textContent = formatStatNumber(maxHealth); } }
+        function regenerateHealth() { if (!maxHealthInput || !currentHealthEl) { console.error("Health elements missing for regeneration."); return; } const maxHealth = safeParseFloat(maxHealthInput.value, 0); currentHealthEl.textContent = formatStatNumber(maxHealth); showMessage('Health fully regenerated!', 'success'); triggerAnimation(currentHealthEl, 'flash-green'); }
 
-        // --- State Management (NEEDS MODIFICATION FOR FORMS) ---
+
+        // --- Show/Hide Logic & Pool Animation --- (Unchanged)
+        function showSelectedEnergyPool() { const selectedType = energyTypeSelect.value; const details = ENERGY_TYPE_DETAILS[selectedType]; let newlyVisiblePool = null; if (poolAnimationTimeoutId) { clearTimeout(poolAnimationTimeoutId); poolAnimationTimeoutId = null; } ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); const typeDetails = ENERGY_TYPE_DETAILS[type]; if (els?.poolDiv && typeDetails) { els.poolDiv.classList.remove(typeDetails.pulseGlow, typeDetails.staticGlow, 'animate__animated', 'animate__fadeIn'); if (type !== selectedType) { els.poolDiv.style.display = 'none'; } } }); calculateAndResetEnergy(selectedType); const poolToShowEls = getEnergyElements(selectedType); if (poolToShowEls?.poolDiv && details) { poolToShowEls.poolDiv.style.display = 'block'; newlyVisiblePool = poolToShowEls.poolDiv; poolToShowEls.poolDiv.classList.add('animate__animated', 'animate__fadeIn'); poolToShowEls.poolDiv.classList.add(details.pulseGlow); poolToShowEls.poolDiv.addEventListener('animationend', (e) => { if (e.animationName === 'fadeIn') { poolToShowEls.poolDiv.classList.remove('animate__animated', 'animate__fadeIn'); } } , { once: true }); poolAnimationTimeoutId = setTimeout(() => { const currentSelectedType = energyTypeSelect.value; const stillSelectedPoolEls = getEnergyElements(currentSelectedType); const stillSelectedDetails = ENERGY_TYPE_DETAILS[currentSelectedType]; if (stillSelectedPoolEls?.poolDiv && stillSelectedDetails && currentSelectedType === selectedType) { stillSelectedPoolEls.poolDiv.classList.remove(stillSelectedDetails.pulseGlow); stillSelectedPoolEls.poolDiv.classList.add(stillSelectedDetails.staticGlow); } poolAnimationTimeoutId = null; }, 5000); } if (kaiokenSection) { if (selectedType === 'ki') { kaiokenSection.classList.remove('hidden'); if (kaiokenCheckbox.checked) { kaiokenDetails.classList.remove('hidden'); updateCurrentHealthDisplay(); } } else { kaiokenSection.classList.add('hidden'); if (kaiokenCheckbox.checked) { kaiokenCheckbox.checked = false; kaiokenDetails.classList.add('hidden'); removeKaiokenStyle(); } } } updateAttackButtonStates(selectedType); updateSliderLimitAndStyle(selectedType); updateStatsDisplay(); }
+
+
+         // --- Attack Logic --- (Unchanged)
+          function updateAttackButtonStates(type) { const currentAttack = activeAttacks[type] || null; superAttackBtn.classList.toggle('active', currentAttack === 'super'); ultimateAttackBtn.classList.toggle('active', currentAttack === 'ultimate'); let statusClasses = 'text-xs mt-2 min-h-[1.25rem]'; if (currentAttack === 'super') { attackStatusMessage.textContent = `Super Attack active for ${ENERGY_TYPE_DETAILS[type]?.name || type}. Slider limited to 95%.`; attackStatusMessage.className = `${statusClasses} text-blue-600`; } else if (currentAttack === 'ultimate') { attackStatusMessage.textContent = `Ultimate Attack active for ${ENERGY_TYPE_DETAILS[type]?.name || type}. Slider limited to 90%.`; attackStatusMessage.className = `${statusClasses} text-purple-600`; } else { attackStatusMessage.textContent = ''; attackStatusMessage.className = `${statusClasses} text-gray-500`; } }
+          function updateSliderLimitAndStyle(type) { const els = getEnergyElements(type); if (!els?.energySlider) return; const slider = els.energySlider; const activeAttack = activeAttacks[type] || null; let limitPercent = 100; let gradientStyle = `linear-gradient(to right, ${SLIDER_TRACK_COLOR} 100%, ${ATTACK_RESERVE_COLOR} 100%)`; if (activeAttack === 'super') { limitPercent = 95; gradientStyle = `linear-gradient(to right, ${SLIDER_TRACK_COLOR} ${limitPercent}%, ${ATTACK_RESERVE_COLOR} ${limitPercent}%)`; } else if (activeAttack === 'ultimate') { limitPercent = 90; gradientStyle = `linear-gradient(to right, ${SLIDER_TRACK_COLOR} ${limitPercent}%, ${ATTACK_RESERVE_COLOR} ${limitPercent}%)`; } slider.style.background = gradientStyle; if (parseInt(slider.value) > limitPercent) { slider.value = limitPercent; } updateSingleSliderDisplay(type); }
+          function handleAttackButtonClick(event) { const button = event.currentTarget; const attackType = button.dataset.attackType; const selectedEnergyType = energyTypeSelect.value; const currentAttackForType = activeAttacks[selectedEnergyType] || null; const newAttackState = (currentAttackForType === attackType) ? null : attackType; activeAttacks[selectedEnergyType] = newAttackState; updateAttackButtonStates(selectedEnergyType); updateSliderLimitAndStyle(selectedEnergyType); triggerAnimation(button, 'pulse'); }
+
+
+        // --- Dynamic Modifiers Logic --- (Unchanged)
+        function addDynamicModifier(modifierData = null) { dynamicModifierCount++; const modifierId = `dynamic-modifier-${dynamicModifierCount}`; const newModifierDiv = document.createElement('div'); const initialType = modifierData?.type || 'additive'; const initialValue = modifierData?.value || '0'; const initialName = modifierData?.name || ''; const isActiveAdditive = initialType === 'additive'; const boxClasses = `dynamic-box p-4 mt-3 border rounded-md border-l-4 relative transition-all duration-300 ease-in-out animate__animated animate__bounceIn ${isActiveAdditive ? 'additive bg-success-light border-success' : 'multiplicative bg-ki/10 border-ki'}`; newModifierDiv.className = boxClasses; newModifierDiv.id = modifierId; newModifierDiv.innerHTML = ` <div class="absolute top-2 right-2"> <button class="remove-dynamic-box bg-error text-white rounded-md shadow-sm w-6 h-6 flex items-center justify-center text-xs hover:bg-error-dark focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-1 transition-transform active:scale-95" aria-label="Remove this modifier" data-target="${modifierId}">×</button> </div> <div class="modifier-type-selector flex gap-2 mb-3 border-b pb-2"> <div class="modifier-type-option additive ${isActiveAdditive ? 'active' : ''} flex-1 p-2 text-center border rounded-md cursor-pointer transition-all duration-300 ease-in-out text-sm" data-value="additive" tabindex="0" role="radio" aria-checked="${isActiveAdditive}"> <input type="radio" name="modifier-type-${modifierId}" value="additive" class="sr-only" ${isActiveAdditive ? 'checked' : ''}> Additive (+) </div> <div class="modifier-type-option multiplicative ${!isActiveAdditive ? 'active' : ''} flex-1 p-2 text-center border rounded-md cursor-pointer transition-all duration-300 ease-in-out text-sm" data-value="multiplicative" tabindex="0" role="radio" aria-checked="${!isActiveAdditive}"> <input type="radio" name="modifier-type-${modifierId}" value="multiplicative" class="sr-only" ${!isActiveAdditive ? 'checked' : ''}> Multiplier (×) </div> </div> <div class="grid grid-cols-1 sm:grid-cols-2 gap-3"> <div> <label for="modifier-name-${modifierId}" class="lbl">Modifier Name:</label> <input type="text" id="modifier-name-${modifierId}" placeholder="e.g., Buff" value="${escapeHtml(initialName)}" class="modifier-name-input w-full p-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-success focus:border-transparent text-sm"> </div> <div> <label for="modifier-value-${modifierId}" class="lbl">Value:</label> <input type="text" id="modifier-value-${modifierId}" placeholder="e.g., 50 or 1.2" value="${escapeHtml(initialValue)}" class="modifier-value-input w-full p-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-success focus:border-transparent text-sm"> </div> </div>`; dynamicModifiersContainer.appendChild(newModifierDiv); addListenersToModifierBox(newModifierDiv); newModifierDiv.addEventListener('animationend', () => { newModifierDiv.classList.remove('animate__animated', 'animate__bounceIn'); }, { once: true }); }
+        function addListenersToModifierBox(modifierDiv) { modifierDiv.querySelector('.remove-dynamic-box')?.addEventListener('click', function() { const targetBox = document.getElementById(this.dataset.target); if (targetBox) { targetBox.classList.add('animate__animated', 'animate__bounceOut'); targetBox.addEventListener('animationend', () => { targetBox.remove(); updateEquationDisplay(); }, { once: true }); } else { updateEquationDisplay(); } }); modifierDiv.querySelectorAll('.modifier-type-option').forEach(option => { option.addEventListener('click', function() { const box = this.closest('.dynamic-box'); const value = this.dataset.value; box.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = (radio.value === value)); box.querySelectorAll('.modifier-type-option').forEach(opt => { const isActive = opt.dataset.value === value; opt.classList.toggle('active', isActive); opt.setAttribute('aria-checked', isActive); }); box.classList.remove('additive', 'multiplicative', 'bg-success-light', 'border-success', 'bg-ki/10', 'border-ki'); box.classList.add(value === 'additive' ? 'additive' : 'multiplicative'); box.classList.add(value === 'additive' ? 'bg-success-light' : 'bg-ki/10'); box.classList.add(value === 'additive' ? 'border-success' : 'border-ki'); updateEquationDisplay(); }); option.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); } }); }); const valueInput = modifierDiv.querySelector('.modifier-value-input'); if (valueInput) { valueInput.addEventListener('input', updateEquationDisplay); valueInput.addEventListener('change', updateEquationDisplay); } const nameInput = modifierDiv.querySelector('.modifier-name-input'); if (nameInput) { nameInput.addEventListener('input', updateEquationDisplay); nameInput.addEventListener('change', updateEquationDisplay); } }
+
+
+        // --- Stats Update Logic --- (Unchanged)
+        function updateStatsDisplay() { if (statTotalDamageEl) statTotalDamageEl.textContent = formatStatNumber(totalDamageDealt); if (statTotalEnergySpentEl) statTotalEnergySpentEl.textContent = formatStatNumber(totalEnergySpent); if (statHighestDamageEl) statHighestDamageEl.textContent = formatStatNumber(highestDamage); if (statAttackCountEl) statAttackCountEl.textContent = attackCount.toLocaleString(); const selectedType = energyTypeSelect.value; const els = getEnergyElements(selectedType); if (statCurrentEnergyEl && els?.currentEnergyEl) { statCurrentEnergyEl.textContent = els.currentEnergyEl.textContent || '0'; } else if (statCurrentEnergyEl) { statCurrentEnergyEl.textContent = 'N/A'; } }
+
+        // --- Calculation Logic --- (updateSingleSliderDisplay, performCalculation - unchanged)
+        function updateSingleSliderDisplay(type) { const els = getEnergyElements(type); if (!els?.energySlider || !els?.sliderValueDisplay || !els?.currentEnergyEl || !els?.damagePerPowerEl) { return; } const percentSpan = els.sliderValueDisplay.querySelector('.slider-percent-value'); const detailsSpan = els.sliderValueDisplay.querySelector('.slider-details-value'); if (!percentSpan || !detailsSpan) { console.error("Slider display spans not found for", type); return; } const sliderPercent = parseInt(els.energySlider.value); const currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent); const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1); const activeAttack = activeAttacks[type] || null; let limitPercent = 100; if (activeAttack === 'super') limitPercent = 95; else if (activeAttack === 'ultimate') limitPercent = 90; const effectivePercent = Math.min(sliderPercent, limitPercent); const potentialEnergyUsed = currentEnergy * (effectivePercent / 100); const actualEnergyUsed = Math.min(potentialEnergyUsed, currentEnergy); const extraDamage = actualEnergyUsed * damagePerPower; percentSpan.textContent = `${sliderPercent}%`; detailsSpan.textContent = `(E: ${formatStatNumber(actualEnergyUsed)}, D: ${formatStatNumber(extraDamage)})`; }
+        function performCalculation() { showLoading(true); setTimeout(() => { let finalDamage = 0; let healthDepleted = false; try { const baseDamage = safeParseFloat(baseDamageInput.value, 0); const compressionPoints = safeParseFloat(attackCompressionPointsInput.value, 0); const baseMultiplier = safeParseFloat(baseMultiplierInput.value, 1); const formMultiplier = safeParseFloat(formMultiplierInput.value, 1); const energyType = energyTypeSelect.value; let baseDamagePart = baseDamage * baseMultiplier * formMultiplier; let compressionMultiplierValue = 1; if (compressionPoints > 0) { compressionMultiplierValue = Math.max(1, (compressionPoints * 1.5) + (Math.floor(compressionPoints / 10) * 3)); } finalDamage = baseDamagePart * compressionMultiplierValue; document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach(modifierDiv => { const valueInput = modifierDiv.querySelector('.modifier-value-input'); const typeOption = modifierDiv.querySelector('.modifier-type-option.active'); if (valueInput && typeOption && typeOption.dataset.value === 'multiplicative') { const modifierValue = safeParseFloat(valueInput.value, 1); finalDamage *= modifierValue; } }); let totalEnergyUsedFromSliders = 0; let totalExtraDamageFromEnergy = 0; ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); if (els?.energySlider && els.currentEnergyEl && els.damagePerPowerEl) { const sliderPercent = safeParseFloat(els.energySlider.value, 0); const activeAttack = activeAttacks[type] || null; let limitPercent = 100; if (activeAttack === 'super') limitPercent = 95; else if (activeAttack === 'ultimate') limitPercent = 90; const effectivePercent = Math.min(sliderPercent, limitPercent); if (effectivePercent > 0) { const currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent); const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1); const energyUsedThisType = currentEnergy * (effectivePercent / 100); const actualEnergyUsed = Math.min(energyUsedThisType, currentEnergy); const extraDamageThisType = actualEnergyUsed * damagePerPower; totalEnergyUsedFromSliders += actualEnergyUsed; totalExtraDamageFromEnergy += extraDamageThisType; let newCurrentEnergyThisType = Math.max(0, currentEnergy - actualEnergyUsed); els.currentEnergyEl.textContent = formatStatNumber(newCurrentEnergyThisType); if (newCurrentEnergyThisType < currentEnergy) { triggerAnimation(els.currentEnergyEl, 'flash-red'); } updateSingleSliderDisplay(type); } } }); finalDamage += totalExtraDamageFromEnergy; document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach(modifierDiv => { const valueInput = modifierDiv.querySelector('.modifier-value-input'); const typeOption = modifierDiv.querySelector('.modifier-type-option.active'); if (valueInput && typeOption && typeOption.dataset.value === 'additive') { const modifierValue = safeParseFloat(valueInput.value, 0); finalDamage += modifierValue; } }); healthDepleted = false; if (energyType === 'ki' && kaiokenCheckbox.checked) { const currentHealthVal = parseFormattedNumber(currentHealthEl.textContent); if (currentHealthVal > 0) { const maxHealth = safeParseFloat(maxHealthInput.value, 0); const kaiokenStrainPercent = safeParseFloat(kaiokenStrainInput.value, 0); if (maxHealth > 0 && kaiokenStrainPercent > 0) { const strainCost = maxHealth * (kaiokenStrainPercent / 100); let newHealth = Math.max(0, currentHealthVal - strainCost); currentHealthEl.textContent = formatStatNumber(newHealth); if (newHealth < currentHealthVal) { triggerAnimation(currentHealthEl, 'flash-red'); } if (newHealth === 0) { healthDepleted = true; } } } } totalDamageDealt += finalDamage; totalEnergySpent += totalEnergyUsedFromSliders; attackCount++; if (finalDamage > highestDamage) { highestDamage = finalDamage; } updateStatsDisplay(); resultValueEl.textContent = formatSimpleNumber(finalDamage); resultTotalEnergyUsedEl.textContent = formatStatNumber(totalEnergyUsedFromSliders); resultTotalExtraDamageEl.textContent = formatStatNumber(totalExtraDamageFromEnergy); displayAllFormats(finalDamage); updateEquationDisplay(); resultDiv.classList.remove('hidden', 'bg-error-light', 'border-error', 'text-error-dark'); resultDiv.classList.add('bg-success-light', 'border-success', 'text-success-dark'); resultDiv.classList.remove('animate__animated', 'animate__fadeInUp'); void resultDiv.offsetWidth; resultDiv.classList.add('animate__animated', 'animate__fadeInUp'); resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-success-dark'; let successMsg = 'Calculation successful!'; if (healthDepleted) { successMsg += ' Warning: Health depleted by Kaioken strain!'; } showMessage(successMsg, healthDepleted ? 'error' : 'success'); } catch (error) { console.error("Calculation Error:", error); resultValueEl.textContent = 'Error'; resultTotalEnergyUsedEl.textContent = 'N/A'; resultTotalExtraDamageEl.textContent = 'N/A'; resultScientificEl.textContent = 'N/A'; resultWordsEl.textContent = 'Error'; equationDisplayEl.innerHTML = '<span class="text-error-dark">Error calculating equation.</span>'; resultDiv.classList.remove('hidden', 'bg-success-light', 'border-success', 'text-success-dark'); resultDiv.classList.add('bg-error-light', 'border-error', 'text-error-dark'); resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-error-dark'; showMessage(`Calculation failed: ${error.message || 'Unknown error'}`, 'error'); } finally { showLoading(false); } }, 50); }
+
+
+        // --- Number Formatting --- (Unchanged)
+        function displayAllFormats(damage) { try { resultScientificEl.textContent = damage.toExponential(2).replace(/e\+?(-?)/, ' x 10^$1'); } catch (e) { resultScientificEl.textContent = "Invalid"; console.error("Scientific notation error:", e); } try { resultWordsEl.textContent = convertNumberToWords(damage); } catch (e) { resultWordsEl.textContent = "Error: " + e.message; console.error("Number to words error:", e); } }
+        function convertNumberToWords(number) { const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen']; const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']; const scales = [ '', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quattuordecillion', 'Quindecillion', 'Sexdecillion', 'Septendecillion', 'Octodecillion', 'Novemdecillion', 'Vigintillion', 'Unvigintillion', 'Duovigintillion', 'Tresvigintillion', 'Quattuorvigintillion', 'Quinvigintillion', 'Sesvigintillion', 'Septemvigintillion', 'Octovigintillion', 'Novemvigintillion', 'Trigintillion', 'Untrigintillion', 'Duotrigintillion', 'Trestrigintillion', 'Quattuortrigintillion', 'Quintrigintillion', 'Sestrigintillion', 'Septentrigintillion', 'Octotrigintillion', 'Noventrigintillion', 'Quadragintillion', 'Unquadragintillion', 'Duoquadragintillion', 'Tresquadragintillion', 'Quattuorquadragintillion', 'Quinquadragintillion', 'Sesquadragintillion', 'Septenquadragintillion', 'Octoquadragintillion', 'Novemquadragintillion', 'Quinquagintillion', 'Unquinquagintillion', 'Duoquinquagintillion', 'Tresquinquagintillion', 'Quattuorquinquagintillion', 'Quinquinquagintillion', 'Sesquinquagintillion', 'Septenquinquagintillion', 'Octoquinquagintillion', 'Novemquinquagintillion', 'Sexagintillion', 'Unsexagintillion', 'Duosexagintillion', 'Tresexagintillion', 'Quattuorsexagintillion', 'Quinsexagintillion', 'Sesexagintillion', 'Septensexagintillion', 'Octosexagintillion', 'Novemsexagintillion', 'Septuagintillion', 'Unseptuagintillion', 'Duoseptuagintillion', 'Tresseptuagintillion', 'Quattuorseptuagintillion', 'Quinseptuagintillion', 'Seseptuagintillion', 'Septenseptuagintillion', 'Octoseptuagintillion', 'Novemseptuagintillion', 'Octogintillion', 'Unoctogintillion', 'Duooctogintillion', 'Tresoctogintillion', 'Quattuoroctogintillion', 'Quinoctogintillion', 'Sexoctogintillion', 'Septemoctogintillion', 'Octooctogintillion', 'Novemoctogintillion', 'Nonagintillion', 'Unnonagintillion', 'Duononagintillion', 'Tresnonagintillion', 'Quattuornonagintillion', 'Quinnonagintillion', 'Senonagintillion', 'Septenonagintillion', 'Octononagintillion', 'Novenonagintillion', 'Centillion' ]; if (typeof number !== 'number' || !isFinite(number)) { return 'Invalid Number'; } if (number === 0) { return 'Zero'; } const MAX_SAFE_INTEGER_FOR_WORDS = BigInt("9".repeat((scales.length) * 3)); let numForCheck; try { numForCheck = number < 0 ? BigInt(Math.abs(Math.trunc(number))) : BigInt(Math.trunc(number)); } catch (e) { console.error("Error converting number to BigInt for size check:", number, e); return number.toExponential(2) + " (Extremely large)"; } if (numForCheck > MAX_SAFE_INTEGER_FOR_WORDS) { console.warn("Number too large for full word conversion, returning scientific."); return number.toExponential(2) + " (Too large for words)"; } let isNegative = number < 0; if (isNegative) number = -number; let integerPart; let fractionalPart = 0; try { const numStr = number.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 20 }); const parts = numStr.split('.'); integerPart = BigInt(parts[0]); if (parts.length > 1) { fractionalPart = parseFloat('0.' + parts[1]); } } catch (e) { console.error("Error processing number for words:", number, e); return "Number too large or invalid format"; } let words = isNegative ? 'Negative ' : ''; function convertHundreds(num) { let word = ''; const h = Math.floor(num / 100); const r = num % 100; if (h > 0) { word += units[h] + ' Hundred'; } if (r > 0) { if (word !== '') word += ' '; if (r < 20) { word += units[r]; } else { const t = Math.floor(r / 10); const o = r % 10; word += tens[t]; if (o > 0) { word += '-' + units[o]; } } } return word; } if (integerPart === 0n) { if (fractionalPart === 0) words += 'Zero'; } else { let scaleIndex = 0; let tempWords = []; let currentInt = integerPart; while (currentInt > 0n) { if (scaleIndex >= scales.length) { console.error("Number exceeds defined scales during conversion:", number); return number.toExponential(2) + " (Too large for words)"; } const chunk = Number(currentInt % 1000n); if (chunk !== 0) { const chunkWords = convertHundreds(chunk); tempWords.push(chunkWords + (scaleIndex > 0 ? ' ' + scales[scaleIndex] : '')); } currentInt /= 1000n; scaleIndex++; } words += tempWords.reverse().filter(w => w.trim()).join(', '); } if (fractionalPart > 1e-9) { words += ' Point'; let fractionalStr = fractionalPart.toFixed(6).substring(2).replace(/0+$/, ''); if (fractionalStr.length > 0) { for (const digit of fractionalStr) { words += ' ' + (units[parseInt(digit)] || 'Zero'); } } else { words = words.replace(/ Point$/, ''); } } return words.trim(); }
+
+
+        // --- State Management --- (Unchanged)
         function gatherState() {
             const state = {
-                // --- Keep all original state properties ---
                 baseDamage: baseDamageInput.value, baseMultiplier: baseMultiplierInput.value, formMultiplier: formMultiplierInput.value, attackCompressionPoints: attackCompressionPointsInput.value,
                 selectedEnergyType: energyTypeSelect.value, sliderPercentages: {}, energyPools: {}, dynamicModifiers: [], activeAttacks: activeAttacks,
                 kaiokenActive: kaiokenCheckbox.checked, maxHealth: maxHealthInput.value, kaiokenStrain: kaiokenStrainInput.value, currentHealth: currentHealthEl?.textContent || '0',
@@ -370,380 +578,195 @@
                 ryokoCheckboxState: ryokoCheckbox?.checked || false,
                 ryokoEquationValue: ryokoEquationInput?.value || '',
                 activeView: characterStatsScreen?.classList.contains('hidden') ? 'calculator' : 'stats',
-                totalDamageDealt: totalDamageDealt, totalEnergySpent: totalEnergySpent, attackCount: attackCount, highestDamage: highestDamage,
-                // --- NEW: Add forms and selected form state ---
-                characterForms: characterForms,
-                selectedForms: {} // { energyType: selectedFormNameOrIndex, ... }
+                totalDamageDealt: totalDamageDealt, totalEnergySpent: totalEnergySpent, attackCount: attackCount, highestDamage: highestDamage
             };
-
-            ALL_ENERGY_TYPES.forEach(type => {
-                const els = getEnergyElements(type);
-                if (els) {
-                    state.energyPools[type] = {
-                        maxMultiplier: els.maxMultiplierEl?.value || '1',
-                        currentEnergy: els.currentEnergyEl?.textContent || '0',
-                        damagePerPower: els.damagePerPowerEl?.value || '1',
-                        regenPercent: els.regenPercentEl?.value || ''
-                    };
-                    state.sliderPercentages[type] = els.energySlider?.value || '0';
-
-                    // NEW: Save selected form
-                    const formDropdown = els.poolDiv?.querySelector('.form-dropdown');
-                    if (formDropdown) {
-                        state.selectedForms[type] = formDropdown.value; // Save the value (which is the formMultiplier)
-                    }
-                }
-            });
-
-            dynamicModifiersContainer.querySelectorAll('.dynamic-box').forEach(box => {
-                 const nameInput = box.querySelector('.modifier-name-input');
-                 const valueInput = box.querySelector('.modifier-value-input');
-                 const typeOption = box.querySelector('.modifier-type-option.active');
-                 if (nameInput && valueInput && typeOption) {
-                     state.dynamicModifiers.push({ name: nameInput.value, value: valueInput.value, type: typeOption.dataset.value });
-                 }
-             });
-
+            ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); if (els) { state.energyPools[type] = { maxMultiplier: els.maxMultiplierEl?.value || '1', currentEnergy: els.currentEnergyEl?.textContent || '0', damagePerPower: els.damagePerPowerEl?.value || '1', regenPercent: els.regenPercentEl?.value || '' }; state.sliderPercentages[type] = els.energySlider?.value || '0'; } });
+            dynamicModifiersContainer.querySelectorAll('.dynamic-box').forEach(box => { const nameInput = box.querySelector('.modifier-name-input'); const valueInput = box.querySelector('.modifier-value-input'); const typeOption = box.querySelector('.modifier-type-option.active'); if (nameInput && valueInput && typeOption) { state.dynamicModifiers.push({ name: nameInput.value, value: valueInput.value, type: typeOption.dataset.value }); } });
             return state;
         }
-
         function applyState(state) {
             if (!state) return;
-
-             // --- Restore original state properties ---
             if (characterNameInput) characterNameInput.value = state.characterName || '';
-            // ... (restore all other original inputs: baseDamage, multipliers, char stats, kaioken etc.) ...
-            baseDamageInput.value = state.baseDamage || ''; baseMultiplierInput.value = state.baseMultiplier || '1'; formMultiplierInput.value = state.formMultiplier || '1'; attackCompressionPointsInput.value = state.attackCompressionPoints || '0';
-            energyTypeSelect.value = state.selectedEnergyType || 'ki';
-             kaiokenCheckbox.checked = state.kaiokenActive || false; maxHealthInput.value = state.maxHealth || '1000'; kaiokenStrainInput.value = state.kaiokenStrain || '10'; if(currentHealthEl) { const savedHealthNum = parseFormattedNumber(state.currentHealth || '0'); currentHealthEl.textContent = formatStatNumber(savedHealthNum); }
-             totalDamageDealt = state.totalDamageDealt || 0; totalEnergySpent = state.totalEnergySpent || 0; attackCount = state.attackCount || 0; highestDamage = state.highestDamage || 0;
-             activeAttacks = state.activeAttacks || {};
-             // Ryoko Mode
+            if (charBaseHealthInput) charBaseHealthInput.value = state.charBaseHealth || '';
             if (charBaseMultiplierInput) charBaseMultiplierInput.value = state.charBaseMultiplier || '1';
+            if (charVitalityInput) charVitalityInput.value = state.charVitality || '';
+            if (charSoulPowerInput) charSoulPowerInput.value = state.charSoulPower || '';
+            if (charSoulHpInput) charSoulHpInput.value = state.charSoulHp || '';
             if (ryokoCheckbox) ryokoCheckbox.checked = state.ryokoCheckboxState || false;
             if (ryokoEquationInput) ryokoEquationInput.value = state.ryokoEquationValue || '';
             handleRyokoCheckboxChange(); // Apply UI changes based on loaded Ryoko state
-
-
-            // --- NEW: Restore Forms ---
-            characterForms = state.characterForms || {};
-            updateFormListDisplay(); // Update the list in Character Stats
-            updateAllFormDropdowns(); // Add options to dropdowns in energy pools
-
-            // --- Restore original energy pool values (AFTER forms are loaded for dropdowns) ---
-             if (state.energyPools) { ALL_ENERGY_TYPES.forEach(type => { /* ... restore pool values ... */ }); }
-             if (state.sliderPercentages) { ALL_ENERGY_TYPES.forEach(type => { /* ... restore slider values ... */ }); }
-
-            // NEW: Set selected forms in dropdowns
-            if (state.selectedForms) {
-                 ALL_ENERGY_TYPES.forEach(type => {
-                     const els = getEnergyElements(type);
-                     const formDropdown = els?.poolDiv?.querySelector('.form-dropdown');
-                     if (formDropdown && state.selectedForms[type] !== undefined) {
-                         formDropdown.value = state.selectedForms[type];
-                         // Trigger change event manually if needed to update calculations immediately
-                         // formDropdown.dispatchEvent(new Event('change'));
-                     }
-                 });
-             }
-
-
-            // --- Restore dynamic modifiers ---
+            baseDamageInput.value = state.baseDamage || ''; baseMultiplierInput.value = state.baseMultiplier || '1'; formMultiplierInput.value = state.formMultiplier || '1'; attackCompressionPointsInput.value = state.attackCompressionPoints || '0';
+            energyTypeSelect.value = state.selectedEnergyType || 'ki';
+            if (state.energyPools) { ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); const poolData = state.energyPools[type]; if (els && poolData) { if(els.maxMultiplierEl) els.maxMultiplierEl.value = poolData.maxMultiplier || '1'; if(els.damagePerPowerEl) els.damagePerPowerEl.value = poolData.damagePerPower || '1'; if(els.regenPercentEl) els.regenPercentEl.value = poolData.regenPercent || ''; const baseMaxEnergy = calculateBaseMaxEnergy(type); const multiplier = safeParseFloat(poolData.maxMultiplier || '1', 1); const totalEnergy = baseMaxEnergy * multiplier; if(els.baseMaxEnergyEl) els.baseMaxEnergyEl.textContent = formatStatNumber(baseMaxEnergy); if(els.totalEnergyEl) els.totalEnergyEl.textContent = formatStatNumber(totalEnergy); if(els.currentEnergyEl) { const savedCurrentNum = parseFormattedNumber(poolData.currentEnergy || '0'); els.currentEnergyEl.textContent = formatStatNumber(Math.min(savedCurrentNum, totalEnergy)); } } }); }
+            if (state.sliderPercentages) { ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); if (els?.energySlider) { els.energySlider.value = state.sliderPercentages[type] || '0'; updateSingleSliderDisplay(type); } updateSliderVisibility(type); }); }
             dynamicModifiersContainer.innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>'; dynamicModifierCount = 0; if (state.dynamicModifiers && Array.isArray(state.dynamicModifiers)) { state.dynamicModifiers.forEach(modData => addDynamicModifier(modData)); }
-
-            // --- Final UI Updates ---
-            ALL_ENERGY_TYPES.forEach(type => { updateSliderLimitAndStyle(type); });
-            updateAttackButtonStates(energyTypeSelect.value);
-            updateEquationDisplay();
-            showSelectedEnergyPool(); // This should handle Kaioken visibility too
+            kaiokenCheckbox.checked = state.kaiokenActive || false; maxHealthInput.value = state.maxHealth || '1000'; kaiokenStrainInput.value = state.kaiokenStrain || '10'; if(currentHealthEl) { const savedHealthNum = parseFormattedNumber(state.currentHealth || '0'); currentHealthEl.textContent = formatStatNumber(savedHealthNum); }
+            totalDamageDealt = state.totalDamageDealt || 0; totalEnergySpent = state.totalEnergySpent || 0; attackCount = state.attackCount || 0; highestDamage = state.highestDamage || 0;
+            activeAttacks = state.activeAttacks || {};
+            ALL_ENERGY_TYPES.forEach(type => { updateSliderLimitAndStyle(type); }); updateAttackButtonStates(energyTypeSelect.value); updateEquationDisplay(); showSelectedEnergyPool();
             if (state.activeView === 'stats') { showCharacterStatsView(); } else { showCalculatorView(); }
         }
-
-        // --- Keep original saveState and clearState ---
         function saveState() { try { const state = gatherState(); const stateString = JSON.stringify(state); localStorage.setItem(LOCAL_STORAGE_KEY, stateString); showMessage('State saved successfully!', 'success'); } catch (error) { console.error("Error saving state:", error); showMessage(`Failed to save state. ${error.message}`, 'error'); } }
         function loadState() { const stateString = localStorage.getItem(LOCAL_STORAGE_KEY); if (stateString) { try { const state = JSON.parse(stateString); applyState(state); showMessage('State loaded successfully!', 'success'); return true; } catch (error) { console.error("Error loading state:", error); showMessage(`Failed to load saved state. Data might be corrupted. ${error.message}`, 'error'); localStorage.removeItem(LOCAL_STORAGE_KEY); } } return false; }
         function clearState() { if (confirm('Are you sure you want to clear the saved state? This cannot be undone.')) { localStorage.removeItem(LOCAL_STORAGE_KEY); showMessage('Saved state cleared. Reloading.', 'success'); setTimeout(() => window.location.reload(), 1000); } }
 
 
-        // --- Generate Elements from Templates (Keep original) ---
-        function generateEnergySections() { /* ... Keep original function ... */ }
-
-        // --- Equation Display Function (Keep original, NEEDS MODIFICATION for forms) ---
-        function updateEquationDisplay() { /* ... Keep original function ... */ }
-
-        // --- Click Handler for Equation Numbers (Keep original) ---
-        function handleEquationClick(event) { /* ... Keep original function ... */ }
-
-        // --- Tab Switching Logic (Keep original) ---
-        function showCharacterStatsView() { /* ... Keep original function ... */ }
-        function showCalculatorView() { /* ... Keep original function ... */ }
-
-        // --- Event Listener Helper (Keep original) ---
-        function handleStatChange() { /* ... Keep original function ... */ }
-
-        // --- Ryoko Mode Logic (Keep original) ---
-        function handleRyokoCheckboxChange() { /* ... Keep original function ... */ }
-        function evaluateRyokoEquation() { /* ... Keep original function ... */ }
+        // --- Generate Elements from Templates --- (Unchanged)
+        function generateEnergySections() { if (!energyPoolTemplate || !energySliderTemplate || !energyPoolsContainer || !slidersGrid) { console.error("Required templates or containers not found! Cannot generate energy sections."); return; } energyPoolsContainer.innerHTML = ''; slidersGrid.innerHTML = ''; ALL_ENERGY_TYPES.forEach(type => { const details = ENERGY_TYPE_DETAILS[type]; if (!details) return; const poolClone = energyPoolTemplate.content.cloneNode(true); const poolDiv = poolClone.querySelector('.energy-pool'); if (poolDiv) { poolDiv.id = `${type}-pool`; poolDiv.style.display = 'none'; poolDiv.classList.add(details.border, details.gradientTo); const titleEl = poolDiv.querySelector('.pool-title'); if (titleEl) titleEl.textContent = `${details.name} Energy Pool`; const setupElement = (selectorSuffix, isInput = true, focusClass = '') => { const el = poolDiv.querySelector(`.${selectorSuffix}`); const labelEl = poolDiv.querySelector(`.${selectorSuffix}-label`); if (el) { el.id = `${type}-${selectorSuffix}`; if(labelEl) { if(isInput) { labelEl.htmlFor = el.id; } else { labelEl.removeAttribute('for'); } } if (isInput && focusClass) el.classList.add(focusClass); } }; setupElement('base-max-energy', false); setupElement('max-multiplier', true, details.focusRing); setupElement('total-energy', false); setupElement('current-energy', false); setupElement('damage-per-power', true, details.focusRing); setupElement('regen-percent', true, details.focusRing); const regenBtn = poolDiv.querySelector('.regen-btn'); if (regenBtn) { regenBtn.dataset.type = type; } energyPoolsContainer.appendChild(poolClone); } else { console.error(`Could not find .energy-pool in template clone for ${type}`); } const sliderClone = energySliderTemplate.content.cloneNode(true); const sliderSection = sliderClone.querySelector('.energy-slider-section'); if (sliderSection) { sliderSection.id = `${type}-slider-section`; sliderSection.dataset.type = type; const sliderLabel = sliderSection.querySelector('.slider-label'); if (sliderLabel) { sliderLabel.htmlFor = `${type}-energy-slider`; sliderLabel.textContent = `${details.name} Energy Used (%):`; } const energySlider = sliderSection.querySelector('.energy-slider'); if (energySlider) { energySlider.id = `${type}-energy-slider`; energySlider.dataset.type = type; } const valueDisplay = sliderSection.querySelector('.energy-slider-value-display'); if (valueDisplay) { valueDisplay.id = `${type}-slider-value-display`; } slidersGrid.appendChild(sliderClone); } else { console.error(`Could not find .energy-slider-section in template clone for ${type}`); } }); console.log("Energy sections generated from templates."); }
 
 
-        // --- NEW: Form Management Functions ---
+        // --- Equation Display Function --- (Unchanged)
+        function updateEquationDisplay() { if (!equationDisplayEl) return; let equationHTML = ''; const op = (operator) => `<span class="equation-operator">${operator}</span>`; const group = (content) => `<span class="equation-group">(</span>${content}<span class="equation-group">)</span>`; const num = (value, targetId, title = '') => { const titleAttr = title ? ` title="${escapeHtml(title)}"` : ''; return `<span class="equation-number" data-target-id="${targetId}"${titleAttr}>${formatSimpleNumber(value)}</span>`; }; try { const baseDamage = safeParseFloat(baseDamageInput.value, 0); const baseMultiplier = safeParseFloat(baseMultiplierInput.value, 1); const formMultiplier = safeParseFloat(formMultiplierInput.value, 1); let basePart = num(baseDamage, 'base-damage', 'Base Damage'); if (baseMultiplier !== 1 || baseMultiplierInput.value.trim() !== '1') { basePart += op('*') + num(baseMultiplier, 'base-multiplier', 'Base Multiplier'); } if (formMultiplier !== 1 || formMultiplierInput.value.trim() !== '1') { basePart += op('*') + num(formMultiplier, 'form-multiplier', 'Form Multiplier'); } let baseCalculationHTML = (basePart !== num(baseDamage, 'base-damage', 'Base Damage')) ? group(basePart) : basePart; const compressionPoints = safeParseFloat(attackCompressionPointsInput.value, 0); if (compressionPoints > 0) { let compressionMultiplierValue = Math.max(1, (compressionPoints * 1.5) + (Math.floor(compressionPoints / 10) * 3)); baseCalculationHTML += op('*') + `<span class="equation-number" data-target-id="attack-compression-points" title="${compressionPoints} Compression Points -> x${formatSimpleNumber(compressionMultiplierValue)} Multiplier">${formatSimpleNumber(compressionMultiplierValue)}</span>`; } equationHTML = baseCalculationHTML; let multiplicativeTerms = []; document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach((modifierDiv) => { const valueInput = modifierDiv.querySelector('.modifier-value-input'); const typeOption = modifierDiv.querySelector('.modifier-type-option.active'); const nameInput = modifierDiv.querySelector('.modifier-name-input'); const modifierId = valueInput?.id; const factorName = nameInput?.value.trim() || 'Unnamed Multiplier'; if (valueInput && typeOption && modifierId && typeOption.dataset.value === 'multiplicative') { const multiplier = safeParseFloat(valueInput.value, 1); if (multiplier !== 1 || valueInput.value.trim() !== '1') { multiplicativeTerms.push(num(multiplier, modifierId, factorName)); } } }); if (multiplicativeTerms.length > 0) { if (multiplicativeTerms.length > 1 || equationHTML.includes(op('*')) || equationHTML.includes(op('+'))) { equationHTML = group(equationHTML); } equationHTML += op('*') + group(multiplicativeTerms.join(op('*'))); } let energyTerms = []; ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); if (els?.energySlider && els.currentEnergyEl && els.damagePerPowerEl) { const sliderPercent = safeParseFloat(els.energySlider.value, 0); const activeAttack = activeAttacks[type] || null; let limitPercent = 100; if (activeAttack === 'super') limitPercent = 95; else if (activeAttack === 'ultimate') limitPercent = 90; const effectivePercent = Math.min(sliderPercent, limitPercent); if (effectivePercent > 0) { const currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent); const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1); const energyUsed = Math.min(currentEnergy * (effectivePercent / 100), currentEnergy); const energyDamage = energyUsed * damagePerPower; if (energyDamage !== 0) { const energyTitle = `${ENERGY_TYPE_DETAILS[type]?.name || type} Energy Used (${sliderPercent}%)`; const dppTitle = `${ENERGY_TYPE_DETAILS[type]?.name || type} Damage/Point`; energyTerms.push(group(num(energyUsed, `${type}-energy-slider`, energyTitle) + op('*') + num(damagePerPower, `${type}-damage-per-power`, dppTitle))); } } } }); if (energyTerms.length > 0) { if (equationHTML.includes(op('*')) || equationHTML.includes(op('+'))) { equationHTML = group(equationHTML); } equationHTML += op('+') + group(energyTerms.join(op('+'))); } let additiveTerms = []; document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach((modifierDiv) => { const valueInput = modifierDiv.querySelector('.modifier-value-input'); const typeOption = modifierDiv.querySelector('.modifier-type-option.active'); const nameInput = modifierDiv.querySelector('.modifier-name-input'); const modifierId = valueInput?.id; const factorName = nameInput?.value.trim() || 'Unnamed Additive'; if (valueInput && typeOption && modifierId && typeOption.dataset.value === 'additive') { const modifierValue = safeParseFloat(valueInput.value, 0); if (modifierValue !== 0 || valueInput.value.trim() !== '0') { additiveTerms.push(num(modifierValue, modifierId, factorName)); } } }); if (additiveTerms.length > 0) { if (equationHTML.includes(op('*')) || equationHTML.includes(op('+'))) { equationHTML = group(equationHTML); } equationHTML += op('+') + group(additiveTerms.join(op('+'))); } equationDisplayEl.innerHTML = equationHTML; } catch (error) { console.error("Error updating equation:", error); equationDisplayEl.innerHTML = '<span class="text-error-dark">Could not generate equation.</span>'; } }
 
-        /** Updates the display list of forms in the Character Stats screen */
-        function updateFormListDisplay() {
-            if (!formListDisplay || !noFormsMessage) return;
-            formListDisplay.innerHTML = ''; // Clear existing list
-            let hasForms = false;
-            Object.keys(characterForms).forEach(energyType => {
-                characterForms[energyType].forEach((form, index) => {
-                    hasForms = true;
-                    const formItem = document.createElement('div');
-                    formItem.className = 'displayed-form-item p-3 bg-gray-50 rounded-md shadow-sm text-sm border border-gray-200 relative'; // Added relative for potential delete button
-                    let resistanceText = '';
-                    if (form.acValue || form.trueResistanceValue) {
-                        resistanceText = ` (Res: AC ${form.acValue}, TR ${form.trueResistanceValue})`;
-                    }
-                    formItem.innerHTML = `
-                        <strong class="text-teal-700">${form.name || `Form ${index + 1}`} (${energyType.toUpperCase()})</strong><br>
-                        Dmg Multi: x${formatSimpleNumber(form.formMultiplier)}, Pool Multi: x${formatSimpleNumber(form.poolMaxMultiplier)}
-                        ${resistanceText}
-                        <button class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-400" data-energy-type="${energyType}" data-form-index="${index}" title="Delete Form">&times;</button>
-                    `;
-                    // Add event listener for the delete button
-                    formItem.querySelector('button').addEventListener('click', handleDeleteForm);
-                    formListDisplay.appendChild(formItem);
-                });
-            });
-            noFormsMessage.classList.toggle('hidden', hasForms);
+        // --- Click Handler for Equation Numbers --- (Unchanged)
+        function handleEquationClick(event) { const target = event.target; if (target.classList.contains('equation-number') && target.dataset.targetId) { const targetId = target.dataset.targetId; const sourceElement = document.getElementById(targetId); if (sourceElement) { sourceElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); let elementToPulse = sourceElement; if (sourceElement.tagName === 'SPAN' && sourceElement.classList.contains('readonly-display')) { elementToPulse = sourceElement.closest('.energy-pool') || sourceElement; } else if (sourceElement.type === 'range') { elementToPulse = sourceElement.closest('.energy-slider-section') || sourceElement; } else if (sourceElement.classList.contains('modifier-value-input')) { elementToPulse = sourceElement.closest('.dynamic-box') || sourceElement; } triggerAnimation(elementToPulse, 'pulse-source'); if (sourceElement.tagName === 'INPUT' && !sourceElement.readOnly && sourceElement.type !== 'range') { sourceElement.focus(); } const energyTypeMatch = targetId.match(/^([a-z]+)-(damage-per-power|energy-slider)/); if (energyTypeMatch) { const energyType = energyTypeMatch[1]; if (ALL_ENERGY_TYPES.includes(energyType) && energyTypeSelect.value !== energyType) { console.log(`Switching view to ${energyType} pool triggered by equation click...`); energyTypeSelect.value = energyType; showSelectedEnergyPool(); } } } else { console.warn(`Equation link target element not found: #${targetId}`); } } }
+
+        // --- Tab Switching Logic --- (Unchanged)
+        function showCharacterStatsView() { if (mainCalculatorContent) mainCalculatorContent.classList.add('hidden'); if (characterStatsScreen) characterStatsScreen.classList.remove('hidden'); if (mainTitle) mainTitle.textContent = 'Character Stats'; if (showCharacterStatsBtn) showCharacterStatsBtn.textContent = 'Energy Calculator'; if (characterStatsScreen) triggerAnimation(characterStatsScreen, 'fadeIn'); }
+        function showCalculatorView() { if (characterStatsScreen) characterStatsScreen.classList.add('hidden'); if (mainCalculatorContent) mainCalculatorContent.classList.remove('hidden'); if (mainTitle) mainTitle.textContent = 'Energy Calculator'; if (showCharacterStatsBtn) showCharacterStatsBtn.textContent = 'Character Stats'; if (mainCalculatorContent) triggerAnimation(mainCalculatorContent, 'fadeIn'); }
+
+
+        // --- Event Listener Helper ---
+        /** Recalculates all energy pools and updates related displays. */
+        function handleStatChange() {
+            ALL_ENERGY_TYPES.forEach(type => calculateAndResetEnergy(type));
+            updateStatsDisplay();
+            updateEquationDisplay();
         }
 
-        /** Handles deleting a form */
-        function handleDeleteForm(event) {
-            const btn = event.currentTarget;
-            const energyType = btn.dataset.energyType;
-            const index = parseInt(btn.dataset.formIndex, 10);
+        // --- Ryoko Mode Logic --- UPDATED
+        /** Handles changes to the Ryoko checkbox */
+        function handleRyokoCheckboxChange() {
+            if (!ryokoCheckbox || !ryokoEquationContainer || !charBaseMultiplierInput || !ryokoEquationInput) return;
 
-            if (characterForms[energyType] && characterForms[energyType][index] !== undefined) {
-                const formName = characterForms[energyType][index].name || `Form ${index + 1}`;
-                if (confirm(`Are you sure you want to delete the form "${formName}" for ${energyType.toUpperCase()}?`)) {
-                    characterForms[energyType].splice(index, 1); // Remove form from array
-                    if (characterForms[energyType].length === 0) {
-                        delete characterForms[energyType]; // Remove energy type if no forms left
-                    }
-                    updateFormListDisplay();
-                    updateAllFormDropdowns();
-                    // Potentially trigger recalculation or reset selection if the deleted form was active
-                    showMessage(`Form "${formName}" deleted.`, 'success');
-                    // Save state? Or let user save manually.
+            const isChecked = ryokoCheckbox.checked;
+            ryokoEquationContainer.classList.toggle('hidden', !isChecked);
+            charBaseMultiplierInput.readOnly = isChecked;
+            charBaseMultiplierInput.classList.toggle('bg-gray-100', isChecked);
+            charBaseMultiplierInput.classList.toggle('cursor-not-allowed', isChecked);
+            charBaseMultiplierInput.classList.toggle('opacity-70', isChecked);
+
+            if (isChecked) {
+                // Populate with default if the equation input is currently empty
+                if (ryokoEquationInput.value.trim() === '') {
+                    ryokoEquationInput.value = DEFAULT_RYOKO_EQUATION;
                 }
-            }
-        }
-
-
-        /** Updates the form selection dropdown for a specific energy type pool */
-        function updateFormDropdown(energyType) {
-            const els = getEnergyElements(energyType);
-            if (!els || !els.poolDiv) return;
-
-            const formSelectionArea = els.poolDiv.querySelector('.form-selection-area');
-            let dropdown = els.poolDiv.querySelector('.form-dropdown');
-            let formLabel = els.poolDiv.querySelector('.form-dropdown-label');
-
-
-            const formsForType = characterForms[energyType] || [];
-
-            if (formsForType.length > 0) {
-                // Ensure elements exist or create them
-                if (!formSelectionArea) {
-                    console.error("'.form-selection-area' not found in template for", energyType); return;
-                }
-                 if (!dropdown) {
-                     console.error("'.form-dropdown' not found in template for", energyType); return;
-                 }
-                  if (!formLabel) {
-                      console.error("'.form-dropdown-label' not found in template for", energyType); return;
-                  }
-
-                formLabel.htmlFor = `${energyType}-form-select`; // Set label association
-                dropdown.id = `${energyType}-form-select`;
-
-                // Preserve selected value if possible
-                 const previouslySelectedValue = dropdown.value;
-
-                 // Clear existing options except the base form
-                 dropdown.innerHTML = `<option value="1" data-pool-max="1" data-ac="0" data-true-resistance="0" data-form-name="Base Form">Base Form (No Multiplier)</option>`;
-
-                 formsForType.forEach((form) => {
-                     const option = document.createElement('option');
-                     // Use formMultiplier as value for now, consider unique ID later
-                     option.value = form.formMultiplier;
-                     option.dataset.poolMax = form.poolMaxMultiplier;
-                     option.dataset.ac = form.acValue || 0; // Store resistance info
-                     option.dataset.trueResistance = form.trueResistanceValue || 0;
-                     option.dataset.formName = form.name || 'Unnamed Form'; // Store name
-                     option.textContent = `${form.name || 'Unnamed Form'} (x${formatSimpleNumber(form.formMultiplier)})`;
-                     dropdown.appendChild(option);
-                 });
-
-                 // Try to restore previous selection
-                 if (dropdown.querySelector(`option[value="${previouslySelectedValue}"]`)) {
-                    dropdown.value = previouslySelectedValue;
-                 } else {
-                     dropdown.value = "1"; // Default to base form if previous selection is gone
-                 }
-
-
-                formSelectionArea.classList.remove('hidden'); // Show the dropdown
-
-                 // Add event listener if not already present
-                 if (!dropdown.dataset.listenerAttached) {
-                     dropdown.addEventListener('change', handleFormSelectionChange);
-                     dropdown.dataset.listenerAttached = 'true';
-                 }
-
-
+                // Evaluate the equation and update the base multiplier
+                evaluateRyokoEquation(); // Call the evaluation function
+                ryokoEquationInput.focus();
             } else {
-                // Hide dropdown if no forms exist for this type
-                if (formSelectionArea) formSelectionArea.classList.add('hidden');
+                // When unchecked, just make base multiplier editable again.
+                // Clear error state from equation input if present
+                ryokoEquationInput.classList.remove('border-red-500', 'focus:ring-red-500');
+                ryokoEquationInput.classList.add('border-gray-300', 'focus:ring-teal-focus'); // Restore default border/focus
             }
+            // Trigger recalculation as the effective base multiplier might have changed
+            handleStatChange();
         }
 
-         /** Updates dropdowns for all energy types */
-         function updateAllFormDropdowns() {
-             ALL_ENERGY_TYPES.forEach(type => updateFormDropdown(type));
-         }
+        /** Evaluates the Ryoko equation input and updates the base multiplier */
+        function evaluateRyokoEquation() {
+            // Ensure checkbox is checked and elements exist
+            if (!ryokoCheckbox || !ryokoCheckbox.checked || !ryokoEquationInput || !charBaseMultiplierInput) return;
 
-         /** Handles change event on form selection dropdowns */
-         function handleFormSelectionChange(event) {
-             const dropdown = event.target;
-             const selectedOption = dropdown.options[dropdown.selectedIndex];
-             const energyType = dropdown.id.split('-')[0]; // Infer type from ID
+            const expression = ryokoEquationInput.value.trim();
+            let result = 1; // Default to 1 if empty or error
 
-             // --- TODO: Implement logic based on selected form ---
-             // 1. Get values from selectedOption.dataset (poolMax, ac, trueResistance)
-             // 2. Update the corresponding energy pool's max multiplier input? Or handle it directly in calculation?
-             // 3. Update the GLOBAL form multiplier input? Or handle override in calculation?
-             // 4. Store the selected AC/True Resistance for use in calculation.
-             // 5. Trigger updateEquationDisplay() and potentially updateStatsDisplay()
+            // Clear previous error state
+            ryokoEquationInput.classList.remove('border-red-500', 'focus:ring-red-500');
+            ryokoEquationInput.classList.add('border-gray-300', 'focus:ring-teal-focus'); // Use default border/focus
 
-             const formName = selectedOption.dataset.formName || 'Selected Form';
-              showMessage(`${energyType.toUpperCase()}: Switched to ${formName}`, 'info');
+            if (expression) {
+                try {
+                    // Use math.js to safely evaluate the expression
+                    const evaluatedResult = math.evaluate(expression);
 
-              // Example: Update pool max multiplier input directly (Choose ONE way to handle this)
-              // const els = getEnergyElements(energyType);
-              // if (els && els.maxMultiplierEl) {
-              //     els.maxMultiplierEl.value = selectedOption.dataset.poolMax || '1';
-              //     calculateAndResetEnergy(energyType); // Recalculate pool based on new max
-              // }
+                    // Check if the result is a valid, finite number
+                    if (typeof evaluatedResult === 'number' && isFinite(evaluatedResult)) {
+                        result = evaluatedResult;
+                    } else {
+                        console.error("Ryoko equation evaluated to non-finite number:", evaluatedResult);
+                        throw new Error("Invalid result (NaN or Infinity)");
+                    }
 
-              updateEquationDisplay(); // Update equation which might depend on selected form
-         }
+                } catch (error) {
+                    console.error("Error evaluating Ryoko equation:", error);
+                    // Indicate error visually on the input
+                    ryokoEquationInput.classList.remove('focus:ring-teal-focus');
+                    ryokoEquationInput.classList.add('border-red-500', 'focus:ring-red-500');
+                    showMessage(`Invalid Ryoko equation: ${error.message}`, 'error');
+                    result = 1; // Reset multiplier to 1 on error
+                }
+            }
 
+            // Update the read-only base multiplier input with the formatted result
+            charBaseMultiplierInput.value = formatSimpleNumber(result);
 
-        /** Parses resistance input string (+5, *1.2, 10) */
-        function parseResistanceValue(inputString) {
-             if (!inputString || typeof inputString !== 'string') return { type: 'add', value: 0 };
-             inputString = inputString.trim();
-             if (inputString.startsWith('*')) {
-                 return { type: 'multiply', value: safeParseFloat(inputString.substring(1), 1) };
-             } else if (inputString.startsWith('+')) {
-                 return { type: 'add', value: safeParseFloat(inputString.substring(1), 0) };
-             } else {
-                 // Default to additive if no symbol
-                 return { type: 'add', value: safeParseFloat(inputString, 0) };
-             }
-         }
+            // Trigger recalculation since the effective multiplier might have changed
+            handleStatChange();
+        }
 
 
         // --- Event Listeners Setup ---
+
+        /** Sets up all initial event listeners for the calculator UI elements upon page load. */
         function setupEventListeners() {
-            // --- Keep all original listeners ---
             energyTypeSelect.addEventListener('change', () => { showSelectedEnergyPool(); updateEquationDisplay(); });
             calculateBtn.addEventListener('click', () => { triggerAnimation(calculateBtn, 'pulse'); performCalculation(); });
             addDynamicBoxBtn.addEventListener('click', () => { triggerAnimation(addDynamicBoxBtn, 'pulse'); addDynamicModifier(); updateEquationDisplay(); });
             [baseDamageInput, attackCompressionPointsInput, baseMultiplierInput, formMultiplierInput].forEach(input => { if(input) { input.addEventListener('input', updateEquationDisplay); input.addEventListener('change', updateEquationDisplay); } });
-            // Character Stat inputs listener
-             const characterStatInputs = [ charBaseHealthInput, charVitalityInput, charSoulPowerInput, charSoulHpInput ];
-             characterStatInputs.forEach(input => { if (input) { input.addEventListener('input', handleStatChange); } });
-             // Specific handling for Character Base Multiplier and Ryoko Mode
-             if (charBaseMultiplierInput) { charBaseMultiplierInput.addEventListener('input', () => { if (!charBaseMultiplierInput.readOnly) { handleStatChange(); } }); }
-             if (ryokoCheckbox) { ryokoCheckbox.addEventListener('change', handleRyokoCheckboxChange); }
-             if (ryokoEquationInput) { ryokoEquationInput.addEventListener('input', evaluateRyokoEquation); ryokoEquationInput.addEventListener('change', evaluateRyokoEquation); }
-             // Dynamically generated energy pool inputs and sliders
-             ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); if (els) { if (els.maxMultiplierEl) els.maxMultiplierEl.addEventListener('input', () => { calculateAndResetEnergy(type); updateStatsDisplay(); updateEquationDisplay(); }); if (els.damagePerPowerEl) els.damagePerPowerEl.addEventListener('input', () => { updateSingleSliderDisplay(type); updateEquationDisplay(); }); if (els.energySlider) { els.energySlider.addEventListener('input', (event) => { const slider = event.target; const currentType = slider.dataset.type; const activeAttack = activeAttacks[currentType] || null; let limitPercent = 100; if (activeAttack === 'super') limitPercent = 95; else if (activeAttack === 'ultimate') limitPercent = 90; if (parseInt(slider.value) > limitPercent) { slider.value = limitPercent; } updateSingleSliderDisplay(currentType); updateEquationDisplay(); }); } const regenBtn = els.poolDiv?.querySelector('.regen-btn'); if (regenBtn) { regenBtn.addEventListener('click', function() { triggerAnimation(this, 'pulse'); regenerateEnergy(this.dataset.type); }); } } else { console.warn(`Could not find elements for type ${type} to attach listeners.`); } });
-            // Kaioken section listeners
-             if (kaiokenCheckbox) { kaiokenCheckbox.addEventListener('change', () => { const isChecked = kaiokenCheckbox.checked; kaiokenDetails.classList.toggle('hidden', !isChecked); if (isChecked) { applyKaiokenStyle(); updateCurrentHealthDisplay(); } else { removeKaiokenStyle(); } updateEquationDisplay(); }); }
-             if (maxHealthInput) { maxHealthInput.addEventListener('input', () => { updateCurrentHealthDisplay(); updateEquationDisplay(); }); maxHealthInput.addEventListener('change', () => { updateCurrentHealthDisplay(); updateEquationDisplay(); }); }
-             if (kaiokenStrainInput) { kaiokenStrainInput.addEventListener('input', updateEquationDisplay); }
-             if (regenHealthBtn) { regenHealthBtn.addEventListener('click', () => { triggerAnimation(regenHealthBtn, 'pulse'); regenerateHealth(); }); }
-            // Save/Load/Clear Button Listeners
-             if (saveBtn) saveBtn.addEventListener('click', () => { triggerAnimation(saveBtn, 'pulse'); saveState(); });
-             if (loadBtn) loadBtn.addEventListener('click', () => { triggerAnimation(loadBtn, 'pulse'); loadState(); });
-             if (clearBtn) clearBtn.addEventListener('click', () => { triggerAnimation(clearBtn, 'pulse'); clearState(); });
-            // Equation click listener
-             if (equationDisplayEl) { equationDisplayEl.addEventListener('click', handleEquationClick); }
-            // Reset Attack Count button listener
-             if (resetAttackCountBtn) { resetAttackCountBtn.addEventListener('click', () => { triggerAnimation(resetAttackCountBtn, 'pulse'); attackCount = 0; updateStatsDisplay(); showMessage('Attack count reset.', 'info'); }); }
-            // Attack Button Listeners
-             if (superAttackBtn) superAttackBtn.addEventListener('click', handleAttackButtonClick);
-             if (ultimateAttackBtn) ultimateAttackBtn.addEventListener('click', handleAttackButtonClick);
-            // Tab Switching Button Listener
-             if (showCharacterStatsBtn) { showCharacterStatsBtn.addEventListener('click', () => { triggerAnimation(showCharacterStatsBtn, 'pulse'); if (characterStatsScreen && characterStatsScreen.classList.contains('hidden')) { showCharacterStatsView(); } else { showCalculatorView(); } }); }
 
+            // Character Stat inputs listener (excluding Base Multiplier)
+            const characterStatInputs = [ charBaseHealthInput, charVitalityInput, charSoulPowerInput, charSoulHpInput ];
+            characterStatInputs.forEach(input => { if (input) { input.addEventListener('input', handleStatChange); } });
 
-            // --- NEW: Form Creator Event Listeners ---
-            if (resistanceCheckbox) {
-                resistanceCheckbox.addEventListener('change', () => {
-                    resistanceValues.classList.toggle('hidden', !resistanceCheckbox.checked);
-                });
+            // Specific handling for Character Base Multiplier and Ryoko Mode
+            if (charBaseMultiplierInput) { charBaseMultiplierInput.addEventListener('input', () => { if (!charBaseMultiplierInput.readOnly) { handleStatChange(); } }); }
+            if (ryokoCheckbox) { ryokoCheckbox.addEventListener('change', handleRyokoCheckboxChange); }
+            if (ryokoEquationInput) {
+                // Evaluate on input change and blur
+                ryokoEquationInput.addEventListener('input', evaluateRyokoEquation);
+                ryokoEquationInput.addEventListener('change', evaluateRyokoEquation);
             }
 
-            if (addFormBtn) {
-                addFormBtn.addEventListener('click', () => {
-                    triggerAnimation(addFormBtn, 'pulse');
-                    const energyType = formEnergyTypeSelect.value;
-                    const formName = formNameInput.value.trim(); // Get form name
-                    const formMultiplier = safeParseFloat(formMultiplierInput_creator.value, 1);
-                    const poolMaxMultiplier = safeParseFloat(poolMaxMultiplierInput_creator.value, 1);
-                    const affectsResistances = resistanceCheckbox.checked;
-                    // Use the parsing function
-                    const acData = affectsResistances ? parseResistanceValue(acValueInput.value) : { type: 'add', value: 0 };
-                    const trData = affectsResistances ? parseResistanceValue(trueResistanceValueInput.value) : { type: 'add', value: 0 };
+            // Dynamically generated energy pool inputs and sliders
+            ALL_ENERGY_TYPES.forEach(type => {
+                const els = getEnergyElements(type);
+                if (els) {
+                    if (els.maxMultiplierEl) els.maxMultiplierEl.addEventListener('input', () => { calculateAndResetEnergy(type); updateStatsDisplay(); updateEquationDisplay(); });
+                    if (els.damagePerPowerEl) els.damagePerPowerEl.addEventListener('input', () => { updateSingleSliderDisplay(type); updateEquationDisplay(); });
+                    if (els.energySlider) { els.energySlider.addEventListener('input', (event) => { const slider = event.target; const currentType = slider.dataset.type; const activeAttack = activeAttacks[currentType] || null; let limitPercent = 100; if (activeAttack === 'super') limitPercent = 95; else if (activeAttack === 'ultimate') limitPercent = 90; if (parseInt(slider.value) > limitPercent) { slider.value = limitPercent; } updateSingleSliderDisplay(currentType); updateEquationDisplay(); }); }
+                    const regenBtn = els.poolDiv?.querySelector('.regen-btn'); if (regenBtn) { regenBtn.addEventListener('click', function() { triggerAnimation(this, 'pulse'); regenerateEnergy(this.dataset.type); }); }
+                } else { console.warn(`Could not find elements for type ${type} to attach listeners.`); }
+            });
 
-                    if (!formName) {
-                         showMessage('Please enter a name for the form.', 'error');
-                         formNameInput.focus();
-                         triggerAnimation(formNameInput, 'shakeX');
-                         return;
-                     }
+            // Kaioken section listeners
+            if (kaiokenCheckbox) { kaiokenCheckbox.addEventListener('change', () => { const isChecked = kaiokenCheckbox.checked; kaiokenDetails.classList.toggle('hidden', !isChecked); if (isChecked) { applyKaiokenStyle(); updateCurrentHealthDisplay(); } else { removeKaiokenStyle(); } updateEquationDisplay(); }); }
+            if (maxHealthInput) { maxHealthInput.addEventListener('input', () => { updateCurrentHealthDisplay(); updateEquationDisplay(); }); maxHealthInput.addEventListener('change', () => { updateCurrentHealthDisplay(); updateEquationDisplay(); }); }
+            if (kaiokenStrainInput) { kaiokenStrainInput.addEventListener('input', updateEquationDisplay); }
+            if (regenHealthBtn) { regenHealthBtn.addEventListener('click', () => { triggerAnimation(regenHealthBtn, 'pulse'); regenerateHealth(); }); }
 
-                    // Store form data
-                    if (!characterForms[energyType]) {
-                        characterForms[energyType] = [];
-                    }
-                    characterForms[energyType].push({
-                        name: formName, // Store the name
-                        formMultiplier: formMultiplier,
-                        poolMaxMultiplier: poolMaxMultiplier,
-                        acValue: acData.value, // Store parsed value
-                        acType: acData.type,   // Store 'add' or 'multiply'
-                        trueResistanceValue: trData.value, // Store parsed value
-                        trueResistanceType: trData.type    // Store 'add' or 'multiply'
-                    });
+            // Save/Load/Clear Button Listeners
+            if (saveBtn) saveBtn.addEventListener('click', () => { triggerAnimation(saveBtn, 'pulse'); saveState(); });
+            if (loadBtn) loadBtn.addEventListener('click', () => { triggerAnimation(loadBtn, 'pulse'); loadState(); });
+            if (clearBtn) clearBtn.addEventListener('click', () => { triggerAnimation(clearBtn, 'pulse'); clearState(); });
 
-                    // Update UI
-                    updateFormListDisplay(); // Update list in Character Stats
-                    updateFormDropdown(energyType); // Update the dropdown for the specific energy type
+            // Equation click listener
+            if (equationDisplayEl) { equationDisplayEl.addEventListener('click', handleEquationClick); }
 
-                    showMessage(`Form "${formName}" added for ${energyType.toUpperCase()} energy type!`, 'success');
+            // Reset Attack Count button listener
+            if (resetAttackCountBtn) { resetAttackCountBtn.addEventListener('click', () => { triggerAnimation(resetAttackCountBtn, 'pulse'); attackCount = 0; updateStatsDisplay(); showMessage('Attack count reset.', 'info'); }); }
 
-                    // Optionally clear creator inputs
-                    // formNameInput.value = '';
-                    // formMultiplierInput_creator.value = '1';
-                    // poolMaxMultiplierInput_creator.value = '1';
-                    // resistanceCheckbox.checked = false;
-                    // resistanceValues.classList.add('hidden');
-                    // acValueInput.value = '';
-                    // trueResistanceValueInput.value = '';
+            // Attack Button Listeners
+            if (superAttackBtn) superAttackBtn.addEventListener('click', handleAttackButtonClick);
+            if (ultimateAttackBtn) ultimateAttackBtn.addEventListener('click', handleAttackButtonClick);
+
+            // Tab Switching Button Listener
+            if (showCharacterStatsBtn) {
+                showCharacterStatsBtn.addEventListener('click', () => {
+                    triggerAnimation(showCharacterStatsBtn, 'pulse');
+                    if (characterStatsScreen && characterStatsScreen.classList.contains('hidden')) { showCharacterStatsView(); }
+                    else { showCalculatorView(); }
                 });
             }
 
@@ -753,34 +776,32 @@
 
         // --- Initial Setup on Page Load ---
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOM Loaded. Initializing Energy Calculator v10.9 (Form Creator Integration)..."); // Updated version
+            console.log("DOM Loaded. Initializing Energy Calculator v10.7 (Evaluate Ryoko Equation)..."); // Updated version
 
             activeAttacks = {};
             ALL_ENERGY_TYPES.forEach(type => { activeAttacks[type] = null; });
 
-            characterForms = {}; // Initialize form storage
+            generateEnergySections();
 
-            generateEnergySections(); // Generates pools AND adds the (initially empty) dropdown structure
+            const stateLoaded = loadState(); // This now calls applyState which handles Ryoko mode init
+            setupEventListeners();
 
-            const stateLoaded = loadState(); // This now calls applyState which handles forms too
-            setupEventListeners(); // Sets up ALL listeners, including new form ones
-
+            // Initial calculation and UI update
             if (!stateLoaded) {
                  ALL_ENERGY_TYPES.forEach(type => { calculateAndResetEnergy(type); });
-                 handleRyokoCheckboxChange();
+                 handleRyokoCheckboxChange(); // Ensure Ryoko UI is correct on first load
                  showCalculatorView();
                  showSelectedEnergyPool();
-                 updateFormListDisplay(); // Show initial state (no forms)
-                 updateAllFormDropdowns(); // Ensure dropdowns are correct (base form only)
                  updateStatsDisplay();
                  updateEquationDisplay();
-             } else {
-                 // State loaded by applyState, which should handle forms and dropdowns
-                 // Ensure pools are calculated based on loaded stats and potentially selected forms
+            } else {
+                 // applyState already restored Ryoko state and view
+                 // Ensure all pools are calculated based on loaded stats
                  ALL_ENERGY_TYPES.forEach(type => { calculateAndResetEnergy(type); });
                  updateStatsDisplay();
                  updateEquationDisplay();
-             }
+            }
+
 
             console.log(`Initialization complete. ${stateLoaded ? '(Saved state loaded)' : '(Using default state)'}`);
         });
