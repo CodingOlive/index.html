@@ -539,15 +539,17 @@
    // === Your Specific Firebase Configuration ===
    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
     const firebaseConfig = {
-      apiKey: "AIzaSyAbYQWbMQBHOdT-PxwIXeDFvLgEXlX7PhY",
-      authDomain: "dndfortheboys-d88d9.firebaseapp.com",
-      databaseURL: "https://dndfortheboys-d88d9-default-rtdb.firebaseio.com",
-      projectId: "dndfortheboys-d88d9",
-      storageBucket: "dndfortheboys-d88d9.firebasestorage.app",
-      messagingSenderId: "721075269380",
-      appId: "1:721075269380:web:197009bf7ded05903faa51",
-      measurementId: "G-H4HSEM39X5"
-    };
+    apiKey: "AIzaSyAbYQWbMQBHOdT-PxwIXeDFvLgEXlX7PhY", // Make sure this is your valid key!
+    authDomain: "dndfortheboys-d88d9.firebaseapp.com",
+    databaseURL: "https://dndfortheboys-d88d9-default-rtdb.firebaseio.com", // <<< STILL MISSING COMMA HERE
+    projectId: "dndfortheboys-d88d9",
+    storageBucket: "dndfortheboys-d88d9.appspot.com", // Double-check this value in your Firebase console
+    messagingSenderId: "721075269380",
+    appId: "1:721075269380:web:197009bf7ded05903faa51",
+    measurementId: "G-H4HSEM39X5"
+};
+// Remove the extra closing brace }; that was here
+// =========================================
     };
     // =========================================
     
@@ -703,7 +705,18 @@ Let me know once you have added this script block, and we can proceed to **Step 
     function formatSimpleNumber(num) { if (typeof num !== 'number' || isNaN(num)) return '0'; try { const options = { maximumFractionDigits: 2 }; return num.toLocaleString('en-US', options); } catch (e) { return num.toString(); } }
     function showMessage(text, type = 'info') { messageArea.textContent = text; messageArea.className = 'mb-4 p-3 rounded-md text-sm border animate__animated'; messageArea.classList.remove('hidden', 'animate__fadeIn', 'animate__shakeX'); let animationClass = 'animate__fadeIn'; switch (type) { case 'error': messageArea.classList.add('bg-error-light', 'text-error-dark', 'border-error'); animationClass = 'animate__shakeX'; break; case 'success': messageArea.classList.add('bg-success-light', 'text-success-dark', 'border-success'); break; default: messageArea.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300'); break; } messageArea.classList.add(animationClass); messageArea.addEventListener('animationend', () => { messageArea.classList.remove('animate__animated', animationClass); }, { once: true }); setTimeout(() => { messageArea.classList.add('hidden'); }, 5000); }
     function showLoading(isLoading) { loadingDiv.classList.toggle('hidden', !isLoading); if(isLoading) resultDiv.classList.add('hidden'); calculateBtn.disabled = isLoading; calculateBtn.classList.toggle('opacity-50', isLoading); calculateBtn.classList.toggle('cursor-not-allowed', isLoading); }
-    function triggerAnimation(element, animationName, duration = 800) { if (!element || !animationName) return; const animateCSSBase = 'animate__animated'; const animationClass = animationName.startsWith('animate__') ? animationName : `animate__${animationName}`; const classesToAdd = [animateCSSBase, animationClass]; element.classList.remove(...classesToAdd); void element.offsetWidth; element.classList.add(...classesToAdd); element.addEventListener('animationend', () => { element.classList.remove(...classesToAdd); }, { once: true }); }
+  function triggerAnimation(element, animationName, duration = 800) {
+    if (!element || !animationName) return;
+    const animateCSSBase = 'animate__animated';
+    const animationClass = animationName.startsWith('animate__') ? animationName : `animate__${animationName}`;
+    const classesToAdd = [animateCSSBase, animationClass];
+    element.classList.remove(...classesToAdd);
+    void element.offsetWidth;
+    element.classList.add(...classesToAdd);
+    element.addEventListener('animationend', () => {
+        element.classList.remove(...classesToAdd);
+    }, { once: true }); // <<< ADD CLOSING PARENTHESIS HERE
+}
     function formatStatNumber(num) { if (typeof num !== 'number' || isNaN(num)) return '0'; const absNum = Math.abs(num); if (absNum >= 1e9) { return num.toExponential(2); } if (absNum >= 1e6) { let shortNum = num / 1e6; let formatted = shortNum.toLocaleString('en-US', { minimumFractionDigits: absNum < 10e6 ? 2 : 1, maximumFractionDigits: absNum < 10e6 ? 2 : 1 }); formatted = formatted.replace(/\.0$/, ''); return formatted + 'M'; } if (absNum >= 1e3) { let shortNum = num / 1e3; let formatted = shortNum.toLocaleString('en-US', { minimumFractionDigits: absNum < 10e3 ? 2 : 1, maximumFractionDigits: absNum < 10e3 ? 2 : 1 }); formatted = formatted.replace(/\.0$/, ''); return formatted + 'K'; } if (absNum < 1000) { return num.toLocaleString('en-US', { maximumFractionDigits: 2 }); } return num.toLocaleString('en-US'); }
     function parseFormattedNumber(str) { if (typeof str !== 'string' && typeof str !== 'number') return 0; if (typeof str === 'number') return isNaN(str) ? 0 : str; str = str.trim().toUpperCase().replace(/,/g, ''); if (str.includes('E')) { const num = parseFloat(str); return isNaN(num) ? 0 : num; } const lastChar = str.slice(-1); const numPart = parseFloat(str.slice(0, -1)); const fullNum = parseFloat(str); if (!isNaN(fullNum) && !['K', 'M', 'B', 'T', 'Q'].includes(lastChar)) { return fullNum; } if (isNaN(numPart) && ['K', 'M', 'B', 'T', 'Q'].includes(lastChar)) return 0; switch (lastChar) { case 'K': return numPart * 1e3; case 'M': return numPart * 1e6; case 'B': return numPart * 1e9; case 'T': return numPart * 1e12; case 'Q': return numPart * 1e15; default: return isNaN(fullNum) ? 0 : fullNum; } }
     function escapeHtml(unsafe) { if (typeof unsafe !== 'string') return ''; return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
