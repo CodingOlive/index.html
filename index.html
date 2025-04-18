@@ -230,6 +230,9 @@
 <body class="p-4 md:p-6">
 
     <div class="mb-4 flex flex-wrap gap-2">
+       <button id="google-signin-btn" class="save-load-btn bg-red-600 hover:bg-red-700 focus:ring-red-500">Sign in with Google</button>
+        <button id="sign-out-btn" class="save-load-btn bg-gray-700 hover:bg-gray-800 focus:ring-gray-600 hidden">Sign Out</button> 
+        <span id="user-info" class="text-sm text-gray-600 self-center ml-2">Not signed in.</span>
         <button id="save-state-btn" class="save-load-btn bg-blue-500 hover:bg-blue-600 focus:ring-blue-400">Save State</button>
         <button id="load-state-btn" class="save-load-btn bg-gray-500 hover:bg-gray-600 focus:ring-gray-400">Load State</button>
         <button id="clear-state-btn" class="save-load-btn bg-red-500 hover:bg-red-600 focus:ring-red-400">Clear Saved</button>
@@ -520,44 +523,59 @@
 
     <script type="module">
       // Import the functions you need from the SDKs you need
-      // (Using recent versions as an example, update as needed from Firebase docs)
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js"; 
       import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js"; 
+      // *** Import Auth functions ***
+      import { 
+          getAuth, 
+          onAuthStateChanged, 
+          GoogleAuthProvider, 
+          signInWithPopup,    
+          signOut             
+      } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"; 
       
       // === Your Specific Firebase Configuration ===
-      // Make sure databaseURL is correct and included!
+      // Make sure databaseURL has a comma after it if other properties follow!
       const firebaseConfig = {
         apiKey: "AIzaSyAbYQWbMQBHOdT-PxwIXeDFvLgEXlX7PhY", 
         authDomain: "dndfortheboys-d88d9.firebaseapp.com",
-        databaseURL: "https://dndfortheboys-d88d9-default-rtdb.firebaseio.com/", // Your Database URL
+        databaseURL: "https://dndfortheboys-d88d9-default-rtdb.firebaseio.com/", // Comma added if needed
         projectId: "dndfortheboys-d88d9",
         storageBucket: "dndfortheboys-d88d9.firebasestorage.app", 
         messagingSenderId: "721075269380", 
         appId: "1:721075269380:web:197009bf7ded05903faa51", 
-        measurementId: "G-H4HSEM39X5" // Optional, for Analytics
+        measurementId: "G-H4HSEM39X5" 
       };
       // =========================================
     
       // Initialize Firebase App
       const app = initializeApp(firebaseConfig);
-      
-      // Initialize Realtime Database service
       const database = getDatabase(app); 
+      const auth = getAuth(app); // Initialize Auth
 
       // --- Make Firebase functions globally accessible ---
       // Needed so your separate, non-module calculator script can use them.
-      window.firebaseDb = database;       // Database instance
-      window.firebaseDbRef = ref;       // Reference function
-      window.firebaseDbSet = set;         // Set data function
-      window.firebaseDbGet = get;         // Get data function
-      window.firebaseDbRemove = remove;   // Remove data function
-      // ------------------------------------------------
+      window.firebaseDb = database;       
+      window.firebaseDbRef = ref;       
+      window.firebaseDbSet = set;         
+      window.firebaseDbGet = get;         
+      window.firebaseDbRemove = remove;   
+      // *** Export Auth functions ***
+      window.firebaseAuth = auth; 
+      window.firebaseOnAuthStateChanged = onAuthStateChanged; 
+      window.firebaseGoogleAuthProvider = GoogleAuthProvider; 
+      window.firebaseSignInWithPopup = signInWithPopup;
+      window.firebaseSignOut = signOut; 
 
       // Signal that Firebase is ready for the main script
-      console.log("Firebase Initialized (v9+ Modular)");
+      console.log("Firebase Initialized (v9+ Modular with Auth)"); 
       document.dispatchEvent(new Event('firebaseReady')); 
-
     </script>
+    ```
+
+This block includes the necessary imports for Google Auth and makes the required functions available globally under the `window.` object (like `window.firebaseAuth`, `window.firebaseOnAuthStateChanged`, etc.) so your main script can call them.
+
+Let me know once you have added this script block, and we can proceed to **Step 3: Modifying the Main Calculator Script**.
 
     <script>
   document.addEventListener('firebaseReady', async () => { 
@@ -642,7 +660,8 @@
 
 
         // --- Global State & Constants ---
-        const FIREBASE_SAVE_PATH = 'calculatorStates/defaultSave'; 
+        const FIREBASE_SAVE_PATH_BASE = 'calculatorStates';
+        let currentUser = null; // Will hold user info (like uid) when signed in
         let totalDamageDealt = 0, totalEnergySpent = 0, attackCount = 0, highestDamage = 0;
         const LOCAL_STORAGE_KEY = 'energyCalculatorState_v1.3_forms'; // Incremented version
         let poolAnimationTimeoutId = null;
@@ -1181,60 +1200,106 @@
             if (state.activeView === 'stats') { showCharacterStatsView(); }
             else { showCalculatorView(); }
         }
-        // *** NEW ASYNC Firebase State Functions (Replace old ones) ***
-            async function saveState() { 
-                 try {
-                     const state = gatherState(); // Assumes gatherState is defined elsewhere
-                     const dbRef = window.firebaseDbRef(window.firebaseDb, FIREBASE_SAVE_PATH); 
-                     await window.firebaseDbSet(dbRef, state); 
-                     showMessage('State saved successfully to Firebase!', 'success'); // Assumes showMessage exists
-                 } catch (error) {
-                     console.error("Firebase save error:", error);
-                     showMessage(`Failed to save state to Firebase. ${error.message}`, 'error');
-                 }
+     // *** NEW ASYNC Firebase State Functions (MODIFIED FOR AUTH) ***
+        async function saveState() { 
+             if (!currentUser) { // Check if user is signed in
+                showMessage('You must be signed in to save state.', 'error');
+                return; 
              }
-             
-            async function loadState() { 
-                 try {
-                     const dbRef = window.firebaseDbRef(window.firebaseDb, FIREBASE_SAVE_PATH); 
-                     const snapshot = await window.firebaseDbGet(dbRef); 
-                     if (snapshot.exists()) {
-                         const state = snapshot.val();
-                         if (state) {
-                             applyState(state); // Assumes applyState is defined elsewhere
-                             showMessage('State loaded successfully from Firebase!', 'success');
-                             return true; 
-                         } else {
-                              console.warn("Firebase data node exists but is null or empty.");
-                              showMessage('No saved state found in Firebase.', 'info');
-                              return false; 
-                         }
-                     } else {
-                         console.log("No saved state found at Firebase path:", FIREBASE_SAVE_PATH);
-                         showMessage('No saved state found in Firebase.', 'info');
-                         return false; 
+             try {
+                 const state = gatherState(); // Assumes gatherState is defined elsewhere
+                 // Construct path using the user's unique ID
+                 const userSavePath = `<span class="math-inline">\{FIREBASE\_SAVE\_PATH\_BASE\}/</span>{currentUser.uid}`; 
+                 const dbRef = window.firebaseDbRef(window.firebaseDb, userSavePath); 
+                 await window.firebaseDbSet(dbRef, state); 
+                 showMessage('State saved successfully to Firebase!', 'success');
+             } catch (error) {
+                 console.error("Firebase save error:", error);
+                 showMessage(`Failed to save state to Firebase. ${error.message}`, 'error');
+             }
+         }
+
+        async function loadState() { 
+             if (!currentUser) { // Check if user is signed in
+                console.warn("Attempted to load state before user was signed in.");
+                return false; // Can't load without a user
+             }
+             // Construct path using the user's unique ID
+             const userSavePath = `<span class="math-inline">\{FIREBASE\_SAVE\_PATH\_BASE\}/</span>{currentUser.uid}`; 
+             try {
+                 const dbRef = window.firebaseDbRef(window.firebaseDb, userSavePath); 
+                 const snapshot = await window.firebaseDbGet(dbRef); 
+                 if (snapshot.exists()) {
+                     const state = snapshot.val();
+                     if (state) {
+                         applyState(state); // Assumes applyState is defined elsewhere
+                         // Message moved to onAuthStateChanged
+                         return true; 
+                     } else { 
+                          console.warn("Firebase data node exists but is null or empty.");
+                          // Message handled in onAuthStateChanged
+                          return false; 
                      }
-                 } catch (error) {
-                     console.error("Error loading state from Firebase:", error);
-                     showMessage(`Failed to load state from Firebase. ${error.message}`, 'error');
+                 } else { 
+                     console.log("No saved state found at Firebase path:", userSavePath);
+                     // Message handled in onAuthStateChanged
                      return false; 
                  }
+             } catch (error) { 
+                 console.error("Error loading state from Firebase:", error);
+                 showMessage(`Failed to load state from Firebase. ${error.message}`, 'error');
+                 return false; 
              }
-             
-            async function clearState() { 
-                 if (confirm('Are you sure you want to clear the saved state FROM FIREBASE? This cannot be undone.')) {
-                    try {
-                        const dbRef = window.firebaseDbRef(window.firebaseDb, FIREBASE_SAVE_PATH); 
-                        await window.firebaseDbRemove(dbRef); 
-                        showMessage('Saved state cleared from Firebase. Reloading.', 'success');
-                        setTimeout(() => window.location.reload(), 1000);
-                    } catch (error) {
-                         console.error("Firebase clear error:", error);
-                         showMessage(`Failed to clear state from Firebase. ${error.message}`, 'error');
-                    }
-                 }
+         }
+
+        async function clearState() { 
+             if (!currentUser) { // Check if user is signed in
+                 showMessage('You must be signed in to clear state.', 'error');
+                 return; 
              }
-            // *** END OF REPLACEMENT FUNCTIONS ***
+             if (confirm('Are you sure you want to clear your saved state FROM FIREBASE? This cannot be undone.')) {
+                // Construct path using the user's unique ID
+                const userSavePath = `<span class="math-inline">\{FIREBASE\_SAVE\_PATH\_BASE\}/</span>{currentUser.uid}`; 
+                try {
+                    const dbRef = window.firebaseDbRef(window.firebaseDb, userSavePath); 
+                    await window.firebaseDbRemove(dbRef); 
+                    showMessage('Saved state cleared from Firebase. Reloading.', 'success');
+                    setTimeout(() => window.location.reload(), 1000); // Reload to get default state cleanly
+                } catch (error) { 
+                     console.error("Firebase clear error:", error);
+                     showMessage(`Failed to clear state from Firebase. ${error.message}`, 'error');
+                }
+             }
+         }
+        // *** END OF REPLACEMENT STATE FUNCTIONS ***
+      // *** ADDED FUNCTIONS FOR GOOGLE SIGN-IN / SIGN-OUT ***
+        async function handleGoogleSignIn() {
+            const provider = new window.firebaseGoogleAuthProvider(); 
+            try {
+                console.log("Attempting Google Sign-in...");
+                const result = await window.firebaseSignInWithPopup(window.firebaseAuth, provider);
+                // onAuthStateChanged will handle loading state and UI updates
+                const user = result.user;
+                console.log("Google Sign-in successful for:", user.displayName);
+                showMessage(`Signed in as ${user.displayName || user.email}`, 'success');
+            } catch (error) {
+                console.error("Google Sign-in error:", error);
+                showMessage(`Google Sign-in failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function handleSignOut() {
+            try {
+                await window.firebaseSignOut(window.firebaseAuth);
+                console.log("Sign-out successful.");
+                showMessage('Signed out successfully.', 'info');
+                // onAuthStateChanged will handle UI/state reset
+            } catch (error) {
+                console.error("Sign-out error:", error);
+                showMessage(`Sign-out failed: ${error.message}`, 'error');
+            }
+        }
+        // *** END OF ADDED FUNCTIONS ***
 
         // --- Generate Elements from Templates ---
         function generateEnergySections() {
@@ -1697,7 +1762,59 @@
                 }
             }
         }
+// --- Helper functions for initialization ---
+        function initializeDefaultState() {
+            console.log("Initializing default state...");
+            // Reset core calculator state variables if needed
+            characterForms = [];
+            calculatorState = { selectedForms: {} };
+            ALL_ENERGY_TYPES.forEach(type => { calculatorState.selectedForms[type] = 'none'; });
+            totalDamageDealt = 0; totalEnergySpent = 0; attackCount = 0; highestDamage = 0; 
+            activeAttacks = {};
+            // Reset UI elements 
+            if (characterNameInput) characterNameInput.value = '';
+            if (charBaseHealthInput) charBaseHealthInput.value = '';
+            if (charBaseMultiplierInput) charBaseMultiplierInput.value = '1';
+            if (charVitalityInput) charVitalityInput.value = '';
+            if (charSoulPowerInput) charSoulPowerInput.value = '';
+            if (charSoulHpInput) charSoulHpInput.value = '';
+            if (charBaseAcInput) charBaseAcInput.value = '10'; 
+            if (charBaseTrInput) charBaseTrInput.value = '5';  
+            if (ryokoCheckbox) ryokoCheckbox.checked = false;
+            if (ryokoEquationInput) ryokoEquationInput.value = '';
+            handleRyokoCheckboxChange(); 
+            baseDamageInput.value = ''; 
+            attackCompressionPointsInput.value = '0';
+            energyTypeSelect.value = 'ki'; 
+            dynamicModifiersContainer.innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>'; dynamicModifierCount = 0; 
+            kaiokenCheckbox.checked = false; maxHealthInput.value = '1000'; kaiokenStrainInput.value = '10'; 
+             if(currentHealthEl) { currentHealthEl.textContent = maxHealthInput.value; }
+            removeKaiokenStyle(); 
+            // Recalculate energy based on potentially reset stats
+            ALL_ENERGY_TYPES.forEach(type => { calculateAndResetEnergy(type); });
+            renderFormList(); 
+            populateFormDropdowns(); 
+            showCalculatorView(); // Default to calculator view
+            showSelectedEnergyPool(); // Show default pool (Ki)
+            updateStatsDisplay(); // Update stats panel
+            updateEquationDisplay();
+        }
 
+        function initializeLoadedStateUI() {
+            console.log("Initializing UI based on loaded state...");
+            // applyState was called within loadState, these ensure UI matches
+            handleRyokoCheckboxChange(); 
+            renderFormList(); 
+            populateFormDropdowns(); 
+             if (mainCalculatorContent?.classList.contains('hidden')) {
+               showCharacterStatsView(); 
+             } else {
+               showCalculatorView(); 
+             }
+            showSelectedEnergyPool(); 
+            updateStatsDisplay(); 
+            updateEquationDisplay();
+        }
 
         // --- Event Listeners Setup ---
 
@@ -1733,6 +1850,24 @@
                     if (els.formSelect) { els.formSelect.addEventListener('change', handleFormSelectChange); }
 
                 } else { console.warn(`Could not find elements for type ${type} to attach listeners.`); }
+                // *** ADD LISTENERS FOR NEW AUTH BUTTONS ***
+            // Ensure elements exist before adding listeners
+            const googleSignInBtn = document.getElementById('google-signin-btn');
+            const signOutBtn = document.getElementById('sign-out-btn');
+
+            if (googleSignInBtn) {
+                googleSignInBtn.removeEventListener('click', handleGoogleSignIn); // Prevent duplicates if run multiple times
+                googleSignInBtn.addEventListener('click', handleGoogleSignIn);
+            } else {
+                console.warn("Google Sign-in button not found");
+            }
+            if (signOutBtn) {
+                signOutBtn.removeEventListener('click', handleSignOut); // Prevent duplicates
+                signOutBtn.addEventListener('click', handleSignOut);
+            } else {
+                 console.warn("Sign out button not found");
+            }
+            // *** END OF NEW LISTENERS ***
             });
 
             // Kaioken section listeners
@@ -1884,12 +2019,84 @@
                  }
      
                  console.log(`Initialization complete. ${stateLoaded ? '(State loaded from Firebase)' : '(Using default state)'}`);
-                 
-             })(); // Immediately invoke the async IIFE
-            // *** END OF MODIFIED INITIALIZATION BLOCK ***
+                 // --- Initial Setup Trigger ---
+             console.log("DOM Loaded, Firebase ready. Setting up auth listener...");
+             generateEnergySections(); // Generate HTML structure first
+             // The Auth Listener below handles the rest 
+             // of the initialization sequence (loading state, setting up listeners, etc.)
 
-       
- }); // --- END of firebaseReady listener ---
+            // --- Authentication State Change Listener ---
+            // This is now the main driver for initialization after Firebase is ready
+            window.firebaseOnAuthStateChanged(window.firebaseAuth, async (user) => { 
+                const googleSignInBtn = document.getElementById('google-signin-btn'); // Get refs inside listener
+                const signOutBtn = document.getElementById('sign-out-btn');
+                const userInfoSpan = document.getElementById('user-info');
+
+                if (user) {
+                    // User is signed in.
+                    currentUser = user; 
+                    console.log("User signed in:", currentUser.displayName, currentUser.uid);
+                    
+                    // Update UI
+                    if (userInfoSpan) userInfoSpan.textContent = `Signed in as: ${currentUser.displayName || currentUser.email || 'User'}`;
+                    if (googleSignInBtn) googleSignInBtn.classList.add('hidden');
+                    if (signOutBtn) signOutBtn.classList.remove('hidden');
+                    
+                    // Attempt to load state for THIS user
+                    console.log("Attempting to load state for user:", currentUser.uid);
+                    let stateLoaded = false;
+                    try {
+                        stateLoaded = await loadState(); 
+                    } catch (loadError) {
+                        console.error("Error during state load after sign-in:", loadError);
+                    }
+                    
+                    // Setup event listeners (might be needed again if elements changed during applyState)
+                    setupEventListeners(); 
+
+                    // Initialize UI based on loaded state or defaults
+                    if (!stateLoaded) {
+                         console.log("No valid state loaded, initializing defaults for user.");
+                         initializeDefaultState(); // Use helper
+                    } else {
+                         console.log("Saved state loaded from Firebase for user.");
+                         initializeLoadedStateUI(); // Use helper
+                    }
+                    
+                    // Ensure readonly status is correct
+                    if (formMultiplierInput) {
+                        formMultiplierInput.readOnly = true;
+                        formMultiplierInput.classList.add('bg-gray-100', 'opacity-70', 'cursor-not-allowed');
+                        formMultiplierInput.title = "This value is determined by the active form selected for the current energy type.";
+                    }
+                    console.log("Initialization complete for user.");
+
+                } else {
+                    // User is signed out.
+                    currentUser = null;
+                    console.log("User is signed out.");
+
+                    // Update UI
+                    if (userInfoSpan) userInfoSpan.textContent = 'Not signed in.';
+                    if (googleSignInBtn) googleSignInBtn.classList.remove('hidden');
+                    if (signOutBtn) signOutBtn.classList.add('hidden');
+                    
+                    // Initialize with defaults when user signs out
+                    console.log("Initializing default state as user is signed out.");
+                    initializeDefaultState(); 
+                    
+                    // Setup essential listeners even when logged out
+                    setupEventListeners(); 
+                     
+                    // Ensure readonly status is correct
+                    if (formMultiplierInput) {
+                        formMultiplierInput.readOnly = true; 
+                        formMultiplierInput.classList.add('bg-gray-100', 'opacity-70', 'cursor-not-allowed');
+                        formMultiplierInput.title = "This value is determined by the active form selected for the current energy type.";
+                     }
+                }
+            }); // End onAuthStateChanged
+ // --- END of firebaseReady listener ---
     </script>
 
 </body>
