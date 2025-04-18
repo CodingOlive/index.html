@@ -573,11 +573,6 @@
       console.log("Firebase Initialized (v9+ Modular with Auth)"); 
       document.dispatchEvent(new Event('firebaseReady')); 
     </script>
-    ```
-
-This block includes the necessary imports for Google Auth and makes the required functions available globally under the `window.` object (like `window.firebaseAuth`, `window.firebaseOnAuthStateChanged`, etc.) so your main script can call them.
-
-Let me know once you have added this script block, and we can proceed to **Step 3: Modifying the Main Calculator Script**.
 
     <script>
   document.addEventListener('firebaseReady', async () => {
