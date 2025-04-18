@@ -518,8 +518,49 @@
          </div>
      </template>
 
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      // (Using recent versions as an example, update as needed from Firebase docs)
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js"; 
+      import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js"; 
+      
+      // === Your Specific Firebase Configuration ===
+      // Make sure databaseURL is correct and included!
+      const firebaseConfig = {
+        apiKey: "AIzaSyAbYQWbMQBHOdT-PxwIXeDFvLgEXlX7PhY", 
+        authDomain: "dndfortheboys-d88d9.firebaseapp.com",
+        databaseURL: "https://dndfortheboys-d88d9-default-rtdb.firebaseio.com/", // Your Database URL
+        projectId: "dndfortheboys-d88d9",
+        storageBucket: "dndfortheboys-d88d9.firebasestorage.app", 
+        messagingSenderId: "721075269380", 
+        appId: "1:721075269380:web:197009bf7ded05903faa51", 
+        measurementId: "G-H4HSEM39X5" // Optional, for Analytics
+      };
+      // =========================================
+    
+      // Initialize Firebase App
+      const app = initializeApp(firebaseConfig);
+      
+      // Initialize Realtime Database service
+      const database = getDatabase(app); 
+
+      // --- Make Firebase functions globally accessible ---
+      // Needed so your separate, non-module calculator script can use them.
+      window.firebaseDb = database;       // Database instance
+      window.firebaseDbRef = ref;       // Reference function
+      window.firebaseDbSet = set;         // Set data function
+      window.firebaseDbGet = get;         // Get data function
+      window.firebaseDbRemove = remove;   // Remove data function
+      // ------------------------------------------------
+
+      // Signal that Firebase is ready for the main script
+      console.log("Firebase Initialized (v9+ Modular)");
+      document.dispatchEvent(new Event('firebaseReady')); 
+
+    </script>
 
     <script>
+  document.addEventListener('firebaseReady', async () => { 
         // --- DOM Element References ---
         const energyTypeSelect = document.getElementById('energy-type');
         const energyPoolsContainer = document.getElementById('energy-pools-container');
@@ -601,6 +642,7 @@
 
 
         // --- Global State & Constants ---
+        const FIREBASE_SAVE_PATH = 'calculatorStates/defaultSave'; 
         let totalDamageDealt = 0, totalEnergySpent = 0, attackCount = 0, highestDamage = 0;
         const LOCAL_STORAGE_KEY = 'energyCalculatorState_v1.3_forms'; // Incremented version
         let poolAnimationTimeoutId = null;
@@ -1139,10 +1181,60 @@
             if (state.activeView === 'stats') { showCharacterStatsView(); }
             else { showCalculatorView(); }
         }
-        function saveState() { try { const state = gatherState(); const stateString = JSON.stringify(state); localStorage.setItem(LOCAL_STORAGE_KEY, stateString); showMessage('State saved successfully!', 'success'); } catch (error) { console.error("Error saving state:", error); showMessage(`Failed to save state. ${error.message}`, 'error'); } }
-        function loadState() { const stateString = localStorage.getItem(LOCAL_STORAGE_KEY); if (stateString) { try { const state = JSON.parse(stateString); applyState(state); showMessage('State loaded successfully!', 'success'); return true; } catch (error) { console.error("Error loading state:", error); showMessage(`Failed to load saved state. Data might be corrupted. ${error.message}`, 'error'); localStorage.removeItem(LOCAL_STORAGE_KEY); } } return false; }
-        function clearState() { if (confirm('Are you sure you want to clear the saved state? This cannot be undone.')) { localStorage.removeItem(LOCAL_STORAGE_KEY); showMessage('Saved state cleared. Reloading.', 'success'); setTimeout(() => window.location.reload(), 1000); } }
-
+        // *** NEW ASYNC Firebase State Functions (Replace old ones) ***
+            async function saveState() { 
+                 try {
+                     const state = gatherState(); // Assumes gatherState is defined elsewhere
+                     const dbRef = window.firebaseDbRef(window.firebaseDb, FIREBASE_SAVE_PATH); 
+                     await window.firebaseDbSet(dbRef, state); 
+                     showMessage('State saved successfully to Firebase!', 'success'); // Assumes showMessage exists
+                 } catch (error) {
+                     console.error("Firebase save error:", error);
+                     showMessage(`Failed to save state to Firebase. ${error.message}`, 'error');
+                 }
+             }
+             
+            async function loadState() { 
+                 try {
+                     const dbRef = window.firebaseDbRef(window.firebaseDb, FIREBASE_SAVE_PATH); 
+                     const snapshot = await window.firebaseDbGet(dbRef); 
+                     if (snapshot.exists()) {
+                         const state = snapshot.val();
+                         if (state) {
+                             applyState(state); // Assumes applyState is defined elsewhere
+                             showMessage('State loaded successfully from Firebase!', 'success');
+                             return true; 
+                         } else {
+                              console.warn("Firebase data node exists but is null or empty.");
+                              showMessage('No saved state found in Firebase.', 'info');
+                              return false; 
+                         }
+                     } else {
+                         console.log("No saved state found at Firebase path:", FIREBASE_SAVE_PATH);
+                         showMessage('No saved state found in Firebase.', 'info');
+                         return false; 
+                     }
+                 } catch (error) {
+                     console.error("Error loading state from Firebase:", error);
+                     showMessage(`Failed to load state from Firebase. ${error.message}`, 'error');
+                     return false; 
+                 }
+             }
+             
+            async function clearState() { 
+                 if (confirm('Are you sure you want to clear the saved state FROM FIREBASE? This cannot be undone.')) {
+                    try {
+                        const dbRef = window.firebaseDbRef(window.firebaseDb, FIREBASE_SAVE_PATH); 
+                        await window.firebaseDbRemove(dbRef); 
+                        showMessage('Saved state cleared from Firebase. Reloading.', 'success');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } catch (error) {
+                         console.error("Firebase clear error:", error);
+                         showMessage(`Failed to clear state from Firebase. ${error.message}`, 'error');
+                    }
+                 }
+             }
+            // *** END OF REPLACEMENT FUNCTIONS ***
 
         // --- Generate Elements from Templates ---
         function generateEnergySections() {
@@ -1726,66 +1818,78 @@
 
             console.log("Event listeners set up.");
         }
+            // --- Initial Setup / Runtime Code (Now inside firebaseReady) ---
+             console.log("DOM Loaded, Firebase ready. Initializing Energy Calculator v11.0 (Firebase)...");
+             
+             activeAttacks = {};
+             ALL_ENERGY_TYPES.forEach(type => { activeAttacks[type] = null; });
+             
+             generateEnergySections(); // Generate HTML structure first
 
+             // Use an async IIFE to handle awaiting loadState
+             (async () => { 
+                 let stateLoaded = false;
+                 try {
+                     // *** THIS CALL IS NOW ASYNC ***
+                     stateLoaded = await loadState(); // Attempt to load state from Firebase
+                 } catch (loadError) {
+                     console.error("Error during initial state load:", loadError);
+                     // stateLoaded remains false, will proceed to default init
+                 }
+     
+                 // Setup event listeners AFTER trying to load state and generating sections
+                 // Assumes setupEventListeners function is defined elsewhere in the firebaseReady scope
+                 setupEventListeners(); 
+     
+                 // Initialize UI based on whether state was loaded or not
+                 if (!stateLoaded) {
+                      // *** This is your original default initialization logic ***
+                      console.log("No valid state loaded from Firebase, initializing defaults.");
+                      characterForms = [];
+                      calculatorState = { selectedForms: {} };
+                      ALL_ENERGY_TYPES.forEach(type => {
+                          if (!calculatorState.selectedForms) calculatorState.selectedForms = {};
+                          calculatorState.selectedForms[type] = 'none';
+                      });
+                      ALL_ENERGY_TYPES.forEach(type => { calculateAndResetEnergy(type); });
+                      handleRyokoCheckboxChange(); 
+                      renderFormList(); 
+                      populateFormDropdowns(); 
+                      showCalculatorView(); 
+                      showSelectedEnergyPool(); 
+                      updateStatsDisplay(); 
+                      updateEquationDisplay();
+                 }
+                 else {
+                      // *** This is your original post-load logic ***
+                      console.log("Saved state loaded from Firebase.");
+                      // applyState was called within loadState. Ensure UI reflects it.
+                      // Re-running these might be redundant if applyState handles them, 
+                      // but can ensure consistency. Test if needed.
+                       if (mainCalculatorContent?.classList.contains('hidden')) {
+                        showCharacterStatsView(); 
+                      } else {
+                        showCalculatorView(); 
+                      }
+                      showSelectedEnergyPool(); // Refresh currently selected pool/form effects
+                      updateStatsDisplay();
+                      updateEquationDisplay();
+                 }
+     
+                 // Make the main Form Multiplier input readonly (always do this)
+                 if (formMultiplierInput) {
+                     formMultiplierInput.readOnly = true;
+                     formMultiplierInput.classList.add('bg-gray-100', 'opacity-70', 'cursor-not-allowed');
+                     formMultiplierInput.title = "This value is determined by the active form selected for the current energy type.";
+                 }
+     
+                 console.log(`Initialization complete. ${stateLoaded ? '(State loaded from Firebase)' : '(Using default state)'}`);
+                 
+             })(); // Immediately invoke the async IIFE
+            // *** END OF MODIFIED INITIALIZATION BLOCK ***
 
-        // --- Initial Setup on Page Load ---
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOM Loaded. Initializing Energy Calculator v11.0 (Modular Forms)...");
-
-            activeAttacks = {};
-            ALL_ENERGY_TYPES.forEach(type => { activeAttacks[type] = null; });
-
-            // Generate base HTML structure (pools, sliders)
-            generateEnergySections();
-
-            // Attempt to load saved state (this now includes forms and calcState)
-            const stateLoaded = loadState();
-
-            // Setup all event listeners (including dynamic ones for pools/sliders/forms)
-            setupEventListeners();
-
-            // If no state was loaded, perform default initialization
-            if (!stateLoaded) {
-                 console.log("No saved state found, initializing defaults.");
-                 // Ensure characterForms and calculatorState are default empty/none
-                 characterForms = [];
-                 calculatorState = { selectedForms: {} };
-                 ALL_ENERGY_TYPES.forEach(type => calculatorState.selectedForms[type] = 'none');
-
-                 ALL_ENERGY_TYPES.forEach(type => { calculateAndResetEnergy(type); });
-                 handleRyokoCheckboxChange(); // Ensure Ryoko UI is correct
-                 renderFormList(); // Show empty form list
-                 populateFormDropdowns(); // Populate empty dropdowns
-                 showCalculatorView(); // Start on calculator view
-                 showSelectedEnergyPool(); // Show default pool (Ki), apply default form effects (none)
-                 updateStatsDisplay(); // Update stats panel
-                 updateEquationDisplay();
-            }
-             // If state *was* loaded, applyState already handled restoring data and view
-             // but we still need to ensure calculations and UI reflect the loaded state fully.
-            else {
-                 console.log("Saved state loaded.");
-                 // applyState restored data including forms and selectedForms.
-                 // Recalculate energies based on loaded stats/multipliers
-                 ALL_ENERGY_TYPES.forEach(type => { calculateAndResetEnergy(type); });
-                 // applyState called renderFormList, populateFormDropdowns, showSelectedEnergyPool, etc.
-                 // Ensure final UI update after everything
-                 updateStatsDisplay();
-                 updateEquationDisplay();
-            }
-
-
-            // Make the main Form Multiplier input readonly
-            if (formMultiplierInput) {
-                formMultiplierInput.readOnly = true;
-                formMultiplierInput.classList.add('bg-gray-100', 'opacity-70', 'cursor-not-allowed');
-                formMultiplierInput.title = "This value is determined by the active form selected for the current energy type.";
-            }
-
-
-            console.log(`Initialization complete. ${stateLoaded ? '(Saved state loaded)' : '(Using default state)'}`);
-        });
-
+       
+ }); // --- END of firebaseReady listener ---
     </script>
 
 </body>
