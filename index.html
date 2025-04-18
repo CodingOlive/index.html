@@ -537,18 +537,17 @@
       // === Your Specific Firebase Configuration ===
       // Make sure databaseURL has a comma after it if other properties follow!
    // === Your Specific Firebase Configuration ===
-    // IMPORTANT: Ensure your Firebase Realtime Database Security Rules are secure,
-    // only allowing authenticated users to access their specific data path.
-    // Consider implementing Firebase App Check for added security.
+   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
     const firebaseConfig = {
-        apiKey: "AIzaSyAbYQWbMQBHOdT-PxwIXeDFvLgEXlX7PhY", // Keep API Key secure, especially in public repositories. Consider environment variables or other secure methods.
-        authDomain: "dndfortheboys-d88d9.firebaseapp.com",
-        databaseURL: "https://dndfortheboys-d88d9-default-rtdb.firebaseio.com/", // <<< COMMA ADDED HERE
-        projectId: "dndfortheboys-d88d9",
-        storageBucket: "dndfortheboys-d88d9.appspot.com", // <<< CORRECTED DOMAIN (Verify in your Firebase Console)
-        messagingSenderId: "721075269380",
-        appId: "1:721075269380:web:197009bf7ded05903faa51",
-        measurementId: "G-H4HSEM39X5"
+      apiKey: "AIzaSyAbYQWbMQBHOdT-PxwIXeDFvLgEXlX7PhY",
+      authDomain: "dndfortheboys-d88d9.firebaseapp.com",
+      databaseURL: "https://dndfortheboys-d88d9-default-rtdb.firebaseio.com",
+      projectId: "dndfortheboys-d88d9",
+      storageBucket: "dndfortheboys-d88d9.firebasestorage.app",
+      messagingSenderId: "721075269380",
+      appId: "1:721075269380:web:197009bf7ded05903faa51",
+      measurementId: "G-H4HSEM39X5"
+    };
     };
     // =========================================
     
