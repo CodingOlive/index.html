@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy Calculator - v11.0 (Modular Forms)</title> <script src="https://cdn.tailwindcss.com"></script>
+    <title>Energy Calculator - v11.1 (New Energies)</title> <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
     <link
         rel="stylesheet"
@@ -14,15 +14,26 @@
         tailwind.config = {
             theme: {
                 extend: {
+                    
                     colors: {
                         // Energy types
                         ki: '#FF9800', nen: '#2196F3', chakra: '#9C27B0', magic: '#26a69a', cursed: '#dc2626',
                         reiatsu: '#475569', haki: '#1f2937', alchemy: '#f59e0b', nature: '#84cc16',
                         force: '#d946ef',
+                        // NEW Energy Types
+                        origin: '#4f46e5',      // Indigo 600
+                        fundamental: '#9ca3af', // Gray 400
+                        other: '#78350f',       // Amber 900
+
                         // Darker variants
                         'ki-dark': '#e65100', 'nen-dark': '#0d47a1', 'chakra-dark': '#4a148c', 'magic-dark': '#00796b', 'cursed-dark': '#b91c1c',
                         'reiatsu-dark': '#1e293b', 'haki-dark': '#000000', 'alchemy-dark': '#b45309', 'nature-dark': '#4d7c0f',
                         'force-dark': '#a21caf',
+                        // NEW Darker variants
+                        'origin-dark': '#3730a3',      // Indigo 800
+                        'fundamental-dark': '#6b7280', // Gray 500
+                        'other-dark': '#451a03',       // Amber 950
+
                         // UI feedback colors
                         'success-light': '#e8f5e9', 'success': '#4CAF50', 'success-dark': '#2e7d32',
                         'error-light': '#ffebee', 'error': '#f44336', 'error-dark': '#c62828',
@@ -35,6 +46,11 @@
                         'haki-focus': '#1f2937', 'alchemy-focus': '#f59e0b', 'nature-focus': '#84cc16',
                         'ki-focus': '#FF9800', 'nen-focus': '#2196F3', 'chakra-focus': '#9C27B0',
                         'force-focus': '#d946ef',
+                        // NEW Focus Rings
+                        'origin-focus': '#4f46e5',
+                        'fundamental-focus': '#9ca3af',
+                        'other-focus': '#78350f',
+
                         'teal-focus': '#2dd4bf', // Teal focus for character stats
                         'form-creator-focus': '#a78bfa', // Violet focus for form creator
                     },
@@ -53,6 +69,11 @@
                         'animate-pulse-glow-alchemy': 'pulse-glow-alchemy 1.5s infinite ease-in-out',
                         'animate-pulse-glow-nature': 'pulse-glow-nature 1.5s infinite ease-in-out',
                         'animate-pulse-glow-force': 'pulse-glow-force 1.5s infinite ease-in-out',
+                        // NEW Glow Animations
+                        'animate-pulse-glow-origin': 'pulse-glow-origin 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-fundamental': 'pulse-glow-fundamental 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-other': 'pulse-glow-other 1.5s infinite ease-in-out',
+
                         'animate-pulse-source': 'pulse-source-input 0.8s ease-out',
                         'bounceIn': 'bounceIn 0.75s', 'bounceOut': 'bounceOut 0.75s', 'fadeInUp': 'fadeInUp 0.5s',
                     },
@@ -78,6 +99,11 @@
                          'pulse-glow-alchemy': { '0%, 100%': { boxShadow: `0 0 8px #f59e0b66` }, '50%': { boxShadow: `0 0 16px #f59e0bB3` } },
                          'pulse-glow-nature': { '0%, 100%': { boxShadow: `0 0 8px #84cc1666` }, '50%': { boxShadow: `0 0 16px #84cc16B3` } },
                          'pulse-glow-force': { '0%, 100%': { boxShadow: `0 0 8px #d946ef66` }, '50%': { boxShadow: `0 0 16px #d946efB3` } },
+                         // NEW Glow Keyframes
+                         'pulse-glow-origin': { '0%, 100%': { boxShadow: `0 0 8px #4f46e566` }, '50%': { boxShadow: `0 0 16px #4f46e5B3` } }, // Indigo
+                         'pulse-glow-fundamental': { '0%, 100%': { boxShadow: `0 0 8px #9ca3af66` }, '50%': { boxShadow: `0 0 16px #9ca3afB3` } }, // Gray
+                         'pulse-glow-other': { '0%, 100%': { boxShadow: `0 0 8px #78350f66` }, '50%': { boxShadow: `0 0 16px #78350fB3` } }, // Amber
+
                          'pulse-source-input': { '0%, 100%': { boxShadow: 'none' }, '50%': { boxShadow: '0 0 12px theme("colors.blue.400")' } },
                          'shakeX': { /* Uses animate.css definition */ },
                          'bounceIn': { /* Uses animate.css definition */ },
@@ -107,6 +133,10 @@
         .energy-pool-alchemy { border-left-color: #f59e0b; } .energy-pool-alchemy h3 { color: #b45309; }
         .energy-pool-nature { border-left-color: #84cc16; } .energy-pool-nature h3 { color: #4d7c0f; }
         .energy-pool-force { border-left-color: #d946ef; } .energy-pool-force h3 { color: #a21caf; }
+        /* NEW Pool Styles */
+        .energy-pool-origin { border-left-color: #4f46e5; } .energy-pool-origin h3 { color: #3730a3; } /* Indigo */
+        .energy-pool-fundamental { border-left-color: #9ca3af; } .energy-pool-fundamental h3 { color: #6b7280; } /* Gray */
+        .energy-pool-other { border-left-color: #78350f; } .energy-pool-other h3 { color: #451a03; } /* Amber */
 
         /* Base Slider Track Style */
         .energy-slider {
@@ -128,6 +158,10 @@
         #alchemy-energy-slider::-webkit-slider-thumb { background: #f59e0b; } #alchemy-energy-slider::-moz-range-thumb { background: #f59e0b; }
         #nature-energy-slider::-webkit-slider-thumb { background: #84cc16; } #nature-energy-slider::-moz-range-thumb { background: #84cc16; }
         #force-energy-slider::-webkit-slider-thumb { background: #d946ef; } #force-energy-slider::-moz-range-thumb { background: #d946ef; }
+        /* NEW Slider Thumb Colors */
+        #origin-energy-slider::-webkit-slider-thumb { background: #4f46e5; } #origin-energy-slider::-moz-range-thumb { background: #4f46e5; } /* Indigo */
+        #fundamental-energy-slider::-webkit-slider-thumb { background: #9ca3af; } #fundamental-energy-slider::-moz-range-thumb { background: #9ca3af; } /* Gray */
+        #other-energy-slider::-webkit-slider-thumb { background: #78350f; } #other-energy-slider::-moz-range-thumb { background: #78350f; } /* Amber */
 
         /* Slider Thumb Hover Colors */
         #ki-energy-slider:hover::-webkit-slider-thumb { background: #e65100; } #ki-energy-slider:hover::-moz-range-thumb { background: #e65100; }
@@ -140,6 +174,10 @@
         #alchemy-energy-slider:hover::-webkit-slider-thumb { background: #b45309; } #alchemy-energy-slider:hover::-moz-range-thumb { background: #b45309; }
         #nature-energy-slider:hover::-webkit-slider-thumb { background: #4d7c0f; } #nature-energy-slider:hover::-moz-range-thumb { background: #4d7c0f; }
         #force-energy-slider:hover::-webkit-slider-thumb { background: #a21caf; } #force-energy-slider:hover::-moz-range-thumb { background: #a21caf; }
+        /* NEW Slider Thumb Hover Colors */
+        #origin-energy-slider:hover::-webkit-slider-thumb { background: #3730a3; } #origin-energy-slider:hover::-moz-range-thumb { background: #3730a3; } /* Indigo Dark */
+        #fundamental-energy-slider:hover::-webkit-slider-thumb { background: #6b7280; } #fundamental-energy-slider:hover::-moz-range-thumb { background: #6b7280; } /* Gray Dark */
+        #other-energy-slider:hover::-webkit-slider-thumb { background: #451a03; } #other-energy-slider:hover::-moz-range-thumb { background: #451a03; } /* Amber Dark */
 
         /* Dynamic Modifier Box Styles */
         .modifier-type-option.additive { border-color: theme('colors.success'); color: theme('colors.success-dark'); }
@@ -156,6 +194,10 @@
         /* Static Glow classes for energy pools */
         .static-glow-ki { box-shadow: 0 0 10px #FF980080; } .static-glow-nen { box-shadow: 0 0 10px #2196F380; } .static-glow-chakra { box-shadow: 0 0 10px #9C27B080; } .static-glow-magic { box-shadow: 0 0 10px #26a69a80; } .static-glow-cursed { box-shadow: 0 0 10px #dc262680; } .static-glow-reiatsu { box-shadow: 0 0 10px #47556980; } .static-glow-haki { box-shadow: 0 0 10px #1f293780; } .static-glow-alchemy { box-shadow: 0 0 10px #f59e0b80; } .static-glow-nature { box-shadow: 0 0 10px #84cc1680; }
         .static-glow-force { box-shadow: 0 0 10px #d946ef80; }
+        /* NEW Static Glow Classes */
+        .static-glow-origin { box-shadow: 0 0 10px #4f46e580; }
+        .static-glow-fundamental { box-shadow: 0 0 10px #9ca3af80; }
+        .static-glow-other { box-shadow: 0 0 10px #78350f80; }
 
         /* Accessibility utility class */
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
@@ -231,7 +273,7 @@
 
     <div class="mb-4 flex flex-wrap gap-2">
        <button id="google-signin-btn" class="save-load-btn bg-red-600 hover:bg-red-700 focus:ring-red-500">Sign in with Google</button>
-        <button id="sign-out-btn" class="save-load-btn bg-gray-700 hover:bg-gray-800 focus:ring-gray-600 hidden">Sign Out</button> 
+        <button id="sign-out-btn" class="save-load-btn bg-gray-700 hover:bg-gray-800 focus:ring-gray-600 hidden">Sign Out</button>
         <span id="user-info" class="text-sm text-gray-600 self-center ml-2">Not signed in.</span>
         <button id="save-state-btn" class="save-load-btn bg-blue-500 hover:bg-blue-600 focus:ring-blue-400">Save State</button>
         <button id="load-state-btn" class="save-load-btn bg-gray-500 hover:bg-gray-600 focus:ring-gray-400">Load State</button>
@@ -248,20 +290,20 @@
                 <div id="message-area" class="mb-4 p-3 rounded-md text-sm hidden" role="alert"></div>
 
                 <div class="energy-pool bg-white p-5 mb-5 rounded-lg shadow-sm border-l-4 border-gray-400">
-                     <h3 class="text-xl font-semibold mb-4 flex items-center">
-                         Damage Modifiers
-                         <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
-                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                         <div><label for="base-damage" class="lbl">Base Damage:</label><input type="text" id="base-damage" placeholder="e.g., 100" aria-required="true" class="inpt focus:ring-success"></div>
-                         <div><label for="attack-compression-points" class="lbl">Attack Compression Points:</label><input type="text" id="attack-compression-points" placeholder="e.g., 10" value="0" class="inpt focus:ring-red-500"></div>
-                         <div><label for="base-multiplier" class="lbl">Base Multiplier:</label><input type="text" id="base-multiplier" placeholder="e.g., 1.5" value="1" class="inpt focus:ring-success"></div>
-                         <div><label for="form-multiplier" class="lbl">Form Multiplier:</label><input type="text" id="form-multiplier" placeholder="From Active Form" value="1" class="inpt focus:ring-success" readonly></div>
-                     </div>
-                     <div id="dynamic-modifiers-container" class="mb-4"><h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4></div>
-                     <button id="add-dynamic-box" aria-label="Add modifier factor" class="px-4 py-2 bg-chakra text-white rounded-md hover:bg-chakra-dark focus:outline-none focus:ring-2 focus:ring-chakra focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
-                         Add Factor
-                     </button>
-                 </div>
+                       <h3 class="text-xl font-semibold mb-4 flex items-center">
+                           Damage Modifiers
+                           <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
+                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                           <div><label for="base-damage" class="lbl">Base Damage:</label><input type="text" id="base-damage" placeholder="e.g., 100" aria-required="true" class="inpt focus:ring-success"></div>
+                           <div><label for="attack-compression-points" class="lbl">Attack Compression Points:</label><input type="text" id="attack-compression-points" placeholder="e.g., 10" value="0" class="inpt focus:ring-red-500"></div>
+                           <div><label for="base-multiplier" class="lbl">Base Multiplier:</label><input type="text" id="base-multiplier" placeholder="e.g., 1.5" value="1" class="inpt focus:ring-success"></div>
+                           <div><label for="form-multiplier" class="lbl">Form Multiplier:</label><input type="text" id="form-multiplier" placeholder="From Active Form" value="1" class="inpt focus:ring-success" readonly></div>
+                       </div>
+                       <div id="dynamic-modifiers-container" class="mb-4"><h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4></div>
+                       <button id="add-dynamic-box" aria-label="Add modifier factor" class="px-4 py-2 bg-chakra text-white rounded-md hover:bg-chakra-dark focus:outline-none focus:ring-2 focus:ring-chakra focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
+                           Add Factor
+                       </button>
+                   </div>
 
                  <div class="form-group mb-5">
                      <label for="energy-type" class="lbl">Energy Type:</label>
@@ -276,6 +318,9 @@
                          <option value="alchemy">Alchemy</option>
                          <option value="nature">Nature Energy</option>
                          <option value="force">Force Energy</option>
+                         <option value="origin">Origin Energy</option>
+                         <option value="fundamental">Fundamental Energy</option>
+                         <option value="other">Other Energy</option>
                      </select>
                  </div>
 
@@ -286,11 +331,11 @@
                   <h3 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Attacks</h3>
                   <div class="flex flex-col sm:flex-row gap-3">
                       <button id="super-attack-btn" data-attack-type="super" data-reserve-percent="5" class="attack-btn flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
-                          Super Attack (Reserves 5%)
-                      </button>
-                      <button id="ultimate-attack-btn" data-attack-type="ultimate" data-reserve-percent="10" class="attack-btn flex-1 px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
-                          Ultimate Attack (Reserves 10%)
-                      </button>
+                           Super Attack (Reserves 5%)
+                       </button>
+                       <button id="ultimate-attack-btn" data-attack-type="ultimate" data-reserve-percent="10" class="attack-btn flex-1 px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
+                           Ultimate Attack (Reserves 10%)
+                       </button>
                   </div>
                   <p id="attack-status-message" class="text-xs text-gray-500 mt-2 min-h-[1.25rem]"></p>
                  </div>
@@ -314,16 +359,16 @@
                   <div class="result-title text-lg font-semibold mb-2 text-success-dark">Calculated Damage:</div>
                   <div id="result-value" class="result-value text-3xl font-bold mb-3 break-words">0</div>
                   <div id="result-details" class="result-details text-sm text-gray-700 mt-3 border-t border-success/30 pt-3">
-                      <p><strong>Total Energy Used:</strong> <span id="result-total-energy-used">0</span></p>
-                      <p><strong>Total Extra Damage from Energy:</strong> <span id="result-total-extra-damage">0.00</span></p>
-                      <div class="mt-3 pt-3 border-t border-success/20">
-                          <p class="font-semibold mb-1">Calculation:</p>
-                          <div id="equation-display" class="text-sm bg-gray-50 p-2 rounded border border-gray-200 break-words leading-relaxed">
-                              Equation not yet calculated.
-                          </div>
-                      </div>
-                      <hr class="my-2 border-success/20"> <p><strong>Scientific Notation:</strong> <span id="result-scientific">0</span></p>
-                      <p><strong>In Words:</strong> <span id="result-words">Zero</span></p>
+                       <p><strong>Total Energy Used:</strong> <span id="result-total-energy-used">0</span></p>
+                       <p><strong>Total Extra Damage from Energy:</strong> <span id="result-total-extra-damage">0.00</span></p>
+                       <div class="mt-3 pt-3 border-t border-success/20">
+                           <p class="font-semibold mb-1">Calculation:</p>
+                           <div id="equation-display" class="text-sm bg-gray-50 p-2 rounded border border-gray-200 break-words leading-relaxed">
+                                Equation not yet calculated.
+                           </div>
+                       </div>
+                       <hr class="my-2 border-success/20"> <p><strong>Scientific Notation:</strong> <span id="result-scientific">0</span></p>
+                       <p><strong>In Words:</strong> <span id="result-words">Zero</span></p>
                   </div>
                  </div>
 
@@ -370,17 +415,17 @@
                          </div>
                      </div>
 
-                    <div id="formListSection" class="pt-3 border-t border-gray-200">
-                         <h4 class="text-md font-semibold mb-2 text-gray-700">Saved Forms</h4>
-                         <div id="formListContainer" class="max-h-48 overflow-y-auto text-xs">
-                             <p class="text-gray-500">No forms created yet.</p>
-                         </div>
-                     </div>
-                     </div>
+                   <div id="formListSection" class="pt-3 border-t border-gray-200">
+                       <h4 class="text-md font-semibold mb-2 text-gray-700">Saved Forms</h4>
+                       <div id="formListContainer" class="max-h-48 overflow-y-auto text-xs">
+                           <p class="text-gray-500">No forms created yet.</p>
+                       </div>
+                   </div>
+                 </div>
             </div> </div> </div> <div id="character-stats-screen" class="hidden bg-white p-6 rounded-lg shadow-md max-w-7xl mx-auto mt-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4 border-b pb-2">
             <h2 class="text-2xl font-bold text-gray-700">Character Stats</h2>
-            </div>
+        </div>
         <div class="flex justify-center items-center flex-col mt-8">
             <label for="character-name" class="lbl text-lg mb-2">Character Name:</label>
             <input type="text" id="character-name" placeholder="Enter character name" class="inpt w-full md:w-1/2 lg:w-1/3 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-focus focus:border-transparent text-center">
@@ -396,7 +441,7 @@
              </div>
             <div class="md:col-span-2 flex items-center gap-2 mt-1 -mb-2"> <input type="checkbox" id="ryoko-checkbox" class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500">
                  <label for="ryoko-checkbox" class="text-sm text-gray-700 select-none">Are you Ryoko?</label>
-              </div>
+             </div>
              <div id="ryoko-equation-input-container" class="hidden md:col-span-2 mt-2"> <label for="ryoko-equation-input" class="lbl text-red-600">Type out your shit equation:</label> <input type="text" id="ryoko-equation-input" placeholder="Enter equation value..." class="inpt focus:ring-red-500 border-red-300"> </div>
             <div>
                 <label for="char-vitality" class="lbl">Vitality:</label>
@@ -418,7 +463,7 @@
                 <label for="char-base-tr" class="lbl">Base True Resistance:</label>
                 <input type="text" id="char-base-tr" placeholder="e.g., 5" value="5" class="inpt focus:ring-teal-focus">
              </div>
-            </div>
+        </div>
 
         <div id="formCreatorSection" class="mt-8 pt-6 border-t border-gray-200">
             <h3 class="text-xl font-semibold mb-4 text-gray-700">Form Creator</h3>
@@ -441,7 +486,10 @@
                         <option value="alchemy">Alchemy</option>
                         <option value="nature">Nature</option>
                         <option value="force">Force</option>
-                        </select>
+                        <option value="origin">Origin</option>
+                        <option value="fundamental">Fundamental</option>
+                        <option value="other">Other</option>
+                    </select>
                  </div>
                  <div>
                     <label for="formFormMultiplierInput" class="lbl">Form Multiplier (Main):</label>
@@ -473,7 +521,7 @@
                  </div>
             </div>
         </div>
-         </div> <template id="energy-pool-template">
+       </div> <template id="energy-pool-template">
         <div class="energy-pool bg-gradient-to-br from-white p-5 mb-5 rounded-lg shadow-sm border-l-4" style="display: none;">
              <h3 class="text-xl font-semibold mb-4 flex items-center">
                  <span class="pool-title">Energy Pool Title</span>
@@ -519,59 +567,59 @@
                  <span class="slider-details-value text-right">(E: 0, D: 0.00)</span>
              </div>
          </div>
-     </template>
+       </template>
 
     <script type="module">
       // Import the functions you need from the SDKs you need
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js"; 
-      import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js"; 
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+      import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
       // *** Import Auth functions ***
-      import { 
-          getAuth, 
-          onAuthStateChanged, 
-          GoogleAuthProvider, 
-          signInWithPopup,    
-          signOut             
-      } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"; 
-      
-      // === Your Specific Firebase Configuration ===
-      // Make sure databaseURL has a comma after it if other properties follow!
-   // === Your Specific Firebase Configuration ===
-   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    const firebaseConfig = {
-    apiKey: "AIzaSyAbYQWbMQBHOdT-PxwIXeDFvLgEXlX7PhY", // Make sure this is your valid key!
-    authDomain: "dndfortheboys-d88d9.firebaseapp.com",
-    databaseURL: "https://dndfortheboys-d88d9-default-rtdb.firebaseio.com",
-    projectId: "dndfortheboys-d88d9",
-    storageBucket: "dndfortheboys-d88d9.appspot.com", // Double-check this value in your Firebase console
-    messagingSenderId: "721075269380",
-    appId: "1:721075269380:web:197009bf7ded05903faa51",
-    measurementId: "G-H4HSEM39X5"
-};
+      import {
+          getAuth,
+          onAuthStateChanged,
+          GoogleAuthProvider,
+          signInWithPopup,
+          signOut
+      } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
-    
+      // === Your Specific Firebase Configuration ===
+     // Make sure databaseURL has a comma after it if other properties follow!
+    // === Your Specific Firebase Configuration ===
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+     const firebaseConfig = {
+        apiKey: "AIzaSyAbYQWbMQBHOdT-PxwIXeDFvLgEXlX7PhY", // Make sure this is your valid key!
+        authDomain: "dndfortheboys-d88d9.firebaseapp.com",
+        databaseURL: "https://dndfortheboys-d88d9-default-rtdb.firebaseio.com",
+        projectId: "dndfortheboys-d88d9",
+        storageBucket: "dndfortheboys-d88d9.appspot.com", // Double-check this value in your Firebase console
+        messagingSenderId: "721075269380",
+        appId: "1:721075269380:web:197009bf7ded05903faa51",
+        measurementId: "G-H4HSEM39X5"
+    };
+
+
       // Initialize Firebase App
       const app = initializeApp(firebaseConfig);
-      const database = getDatabase(app); 
+      const database = getDatabase(app);
       const auth = getAuth(app); // Initialize Auth
 
       // --- Make Firebase functions globally accessible ---
       // Needed so your separate, non-module calculator script can use them.
-      window.firebaseDb = database;       
-      window.firebaseDbRef = ref;       
-      window.firebaseDbSet = set;         
-      window.firebaseDbGet = get;         
-      window.firebaseDbRemove = remove;   
+      window.firebaseDb = database;
+      window.firebaseDbRef = ref;
+      window.firebaseDbSet = set;
+      window.firebaseDbGet = get;
+      window.firebaseDbRemove = remove;
       // *** Export Auth functions ***
-      window.firebaseAuth = auth; 
-      window.firebaseOnAuthStateChanged = onAuthStateChanged; 
-      window.firebaseGoogleAuthProvider = GoogleAuthProvider; 
+      window.firebaseAuth = auth;
+      window.firebaseOnAuthStateChanged = onAuthStateChanged;
+      window.firebaseGoogleAuthProvider = GoogleAuthProvider;
       window.firebaseSignInWithPopup = signInWithPopup;
-      window.firebaseSignOut = signOut; 
+      window.firebaseSignOut = signOut;
 
       // Signal that Firebase is ready for the main script
-      console.log("Firebase Initialized (v9+ Modular with Auth)"); 
-      document.dispatchEvent(new Event('firebaseReady')); 
+      console.log("Firebase Initialized (v9+ Modular with Auth)");
+      document.dispatchEvent(new Event('firebaseReady'));
     </script>
 
     <script>
@@ -659,9 +707,10 @@
     const FIREBASE_SAVE_PATH_BASE = 'calculatorStates';
     let currentUser = null; // Will hold user info (like uid) when signed in
     let totalDamageDealt = 0, totalEnergySpent = 0, attackCount = 0, highestDamage = 0;
-    const LOCAL_STORAGE_KEY = 'energyCalculatorState_v1.3_forms'; // Incremented version
+    const LOCAL_STORAGE_KEY = 'energyCalculatorState_v1.4_new_energies'; // Incremented version
     let poolAnimationTimeoutId = null;
-    const ALL_ENERGY_TYPES = ['ki', 'nen', 'chakra', 'magic', 'cursed', 'reiatsu', 'haki', 'alchemy', 'nature', 'force'];
+    // UPDATED: Added new energy types
+    const ALL_ENERGY_TYPES = ['ki', 'nen', 'chakra', 'magic', 'cursed', 'reiatsu', 'haki', 'alchemy', 'nature', 'force', 'origin', 'fundamental', 'other'];
     const ALL_FORM_ENERGY_TYPES = ["None", ...ALL_ENERGY_TYPES]; // For form creator dropdown
     let dynamicModifierCount = 0;
     let activeAttacks = {};
@@ -672,23 +721,28 @@
     // Form System State
     let characterForms = []; // Holds all defined form objects
     let calculatorState = {
-        selectedForms: {
-            'ki': 'none', 'nen': 'none', 'chakra': 'none', 'magic': 'none', 'cursed': 'none',
-            'reiatsu': 'none', 'haki': 'none', 'alchemy': 'none', 'nature': 'none', 'force': 'none'
-        }
+        selectedForms: {} // Initialize empty, will be populated
         // currentEnergyType is implicitly energyTypeSelect.value
     };
+    // Initialize selectedForms with 'none' for all types
+    ALL_ENERGY_TYPES.forEach(type => { calculatorState.selectedForms[type] = 'none'; });
+
+    // UPDATED: Added details for new energy types
     const ENERGY_TYPE_DETAILS = {
-        ki:      { name: 'Ki',      color: 'ki',      colorDark: 'ki-dark',      gradientTo: 'to-orange-100', focusRing: 'focus:ring-ki-focus',      staticGlow: 'static-glow-ki',      pulseGlow: 'animate-pulse-glow-ki',      border: 'border-l-ki' },
-        nen:      { name: 'Nen',      color: 'nen',      colorDark: 'nen-dark',      gradientTo: 'to-blue-100',   focusRing: 'focus:ring-nen-focus',      staticGlow: 'static-glow-nen',      pulseGlow: 'animate-pulse-glow-nen',      border: 'border-l-nen' },
-        chakra:   { name: 'Chakra',   color: 'chakra',   colorDark: 'chakra-dark',   gradientTo: 'to-purple-100', focusRing: 'focus:ring-chakra-focus',   staticGlow: 'static-glow-chakra',   pulseGlow: 'animate-pulse-glow-chakra',   border: 'border-l-chakra' },
-        magic:    { name: 'Magic',    color: 'magic',    colorDark: 'magic-dark',    gradientTo: 'to-teal-100',   focusRing: 'focus:ring-magic-focus',    staticGlow: 'static-glow-magic',    pulseGlow: 'animate-pulse-glow-magic',    border: 'border-l-magic' },
-        cursed:   { name: 'Cursed',   color: 'cursed',   colorDark: 'cursed-dark',   gradientTo: 'to-red-100',    focusRing: 'focus:ring-cursed-focus',   staticGlow: 'static-glow-cursed',   pulseGlow: 'animate-pulse-glow-cursed',   border: 'border-l-cursed' },
-        reiatsu: { name: 'Reiatsu', color: 'reiatsu', colorDark: 'reiatsu-dark', gradientTo: 'to-slate-100',  focusRing: 'focus:ring-reiatsu-focus', staticGlow: 'static-glow-reiatsu', pulseGlow: 'animate-pulse-glow-reiatsu', border: 'border-l-reiatsu' },
-        haki:      { name: 'Haki',      color: 'haki',      colorDark: 'haki-dark',      gradientTo: 'to-gray-100',   focusRing: 'focus:ring-haki-focus',      staticGlow: 'static-glow-haki',      pulseGlow: 'animate-pulse-glow-haki',      border: 'border-l-haki' },
-        alchemy: { name: 'Alchemy', color: 'alchemy', colorDark: 'alchemy-dark', gradientTo: 'to-amber-100',  focusRing: 'focus:ring-alchemy-focus', staticGlow: 'static-glow-alchemy', pulseGlow: 'animate-pulse-glow-alchemy', border: 'border-l-alchemy' },
-        nature:   { name: 'Nature',   color: 'nature',   colorDark: 'nature-dark',   gradientTo: 'to-lime-100',   focusRing: 'focus:ring-nature-focus',   staticGlow: 'static-glow-nature',   pulseGlow: 'animate-pulse-glow-nature',   border: 'border-l-nature' },
-        force:    { name: 'Force',    color: 'force',    colorDark: 'force-dark',    gradientTo: 'to-fuchsia-100',focusRing: 'focus:ring-force-focus',    staticGlow: 'static-glow-force',    pulseGlow: 'animate-pulse-glow-force',    border: 'border-l-force' },
+        ki:          { name: 'Ki',          color: 'ki',          colorDark: 'ki-dark',          gradientTo: 'to-orange-100',   focusRing: 'focus:ring-ki-focus',          staticGlow: 'static-glow-ki',          pulseGlow: 'animate-pulse-glow-ki',          border: 'border-l-ki' },
+        nen:         { name: 'Nen',         color: 'nen',         colorDark: 'nen-dark',         gradientTo: 'to-blue-100',     focusRing: 'focus:ring-nen-focus',         staticGlow: 'static-glow-nen',         pulseGlow: 'animate-pulse-glow-nen',         border: 'border-l-nen' },
+        chakra:      { name: 'Chakra',      color: 'chakra',      colorDark: 'chakra-dark',      gradientTo: 'to-purple-100',   focusRing: 'focus:ring-chakra-focus',      staticGlow: 'static-glow-chakra',      pulseGlow: 'animate-pulse-glow-chakra',      border: 'border-l-chakra' },
+        magic:       { name: 'Magic',       color: 'magic',       colorDark: 'magic-dark',       gradientTo: 'to-teal-100',     focusRing: 'focus:ring-magic-focus',       staticGlow: 'static-glow-magic',       pulseGlow: 'animate-pulse-glow-magic',       border: 'border-l-magic' },
+        cursed:      { name: 'Cursed',      color: 'cursed',      colorDark: 'cursed-dark',      gradientTo: 'to-red-100',      focusRing: 'focus:ring-cursed-focus',      staticGlow: 'static-glow-cursed',      pulseGlow: 'animate-pulse-glow-cursed',      border: 'border-l-cursed' },
+        reiatsu:     { name: 'Reiatsu',     color: 'reiatsu',     colorDark: 'reiatsu-dark',     gradientTo: 'to-slate-100',    focusRing: 'focus:ring-reiatsu-focus',     staticGlow: 'static-glow-reiatsu',     pulseGlow: 'animate-pulse-glow-reiatsu',     border: 'border-l-reiatsu' },
+        haki:        { name: 'Haki',        color: 'haki',        colorDark: 'haki-dark',        gradientTo: 'to-gray-100',     focusRing: 'focus:ring-haki-focus',        staticGlow: 'static-glow-haki',        pulseGlow: 'animate-pulse-glow-haki',        border: 'border-l-haki' },
+        alchemy:     { name: 'Alchemy',     color: 'alchemy',     colorDark: 'alchemy-dark',     gradientTo: 'to-amber-100',    focusRing: 'focus:ring-alchemy-focus',     staticGlow: 'static-glow-alchemy',     pulseGlow: 'animate-pulse-glow-alchemy',     border: 'border-l-alchemy' },
+        nature:      { name: 'Nature',      color: 'nature',      colorDark: 'nature-dark',      gradientTo: 'to-lime-100',     focusRing: 'focus:ring-nature-focus',      staticGlow: 'static-glow-nature',      pulseGlow: 'animate-pulse-glow-nature',      border: 'border-l-nature' },
+        force:       { name: 'Force',       color: 'force',       colorDark: 'force-dark',       gradientTo: 'to-fuchsia-100',  focusRing: 'focus:ring-force-focus',       staticGlow: 'static-glow-force',       pulseGlow: 'animate-pulse-glow-force',       border: 'border-l-force' },
+        // NEW Energy Type Details
+        origin:      { name: 'Origin',      color: 'origin',      colorDark: 'origin-dark',      gradientTo: 'to-indigo-100',   focusRing: 'focus:ring-origin-focus',      staticGlow: 'static-glow-origin',      pulseGlow: 'animate-pulse-glow-origin',      border: 'border-l-origin' },
+        fundamental: { name: 'Fundamental', color: 'fundamental', colorDark: 'fundamental-dark', gradientTo: 'to-gray-100',     focusRing: 'focus:ring-fundamental-focus', staticGlow: 'static-glow-fundamental', pulseGlow: 'animate-pulse-glow-fundamental', border: 'border-l-fundamental' },
+        other:       { name: 'Other',       color: 'other',       colorDark: 'other-dark',       gradientTo: 'to-amber-100',    focusRing: 'focus:ring-other-focus',       staticGlow: 'static-glow-other',       pulseGlow: 'animate-pulse-glow-other',       border: 'border-l-other' },
     };
 
 
@@ -697,7 +751,7 @@
     function formatSimpleNumber(num) { if (typeof num !== 'number' || isNaN(num)) return '0'; try { const options = { maximumFractionDigits: 2 }; return num.toLocaleString('en-US', options); } catch (e) { return num.toString(); } }
     function showMessage(text, type = 'info') { messageArea.textContent = text; messageArea.className = 'mb-4 p-3 rounded-md text-sm border animate__animated'; messageArea.classList.remove('hidden', 'animate__fadeIn', 'animate__shakeX'); let animationClass = 'animate__fadeIn'; switch (type) { case 'error': messageArea.classList.add('bg-error-light', 'text-error-dark', 'border-error'); animationClass = 'animate__shakeX'; break; case 'success': messageArea.classList.add('bg-success-light', 'text-success-dark', 'border-success'); break; default: messageArea.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300'); break; } messageArea.classList.add(animationClass); messageArea.addEventListener('animationend', () => { messageArea.classList.remove('animate__animated', animationClass); }, { once: true }); setTimeout(() => { messageArea.classList.add('hidden'); }, 5000); }
     function showLoading(isLoading) { loadingDiv.classList.toggle('hidden', !isLoading); if(isLoading) resultDiv.classList.add('hidden'); calculateBtn.disabled = isLoading; calculateBtn.classList.toggle('opacity-50', isLoading); calculateBtn.classList.toggle('cursor-not-allowed', isLoading); }
-  function triggerAnimation(element, animationName, duration = 800) {
+    function triggerAnimation(element, animationName, duration = 800) {
     if (!element || !animationName) return;
     const animateCSSBase = 'animate__animated';
     const animationClass = animationName.startsWith('animate__') ? animationName : `animate__${animationName}`;
@@ -737,9 +791,10 @@
             energySlider: document.getElementById(`${type}-energy-slider`),     // In sliders container
             sliderValueDisplay: document.getElementById(`${type}-slider-value-display`), // In sliders container
             formSelectContainer: poolDiv.querySelector('.form-select-container'), // NEW
-            formSelect: poolDiv.querySelector('.form-select'),                  // NEW
+            formSelect: poolDiv.querySelector('.form-select'),                   // NEW
         };
     }
+    // UPDATED: Added calculations for new energy types
     function calculateBaseMaxEnergy(type) {
         const baseHp = safeParseFloat(charBaseHealthInput?.value, 0);
         const vitality = safeParseFloat(charVitalityInput?.value, 0);
@@ -756,6 +811,10 @@
             case 'nature': baseMax = vitality * (soulHp + baseHp + soulPower); break;
             case 'magic': baseMax = soulPower * (soulHp + baseHp + vitality); break;
             case 'force': baseMax = soulHp + vitality; break;
+            // NEW Calculations
+            case 'origin': baseMax = vitality * soulPower * soulHp; break;
+            case 'fundamental': baseMax = vitality * (soulPower + soulHp); break; // Same as Ki/Haki
+            case 'other': baseMax = vitality + soulPower + soulHp; break;
             default: console.warn(`Unknown energy type for base max calculation: ${type}`); baseMax = 0;
         }
         return Math.max(0, baseMax);
@@ -1219,7 +1278,7 @@
              console.error("Firebase save error:", error);
              showMessage(`Failed to save state to Firebase. ${error.message}`, 'error');
          }
-     }
+       }
 
     async function loadState() {
          if (!currentUser) { // Check if user is signed in
@@ -1252,12 +1311,12 @@
              showMessage(`Failed to load state from Firebase. ${error.message}`, 'error');
              return false;
          }
-     }
+       }
 
     async function clearState() {
          if (!currentUser) { // Check if user is signed in
-              showMessage('You must be signed in to clear state.', 'error');
-              return;
+             showMessage('You must be signed in to clear state.', 'error');
+             return;
          }
          if (confirm('Are you sure you want to clear your saved state FROM FIREBASE? This cannot be undone.')) {
              // Construct path using the user's unique ID
@@ -1272,7 +1331,7 @@
                   showMessage(`Failed to clear state from Firebase. ${error.message}`, 'error');
              }
          }
-     }
+       }
     // *** END OF REPLACEMENT STATE FUNCTIONS ***
     // *** ADDED FUNCTIONS FOR GOOGLE SIGN-IN / SIGN-OUT ***
     async function handleGoogleSignIn() {
@@ -1464,7 +1523,7 @@
              });
              if (energyTerms.length > 0) {
                   if (equationHTML.includes(op('*')) || equationHTML.includes(op('+'))) {
-                       equationHTML = group(equationHTML);
+                      equationHTML = group(equationHTML);
                   }
                  equationHTML += op('+') + group(energyTerms.join(op('+')));
              }
@@ -1485,7 +1544,7 @@
              });
              if (additiveTerms.length > 0) {
                   if (equationHTML.includes(op('*')) || equationHTML.includes(op('+'))) {
-                       equationHTML = group(equationHTML);
+                      equationHTML = group(equationHTML);
                   }
                  equationHTML += op('+') + group(additiveTerms.join(op('+')));
              }
@@ -1495,7 +1554,7 @@
              console.error("Error updating equation:", error);
              equationDisplayEl.innerHTML = '<span class="text-error-dark">Could not generate equation.</span>';
          }
-     }
+       }
 
 
     // --- Click Handler for Equation Numbers ---
@@ -1542,7 +1601,7 @@
 
         const sortedEnergyTypes = Object.keys(formsByEnergyType).sort((a, b) => {
              if (a === 'None') return 1; if (b === 'None') return -1;
-             const aIndex = ALL_ENERGY_TYPES.indexOf(a);
+             const aIndex = ALL_ENERGY_TYPES.indexOf(a); // Use the main list which includes new types
              const bIndex = ALL_ENERGY_TYPES.indexOf(b);
              if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex; // Sort by defined order
              return a.localeCompare(b); // Alphabetical fallback
@@ -1729,7 +1788,7 @@
 
 
                     // Update UI
-                    renderFormList();        // Refresh the list in the stats panel
+                    renderFormList();       // Refresh the list in the stats panel
                     populateFormDropdowns();    // Refresh dropdowns in energy pools
 
                     // If the deleted form was active for the currently viewed energy type,
@@ -1796,9 +1855,9 @@
         renderFormList();
         populateFormDropdowns();
          if (mainCalculatorContent?.classList.contains('hidden')) {
-           showCharacterStatsView();
+            showCharacterStatsView();
          } else {
-           showCalculatorView();
+            showCalculatorView();
          }
         showSelectedEnergyPool();
         updateStatsDisplay();
@@ -1858,9 +1917,9 @@
                  }
              });
              energyPoolsContainer.addEventListener('change', (event) => {
-                if (event.target.classList.contains('form-select')) {
-                    handleFormSelectChange(event);
-                }
+                 if (event.target.classList.contains('form-select')) {
+                     handleFormSelectChange(event);
+                 }
              });
         }
 
@@ -1922,10 +1981,10 @@
         if (formAffectsResistancesCheckbox) {
             formAffectsResistancesCheckbox.addEventListener('change', () => {
                  formResistanceBonusInputsDiv.classList.toggle('hidden', !formAffectsResistancesCheckbox.checked);
-                if (!formAffectsResistancesCheckbox.checked) {
-                    if(formAcBonusInput) formAcBonusInput.value = 0;
-                    if(formTrueResistanceBonusInput) formTrueResistanceBonusInput.value = 0;
-                }
+                 if (!formAffectsResistancesCheckbox.checked) {
+                     if(formAcBonusInput) formAcBonusInput.value = 0;
+                     if(formTrueResistanceBonusInput) formTrueResistanceBonusInput.value = 0;
+                 }
             });
         }
         if (addFormButton) {
@@ -1979,7 +2038,7 @@
 
 
     // --- Initialization Sequence ---
-    console.log("DOM Loaded, Firebase ready. Initializing Energy Calculator v11.0 (Firebase Auth)...");
+    console.log("DOM Loaded, Firebase ready. Initializing Energy Calculator v11.1 (New Energies)...");
 
     generateEnergySections(); // 1. Create the HTML elements needed
     setupEventListeners();    // 2. Attach listeners to elements ONCE
@@ -2019,8 +2078,8 @@
                  showMessage('Welcome! No saved state found, starting fresh.', 'info');
             } else {
                 console.log("Saved state loaded from Firebase for user.");
-                initializeLoadedStateUI(); // Updates UI components to reflect loaded state
-                showMessage(`Welcome back, ${currentUser.displayName || 'User'}! State loaded.`, 'success');
+                 initializeLoadedStateUI(); // Updates UI components to reflect loaded state
+                 showMessage(`Welcome back, ${currentUser.displayName || 'User'}! State loaded.`, 'success');
             }
 
         } else {
