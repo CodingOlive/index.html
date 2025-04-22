@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy Calculator - v11.1 (New Energies)</title> <script src="https://cdn.tailwindcss.com"></script>
+    <title>Energy Calculator - v11.2 (Speed Stat)</title> <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
     <link
         rel="stylesheet"
@@ -14,7 +14,7 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    
+
                     colors: {
                         // Energy types
                         ki: '#FF9800', nen: '#2196F3', chakra: '#9C27B0', magic: '#26a69a', cursed: '#dc2626',
@@ -23,7 +23,7 @@
                         // NEW Energy Types
                         origin: '#4f46e5',      // Indigo 600
                         fundamental: '#9ca3af', // Gray 400
-                        other: '#78350f',       // Amber 900
+                        other: '#78350f',      // Amber 900
 
                         // Darker variants
                         'ki-dark': '#e65100', 'nen-dark': '#0d47a1', 'chakra-dark': '#4a148c', 'magic-dark': '#00796b', 'cursed-dark': '#b91c1c',
@@ -32,7 +32,7 @@
                         // NEW Darker variants
                         'origin-dark': '#3730a3',      // Indigo 800
                         'fundamental-dark': '#6b7280', // Gray 500
-                        'other-dark': '#451a03',       // Amber 950
+                        'other-dark': '#451a03',      // Amber 950
 
                         // UI feedback colors
                         'success-light': '#e8f5e9', 'success': '#4CAF50', 'success-dark': '#2e7d32',
@@ -53,6 +53,15 @@
 
                         'teal-focus': '#2dd4bf', // Teal focus for character stats
                         'form-creator-focus': '#a78bfa', // Violet focus for form creator
+                        'speed-focus': '#38bdf8', // <<< ADDED sky-400 for speed focus ring
+                    },
+                    // Add base 'sky' colors if not implicitly available or for specific shades
+                    // (Tailwind might make these available automatically, but explicit definition is safer)
+                    sky: { // <<< ADDED Speed colors
+                        100: '#e0f2fe', // For gradients like to-sky-100
+                        500: '#0ea5e9', // Main slider thumb color bg-sky-500
+                        600: '#0284c7', // Darker hover state hover:bg-sky-600
+                        700: '#0369a1'  // Even darker variant if needed
                     },
                     // Animations
                     animation: {
@@ -73,6 +82,7 @@
                         'animate-pulse-glow-origin': 'pulse-glow-origin 1.5s infinite ease-in-out',
                         'animate-pulse-glow-fundamental': 'pulse-glow-fundamental 1.5s infinite ease-in-out',
                         'animate-pulse-glow-other': 'pulse-glow-other 1.5s infinite ease-in-out',
+                        'animate-pulse-glow-speed': 'pulse-glow-speed 1.5s infinite ease-in-out', // <<< ADDED
 
                         'animate-pulse-source': 'pulse-source-input 0.8s ease-out',
                         'bounceIn': 'bounceIn 0.75s', 'bounceOut': 'bounceOut 0.75s', 'fadeInUp': 'fadeInUp 0.5s',
@@ -103,6 +113,7 @@
                          'pulse-glow-origin': { '0%, 100%': { boxShadow: `0 0 8px #4f46e566` }, '50%': { boxShadow: `0 0 16px #4f46e5B3` } }, // Indigo
                          'pulse-glow-fundamental': { '0%, 100%': { boxShadow: `0 0 8px #9ca3af66` }, '50%': { boxShadow: `0 0 16px #9ca3afB3` } }, // Gray
                          'pulse-glow-other': { '0%, 100%': { boxShadow: `0 0 8px #78350f66` }, '50%': { boxShadow: `0 0 16px #78350fB3` } }, // Amber
+                         'pulse-glow-speed': { '0%, 100%': { boxShadow: `0 0 8px #0ea5e966` }, '50%': { boxShadow: `0 0 16px #0ea5e9B3` } }, // <<< ADDED Sky-500 glow
 
                          'pulse-source-input': { '0%, 100%': { boxShadow: 'none' }, '50%': { boxShadow: '0 0 12px theme("colors.blue.400")' } },
                          'shakeX': { /* Uses animate.css definition */ },
@@ -162,6 +173,8 @@
         #origin-energy-slider::-webkit-slider-thumb { background: #4f46e5; } #origin-energy-slider::-moz-range-thumb { background: #4f46e5; } /* Indigo */
         #fundamental-energy-slider::-webkit-slider-thumb { background: #9ca3af; } #fundamental-energy-slider::-moz-range-thumb { background: #9ca3af; } /* Gray */
         #other-energy-slider::-webkit-slider-thumb { background: #78350f; } #other-energy-slider::-moz-range-thumb { background: #78350f; } /* Amber */
+        /* Speed Slider Thumb Color */ /* <<< ADDED */
+        #speed-slider::-webkit-slider-thumb { background: theme('colors.sky.500'); } #speed-slider::-moz-range-thumb { background: theme('colors.sky.500'); }
 
         /* Slider Thumb Hover Colors */
         #ki-energy-slider:hover::-webkit-slider-thumb { background: #e65100; } #ki-energy-slider:hover::-moz-range-thumb { background: #e65100; }
@@ -178,6 +191,8 @@
         #origin-energy-slider:hover::-webkit-slider-thumb { background: #3730a3; } #origin-energy-slider:hover::-moz-range-thumb { background: #3730a3; } /* Indigo Dark */
         #fundamental-energy-slider:hover::-webkit-slider-thumb { background: #6b7280; } #fundamental-energy-slider:hover::-moz-range-thumb { background: #6b7280; } /* Gray Dark */
         #other-energy-slider:hover::-webkit-slider-thumb { background: #451a03; } #other-energy-slider:hover::-moz-range-thumb { background: #451a03; } /* Amber Dark */
+        /* Speed Slider Thumb Hover Color */ /* <<< ADDED */
+        #speed-slider:hover::-webkit-slider-thumb { background: theme('colors.sky.600'); } #speed-slider:hover::-moz-range-thumb { background: theme('colors.sky.600'); }
 
         /* Dynamic Modifier Box Styles */
         .modifier-type-option.additive { border-color: theme('colors.success'); color: theme('colors.success-dark'); }
@@ -290,138 +305,138 @@
                 <div id="message-area" class="mb-4 p-3 rounded-md text-sm hidden" role="alert"></div>
 
                 <div class="energy-pool bg-white p-5 mb-5 rounded-lg shadow-sm border-l-4 border-gray-400">
-                       <h3 class="text-xl font-semibold mb-4 flex items-center">
-                           Damage Modifiers
-                           <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
-                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                           <div><label for="base-damage" class="lbl">Base Damage:</label><input type="text" id="base-damage" placeholder="e.g., 100" aria-required="true" class="inpt focus:ring-success"></div>
-                           <div><label for="attack-compression-points" class="lbl">Attack Compression Points:</label><input type="text" id="attack-compression-points" placeholder="e.g., 10" value="0" class="inpt focus:ring-red-500"></div>
-                           <div><label for="base-multiplier" class="lbl">Base Multiplier:</label><input type="text" id="base-multiplier" placeholder="e.g., 1.5" value="1" class="inpt focus:ring-success"></div>
-                           <div><label for="form-multiplier" class="lbl">Form Multiplier:</label><input type="text" id="form-multiplier" placeholder="From Active Form" value="1" class="inpt focus:ring-success" readonly></div>
-                       </div>
-                       <div id="dynamic-modifiers-container" class="mb-4"><h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4></div>
-                       <button id="add-dynamic-box" aria-label="Add modifier factor" class="px-4 py-2 bg-chakra text-white rounded-md hover:bg-chakra-dark focus:outline-none focus:ring-2 focus:ring-chakra focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
-                           Add Factor
-                       </button>
-                   </div>
+                    <h3 class="text-xl font-semibold mb-4 flex items-center">
+                        Damage Modifiers
+                        <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div><label for="base-damage" class="lbl">Base Damage:</label><input type="text" id="base-damage" placeholder="e.g., 100" aria-required="true" class="inpt focus:ring-success"></div>
+                        <div><label for="attack-compression-points" class="lbl">Attack Compression Points:</label><input type="text" id="attack-compression-points" placeholder="e.g., 10" value="0" class="inpt focus:ring-red-500"></div>
+                        <div><label for="base-multiplier" class="lbl">Base Multiplier:</label><input type="text" id="base-multiplier" placeholder="e.g., 1.5" value="1" class="inpt focus:ring-success"></div>
+                        <div><label for="form-multiplier" class="lbl">Form Multiplier:</label><input type="text" id="form-multiplier" placeholder="From Active Form" value="1" class="inpt focus:ring-success" readonly></div>
+                    </div>
+                    <div id="dynamic-modifiers-container" class="mb-4"><h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4></div>
+                    <button id="add-dynamic-box" aria-label="Add modifier factor" class="px-4 py-2 bg-chakra text-white rounded-md hover:bg-chakra-dark focus:outline-none focus:ring-2 focus:ring-chakra focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
+                        Add Factor
+                    </button>
+                </div>
 
-                 <div class="form-group mb-5">
-                     <label for="energy-type" class="lbl">Energy Type:</label>
-                     <select id="energy-type" aria-label="Select energy type" class="slct focus:ring-success">
-                         <option value="ki">Ki Energy</option>
-                         <option value="nen">Nen Energy</option>
-                         <option value="chakra">Chakra Energy</option>
-                         <option value="magic">Magic Energy</option>
-                         <option value="cursed">Cursed Energy</option>
-                         <option value="reiatsu">Reiatsu</option>
-                         <option value="haki">Haki</option>
-                         <option value="alchemy">Alchemy</option>
-                         <option value="nature">Nature Energy</option>
-                         <option value="force">Force Energy</option>
-                         <option value="origin">Origin Energy</option>
-                         <option value="fundamental">Fundamental Energy</option>
-                         <option value="other">Other Energy</option>
-                     </select>
+                <div class="form-group mb-5">
+                    <label for="energy-type" class="lbl">Energy Type:</label>
+                    <select id="energy-type" aria-label="Select energy type" class="slct focus:ring-success">
+                        <option value="ki">Ki Energy</option>
+                        <option value="nen">Nen Energy</option>
+                        <option value="chakra">Chakra Energy</option>
+                        <option value="magic">Magic Energy</option>
+                        <option value="cursed">Cursed Energy</option>
+                        <option value="reiatsu">Reiatsu</option>
+                        <option value="haki">Haki</option>
+                        <option value="alchemy">Alchemy</option>
+                        <option value="nature">Nature Energy</option>
+                        <option value="force">Force Energy</option>
+                        <option value="origin">Origin Energy</option>
+                        <option value="fundamental">Fundamental Energy</option>
+                        <option value="other">Other Energy</option>
+                    </select>
+                </div>
+
+                <div id="energy-pools-container" class="mb-5">
+                    </div>
+
+                <div id="attacks-section" class="bg-white p-5 mb-5 rounded-lg shadow-sm">
+                 <h3 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Attacks</h3>
+                 <div class="flex flex-col sm:flex-row gap-3">
+                     <button id="super-attack-btn" data-attack-type="super" data-reserve-percent="5" class="attack-btn flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
+                         Super Attack (Reserves 5%)
+                        </button>
+                        <button id="ultimate-attack-btn" data-attack-type="ultimate" data-reserve-percent="10" class="attack-btn flex-1 px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
+                         Ultimate Attack (Reserves 10%)
+                        </button>
                  </div>
+                 <p id="attack-status-message" class="text-xs text-gray-500 mt-2 min-h-[1.25rem]"></p>
+                </div>
 
-                 <div id="energy-pools-container" class="mb-5">
+                <div id="all-sliders-container" class="bg-white p-5 mb-5 rounded-lg shadow-sm">
+                 <h3 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Usage Sliders</h3>
+                 <div id="sliders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                      </div>
+                </div>
 
-                 <div id="attacks-section" class="bg-white p-5 mb-5 rounded-lg shadow-sm">
-                  <h3 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Attacks</h3>
-                  <div class="flex flex-col sm:flex-row gap-3">
-                      <button id="super-attack-btn" data-attack-type="super" data-reserve-percent="5" class="attack-btn flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
-                           Super Attack (Reserves 5%)
-                       </button>
-                       <button id="ultimate-attack-btn" data-attack-type="ultimate" data-reserve-percent="10" class="attack-btn flex-1 px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">
-                           Ultimate Attack (Reserves 10%)
-                       </button>
-                  </div>
-                  <p id="attack-status-message" class="text-xs text-gray-500 mt-2 min-h-[1.25rem]"></p>
+                <button id="calculate-btn" aria-label="Calculate final damage value" class="w-full px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 ease-in-out text-lg font-semibold shadow-md mb-5 active:scale-95">
+                 Calculate Damage
+                </button>
+
+                <div id="loading" class="loading text-center p-5 hidden">
+                 <div class="loading-spinner inline-block w-8 h-8 border-4 border-t-success border-gray-200 rounded-full animate-spin" aria-hidden="true"></div>
+                 <div class="loading-text mt-2 text-gray-600">Calculating...</div><span class="sr-only">Loading, please wait</span>
+                </div>
+
+                <div id="result" class="result bg-success-light p-5 rounded-lg border-l-4 border-success shadow-sm hidden" aria-live="polite">
+                 <div class="result-title text-lg font-semibold mb-2 text-success-dark">Calculated Damage:</div>
+                 <div id="result-value" class="result-value text-3xl font-bold mb-3 break-words">0</div>
+                 <div id="result-details" class="result-details text-sm text-gray-700 mt-3 border-t border-success/30 pt-3">
+                     <p><strong>Total Energy Used:</strong> <span id="result-total-energy-used">0</span></p>
+                     <p><strong>Total Extra Damage (Energy + Speed):</strong> <span id="result-total-extra-damage">0.00</span></p>
+                     <div class="mt-3 pt-3 border-t border-success/20">
+                         <p class="font-semibold mb-1">Calculation:</p>
+                         <div id="equation-display" class="text-sm bg-gray-50 p-2 rounded border border-gray-200 break-words leading-relaxed">
+                             Equation not yet calculated.
+                            </div>
+                     </div>
+                     <hr class="my-2 border-success/20"> <p><strong>Scientific Notation:</strong> <span id="result-scientific">0</span></p>
+                     <p><strong>In Words:</strong> <span id="result-words">Zero</span></p>
                  </div>
-
-                 <div id="all-sliders-container" class="bg-white p-5 mb-5 rounded-lg shadow-sm">
-                  <h3 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Energy Usage Sliders</h3>
-                  <div id="sliders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-                      </div>
-                 </div>
-
-                 <button id="calculate-btn" aria-label="Calculate final damage value" class="w-full px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 ease-in-out text-lg font-semibold shadow-md mb-5 active:scale-95">
-                  Calculate Damage
-                 </button>
-
-                 <div id="loading" class="loading text-center p-5 hidden">
-                  <div class="loading-spinner inline-block w-8 h-8 border-4 border-t-success border-gray-200 rounded-full animate-spin" aria-hidden="true"></div>
-                  <div class="loading-text mt-2 text-gray-600">Calculating...</div><span class="sr-only">Loading, please wait</span>
-                 </div>
-
-                 <div id="result" class="result bg-success-light p-5 rounded-lg border-l-4 border-success shadow-sm hidden" aria-live="polite">
-                  <div class="result-title text-lg font-semibold mb-2 text-success-dark">Calculated Damage:</div>
-                  <div id="result-value" class="result-value text-3xl font-bold mb-3 break-words">0</div>
-                  <div id="result-details" class="result-details text-sm text-gray-700 mt-3 border-t border-success/30 pt-3">
-                       <p><strong>Total Energy Used:</strong> <span id="result-total-energy-used">0</span></p>
-                       <p><strong>Total Extra Damage from Energy:</strong> <span id="result-total-extra-damage">0.00</span></p>
-                       <div class="mt-3 pt-3 border-t border-success/20">
-                           <p class="font-semibold mb-1">Calculation:</p>
-                           <div id="equation-display" class="text-sm bg-gray-50 p-2 rounded border border-gray-200 break-words leading-relaxed">
-                                Equation not yet calculated.
-                           </div>
-                       </div>
-                       <hr class="my-2 border-success/20"> <p><strong>Scientific Notation:</strong> <span id="result-scientific">0</span></p>
-                       <p><strong>In Words:</strong> <span id="result-words">Zero</span></p>
-                  </div>
-                 </div>
+                </div>
 
             </div> <div id="stats-panel" class="stats-panel md:w-1/4 lg:w-1/5 p-5 bg-white rounded-lg shadow-sm self-start sticky top-6 border-stats-border">
-                 <h3 id="stats-panel-header" class="stats-panel-header text-xl font-semibold mb-4 flex items-center text-stats-header">
-                     Stats
-                     <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
-                 <div class="space-y-3">
-                     <p class="text-sm text-gray-600">Selected Current Energy: <span id="stat-current-energy" class="font-medium text-gray-800 break-words">0</span></p>
-                     <hr class="border-gray-200">
-                     <p class="text-sm text-gray-600">Total Damage Dealt: <span id="stat-total-damage" class="font-medium text-gray-800 break-words">0</span></p>
-                     <p class="text-sm text-gray-600">Total Energy Spent: <span id="stat-total-energy-spent" class="font-medium text-gray-800 break-words">0</span></p>
-                     <p class="text-sm text-gray-600">Highest Damage: <span id="stat-highest-damage" class="font-medium text-gray-800 break-words">0</span></p>
-                     <div class="flex items-center justify-between text-sm text-gray-600">
-                         <span>Number of Attacks: <span id="stat-attack-count" class="font-medium text-gray-800 break-words">0</span></span>
-                         <button id="reset-attack-count-btn" title="Reset Attack Count" class="px-2 py-0.5 text-xs bg-gray-200 hover:bg-red-200 text-gray-600 hover:text-red-700 rounded focus:outline-none focus:ring-1 focus:ring-red-400 focus:ring-offset-1 transition-colors duration-150 active:scale-95">
-                             Reset?
-                         </button>
-                     </div>
-                     <hr class="border-gray-200">
-                      <p class="text-sm text-gray-600">Form AC Bonus: <span id="stat-form-ac-bonus" class="font-medium text-gray-800 break-words">0</span></p>
-                      <p class="text-sm text-gray-600">Form TR Bonus: <span id="stat-form-tr-bonus" class="font-medium text-gray-800 break-words">0</span></p>
-                      <p class="text-sm text-gray-600">Total AC: <span id="stat-total-ac" class="font-medium text-gray-800 break-words">0</span></p>
-                      <p class="text-sm text-gray-600">Total TR: <span id="stat-total-tr" class="font-medium text-gray-800 break-words">0</span></p>
-                     <hr class="border-gray-200">
-                     <div id="kaioken-section" class="hidden pt-3 border-t border-gray-200">
-                         <div class="flex items-center gap-2 mb-3">
-                             <input type="checkbox" id="kaioken-checkbox" class="rounded border-gray-300 text-red-600 shadow-sm focus:ring-kaioken-focus">
-                             <label for="kaioken-checkbox" class="text-sm font-medium text-kaioken-header">Kaioken?</label>
-                         </div>
-                         <div id="kaioken-details" class="hidden space-y-2">
-                             <div class="flex items-center gap-2">
-                                 <div class="flex-grow">
-                                     <label for="max-health" class="lbl">Max Health:</label>
-                                     <input type="text" id="max-health" placeholder="e.g., 1000" value="1000" class="inpt focus:ring-kaioken-focus">
-                                 </div>
-                                 <button id="regen-health-btn" title="Regenerate Health to Max" class="px-2 py-1 text-xs bg-success hover:bg-success-dark text-white rounded-md focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-1 self-end mb-1 transition-transform active:scale-95">Regen Health</button>
-                             </div>
-                             <div><label for="kaioken-strain" class="lbl">Kaioken Strain (% Max HP):</label><input type="text" id="kaioken-strain" placeholder="e.g., 10" value="10" class="inpt focus:ring-kaioken-focus"></div>
-                             <div>
-                                 <label class="lbl">Current Health:</label>
-                                 <span id="current-health" class="readonly-display current-health">1000</span>
-                             </div>
-                         </div>
-                     </div>
+                <h3 id="stats-panel-header" class="stats-panel-header text-xl font-semibold mb-4 flex items-center text-stats-header">
+                    Stats
+                    <span class="flex-grow h-px bg-gray-200 ml-3"></span> </h3>
+                <div class="space-y-3">
+                    <p class="text-sm text-gray-600">Selected Current Energy: <span id="stat-current-energy" class="font-medium text-gray-800 break-words">0</span></p>
+                    <hr class="border-gray-200">
+                    <p class="text-sm text-gray-600">Total Damage Dealt: <span id="stat-total-damage" class="font-medium text-gray-800 break-words">0</span></p>
+                    <p class="text-sm text-gray-600">Total Energy Spent: <span id="stat-total-energy-spent" class="font-medium text-gray-800 break-words">0</span></p>
+                    <p class="text-sm text-gray-600">Highest Damage: <span id="stat-highest-damage" class="font-medium text-gray-800 break-words">0</span></p>
+                    <div class="flex items-center justify-between text-sm text-gray-600">
+                        <span>Number of Attacks: <span id="stat-attack-count" class="font-medium text-gray-800 break-words">0</span></span>
+                        <button id="reset-attack-count-btn" title="Reset Attack Count" class="px-2 py-0.5 text-xs bg-gray-200 hover:bg-red-200 text-gray-600 hover:text-red-700 rounded focus:outline-none focus:ring-1 focus:ring-red-400 focus:ring-offset-1 transition-colors duration-150 active:scale-95">
+                            Reset?
+                        </button>
+                    </div>
+                    <hr class="border-gray-200">
+                     <p class="text-sm text-gray-600">Form AC Bonus: <span id="stat-form-ac-bonus" class="font-medium text-gray-800 break-words">0</span></p>
+                     <p class="text-sm text-gray-600">Form TR Bonus: <span id="stat-form-tr-bonus" class="font-medium text-gray-800 break-words">0</span></p>
+                     <p class="text-sm text-gray-600">Total AC: <span id="stat-total-ac" class="font-medium text-gray-800 break-words">0</span></p>
+                     <p class="text-sm text-gray-600">Total TR: <span id="stat-total-tr" class="font-medium text-gray-800 break-words">0</span></p>
+                     <p class="text-sm text-gray-600">Speed: <span id="stat-speed" class="font-medium text-gray-800 break-words">0</span></p> <hr class="border-gray-200">
+                    <div id="kaioken-section" class="hidden pt-3 border-t border-gray-200">
+                        <div class="flex items-center gap-2 mb-3">
+                            <input type="checkbox" id="kaioken-checkbox" class="rounded border-gray-300 text-red-600 shadow-sm focus:ring-kaioken-focus">
+                            <label for="kaioken-checkbox" class="text-sm font-medium text-kaioken-header">Kaioken?</label>
+                        </div>
+                        <div id="kaioken-details" class="hidden space-y-2">
+                            <div class="flex items-center gap-2">
+                                <div class="flex-grow">
+                                    <label for="max-health" class="lbl">Max Health:</label>
+                                    <input type="text" id="max-health" placeholder="e.g., 1000" value="1000" class="inpt focus:ring-kaioken-focus">
+                                </div>
+                                <button id="regen-health-btn" title="Regenerate Health to Max" class="px-2 py-1 text-xs bg-success hover:bg-success-dark text-white rounded-md focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-1 self-end mb-1 transition-transform active:scale-95">Regen Health</button>
+                            </div>
+                            <div><label for="kaioken-strain" class="lbl">Kaioken Strain (% Max HP):</label><input type="text" id="kaioken-strain" placeholder="e.g., 10" value="10" class="inpt focus:ring-kaioken-focus"></div>
+                            <div>
+                                <label class="lbl">Current Health:</label>
+                                <span id="current-health" class="readonly-display current-health">1000</span>
+                            </div>
+                        </div>
+                    </div>
 
-                   <div id="formListSection" class="pt-3 border-t border-gray-200">
-                       <h4 class="text-md font-semibold mb-2 text-gray-700">Saved Forms</h4>
-                       <div id="formListContainer" class="max-h-48 overflow-y-auto text-xs">
-                           <p class="text-gray-500">No forms created yet.</p>
-                       </div>
-                   </div>
+                 <div id="formListSection" class="pt-3 border-t border-gray-200">
+                     <h4 class="text-md font-semibold mb-2 text-gray-700">Saved Forms</h4>
+                     <div id="formListContainer" class="max-h-48 overflow-y-auto text-xs">
+                         <p class="text-gray-500">No forms created yet.</p>
+                        </div>
                  </div>
+                </div>
             </div> </div> </div> <div id="character-stats-screen" class="hidden bg-white p-6 rounded-lg shadow-md max-w-7xl mx-auto mt-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4 border-b pb-2">
             <h2 class="text-2xl font-bold text-gray-700">Character Stats</h2>
@@ -438,10 +453,10 @@
              <div>
                 <label for="char-base-multiplier" class="lbl">Base Multiplier:</label>
                 <input type="text" id="char-base-multiplier" placeholder="e.g., 1" value="1" class="inpt focus:ring-teal-focus">
-             </div>
+            </div>
             <div class="md:col-span-2 flex items-center gap-2 mt-1 -mb-2"> <input type="checkbox" id="ryoko-checkbox" class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500">
-                 <label for="ryoko-checkbox" class="text-sm text-gray-700 select-none">Are you Ryoko?</label>
-             </div>
+                <label for="ryoko-checkbox" class="text-sm text-gray-700 select-none">Are you Ryoko?</label>
+            </div>
              <div id="ryoko-equation-input-container" class="hidden md:col-span-2 mt-2"> <label for="ryoko-equation-input" class="lbl text-red-600">Type out your shit equation:</label> <input type="text" id="ryoko-equation-input" placeholder="Enter equation value..." class="inpt focus:ring-red-500 border-red-300"> </div>
             <div>
                 <label for="char-vitality" class="lbl">Vitality:</label>
@@ -462,17 +477,20 @@
              <div>
                 <label for="char-base-tr" class="lbl">Base True Resistance:</label>
                 <input type="text" id="char-base-tr" placeholder="e.g., 5" value="5" class="inpt focus:ring-teal-focus">
+            </div>
+             <div> <label for="char-speed" class="lbl">Speed:</label>
+                 <input type="text" id="char-speed" placeholder="e.g., 100" class="inpt focus:ring-teal-focus">
              </div>
         </div>
 
         <div id="formCreatorSection" class="mt-8 pt-6 border-t border-gray-200">
             <h3 class="text-xl font-semibold mb-4 text-gray-700">Form Creator</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 bg-gray-50 p-4 rounded-md border border-gray-200">
-                 <div>
+                <div>
                     <label for="formNameInput" class="lbl">Form Name:</label>
                     <input type="text" id="formNameInput" placeholder="e.g., Super Saiyan 1" class="inpt form-creator-input">
-                 </div>
-                 <div>
+                </div>
+                <div>
                     <label for="formEnergyTypeSelect" class="lbl">Form Energy Type:</label>
                     <select id="formEnergyTypeSelect" class="slct form-creator-input">
                         <option value="None">None</option>
@@ -490,140 +508,140 @@
                         <option value="fundamental">Fundamental</option>
                         <option value="other">Other</option>
                     </select>
-                 </div>
-                 <div>
+                </div>
+                <div>
                     <label for="formFormMultiplierInput" class="lbl">Form Multiplier (Main):</label>
                     <input type="number" id="formFormMultiplierInput" value="1" step="0.1" class="inpt form-creator-input">
-                 </div>
-                 <div>
+                </div>
+                <div>
                     <label for="formPoolMaxMultiplierInput" class="lbl">Pool Max Multiplier:</label>
                     <input type="number" id="formPoolMaxMultiplierInput" value="1" step="0.1" class="inpt form-creator-input">
-                 </div>
+                </div>
 
-                 <div class="md:col-span-2">
+                <div class="md:col-span-2">
                     <label for="formAffectsResistancesCheckbox" class="flex items-center gap-2">
                         <input type="checkbox" id="formAffectsResistancesCheckbox" class="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
                         <span class="lbl mb-0">Affects Resistances?</span>
                     </label>
-                 </div>
-                 <div id="formResistanceBonusInputs" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 pl-6 border-l-2 border-purple-200">
-                     <div>
+                </div>
+                <div id="formResistanceBonusInputs" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 pl-6 border-l-2 border-purple-200">
+                    <div>
                         <label for="formAcBonusInput" class="lbl">AC Bonus:</label>
                         <input type="number" id="formAcBonusInput" value="0" class="inpt form-creator-input">
-                     </div>
-                     <div>
+                    </div>
+                    <div>
                         <label for="formTrueResistanceBonusInput" class="lbl">True Resistance Bonus:</label>
                         <input type="number" id="formTrueResistanceBonusInput" value="0" class="inpt form-creator-input">
-                     </div>
-                 </div>
-                 <div class="md:col-span-2">
+                    </div>
+                </div>
+                <div class="md:col-span-2">
                     <button id="addFormButton" class="form-creator-button w-full md:w-auto">Add This Form</button>
-                 </div>
+                </div>
             </div>
         </div>
-       </div> <template id="energy-pool-template">
+    </div> <template id="energy-pool-template">
         <div class="energy-pool bg-gradient-to-br from-white p-5 mb-5 rounded-lg shadow-sm border-l-4" style="display: none;">
-             <h3 class="text-xl font-semibold mb-4 flex items-center">
-                 <span class="pool-title">Energy Pool Title</span>
-                 <span class="flex-grow h-px bg-gray-200 ml-3"></span>
-             </h3>
+            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                <span class="pool-title">Energy Pool Title</span>
+                <span class="flex-grow h-px bg-gray-200 ml-3"></span>
+            </h3>
 
-             <div class="form-select-container mb-4 hidden">
-                 <label class="lbl form-select-label">Active Form:</label>
-                 <select class="slct form-select">
-                     <option value="none">None</option>
-                     </select>
-             </div>
-             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <div>
-                     <label class="lbl base-max-energy-label">Base Max Energy (Calculated):</label>
-                     <span class="readonly-display base-max-energy">0</span> </div>
-                 <div><label class="lbl max-multiplier-label" for="">Pool Max Multiplier:</label><input type="text" value="1" class="inpt max-multiplier"></div>
-                 <div>
-                     <label class="lbl total-energy-label">Total Energy (Calculated):</label>
-                     <span class="readonly-display total-energy">0</span> </div>
-                 <div>
-                     <label class="lbl current-energy-label">Current Energy:</label>
-                     <span class="readonly-display current-energy">0</span> </div>
-                 <div><label class="lbl damage-per-power-label" for="">Damage per Energy Point:</label><input type="text" value="1" class="inpt damage-per-power"></div>
-                 <div>
-                     <label class="lbl regen-percent-label" for="">Regeneration Rate (% of Total):</label>
-                     <div class="flex items-center gap-2">
-                         <input type="text" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:border-transparent text-sm regen-percent">
-                         <button class="regen-btn bg-success hover:bg-success-dark focus:ring-success px-3 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">Regen</button>
-                     </div>
-                 </div>
-             </div>
-          </div>
-       </template>
+            <div class="form-select-container mb-4 hidden">
+                <label class="lbl form-select-label">Active Form:</label>
+                <select class="slct form-select">
+                    <option value="none">None</option>
+                    </select>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="lbl base-max-energy-label">Base Max Energy (Calculated):</label>
+                    <span class="readonly-display base-max-energy">0</span> </div>
+                <div><label class="lbl max-multiplier-label" for="">Pool Max Multiplier:</label><input type="text" value="1" class="inpt max-multiplier"></div>
+                <div>
+                    <label class="lbl total-energy-label">Total Energy (Calculated):</label>
+                    <span class="readonly-display total-energy">0</span> </div>
+                <div>
+                    <label class="lbl current-energy-label">Current Energy:</label>
+                    <span class="readonly-display current-energy">0</span> </div>
+                <div><label class="lbl damage-per-power-label" for="">Damage per Energy Point:</label><input type="text" value="1" class="inpt damage-per-power"></div>
+                <div>
+                    <label class="lbl regen-percent-label" for="">Regeneration Rate (% of Total):</label>
+                    <div class="flex items-center gap-2">
+                        <input type="text" placeholder="e.g., 10" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:border-transparent text-sm regen-percent">
+                        <button class="regen-btn bg-success hover:bg-success-dark focus:ring-success px-3 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95">Regen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
 
     <template id="energy-slider-template">
-         <div class="energy-slider-section hidden">
-             <label class="lbl text-sm slider-label" for="">Energy Used (%):</label>
-             <input type="range" class="energy-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" min="0" max="100" value="0">
-             <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div>
-             <div class="energy-slider-value-display flex justify-between items-center text-xs bg-gray-100 text-gray-700 p-1 rounded-md min-h-[2.5rem]">
-                 <span class="slider-percent-value">0%</span>
-                 <span class="slider-details-value text-right">(E: 0, D: 0.00)</span>
-             </div>
-         </div>
-       </template>
+        <div class="energy-slider-section hidden">
+            <label class="lbl text-sm slider-label" for="">Energy Used (%):</label>
+            <input type="range" class="energy-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" min="0" max="100" value="0">
+            <div class="flex justify-between text-xs text-gray-500 px-1"><span>0%</span><span>50%</span><span>100%</span></div>
+            <div class="energy-slider-value-display flex justify-between items-center text-xs bg-gray-100 text-gray-700 p-1 rounded-md min-h-[2.5rem]">
+                <span class="slider-percent-value">0%</span>
+                <span class="slider-details-value text-right">(E: 0, D: 0.00)</span>
+            </div>
+        </div>
+    </template>
 
     <script type="module">
-      // Import the functions you need from the SDKs you need
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-      import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
-      // *** Import Auth functions ***
-      import {
-          getAuth,
-          onAuthStateChanged,
-          GoogleAuthProvider,
-          signInWithPopup,
-          signOut
-      } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+        // *** Import Auth functions ***
+        import {
+            getAuth,
+            onAuthStateChanged,
+            GoogleAuthProvider,
+            signInWithPopup,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
-      // === Your Specific Firebase Configuration ===
-     // Make sure databaseURL has a comma after it if other properties follow!
-    // === Your Specific Firebase Configuration ===
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-     const firebaseConfig = {
-        apiKey: "AIzaSyAbYQWbMQBHOdT-PxwIXeDFvLgEXlX7PhY", // Make sure this is your valid key!
-        authDomain: "dndfortheboys-d88d9.firebaseapp.com",
-        databaseURL: "https://dndfortheboys-d88d9-default-rtdb.firebaseio.com",
-        projectId: "dndfortheboys-d88d9",
-        storageBucket: "dndfortheboys-d88d9.appspot.com", // Double-check this value in your Firebase console
-        messagingSenderId: "721075269380",
-        appId: "1:721075269380:web:197009bf7ded05903faa51",
-        measurementId: "G-H4HSEM39X5"
-    };
+        // === Your Specific Firebase Configuration ===
+       // Make sure databaseURL has a comma after it if other properties follow!
+       // === Your Specific Firebase Configuration ===
+       // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY", // Replace with your actual API key
+            authDomain: "dndfortheboys-d88d9.firebaseapp.com",
+            databaseURL: "https://dndfortheboys-d88d9-default-rtdb.firebaseio.com",
+            projectId: "dndfortheboys-d88d9",
+            storageBucket: "dndfortheboys-d88d9.appspot.com", // Double-check this value in your Firebase console
+            messagingSenderId: "721075269380",
+            appId: "1:721075269380:web:197009bf7ded05903faa51",
+            measurementId: "G-H4HSEM39X5"
+       };
 
 
-      // Initialize Firebase App
-      const app = initializeApp(firebaseConfig);
-      const database = getDatabase(app);
-      const auth = getAuth(app); // Initialize Auth
+        // Initialize Firebase App
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app); // Initialize Auth
 
-      // --- Make Firebase functions globally accessible ---
-      // Needed so your separate, non-module calculator script can use them.
-      window.firebaseDb = database;
-      window.firebaseDbRef = ref;
-      window.firebaseDbSet = set;
-      window.firebaseDbGet = get;
-      window.firebaseDbRemove = remove;
-      // *** Export Auth functions ***
-      window.firebaseAuth = auth;
-      window.firebaseOnAuthStateChanged = onAuthStateChanged;
-      window.firebaseGoogleAuthProvider = GoogleAuthProvider;
-      window.firebaseSignInWithPopup = signInWithPopup;
-      window.firebaseSignOut = signOut;
+        // --- Make Firebase functions globally accessible ---
+        // Needed so your separate, non-module calculator script can use them.
+        window.firebaseDb = database;
+        window.firebaseDbRef = ref;
+        window.firebaseDbSet = set;
+        window.firebaseDbGet = get;
+        window.firebaseDbRemove = remove;
+        // *** Export Auth functions ***
+        window.firebaseAuth = auth;
+        window.firebaseOnAuthStateChanged = onAuthStateChanged;
+        window.firebaseGoogleAuthProvider = GoogleAuthProvider;
+        window.firebaseSignInWithPopup = signInWithPopup;
+        window.firebaseSignOut = signOut;
 
-      // Signal that Firebase is ready for the main script
-      console.log("Firebase Initialized (v9+ Modular with Auth)");
-      document.dispatchEvent(new Event('firebaseReady'));
+        // Signal that Firebase is ready for the main script
+        console.log("Firebase Initialized (v9+ Modular with Auth)");
+        document.dispatchEvent(new Event('firebaseReady'));
     </script>
 
     <script>
-  document.addEventListener('firebaseReady', async () => {
+document.addEventListener('firebaseReady', async () => {
     // --- DOM Element References ---
     const energyTypeSelect = document.getElementById('energy-type');
     const energyPoolsContainer = document.getElementById('energy-pools-container');
@@ -681,6 +699,7 @@
     const charSoulHpInput = document.getElementById('char-soul-hp');
     const charBaseAcInput = document.getElementById('char-base-ac'); // New
     const charBaseTrInput = document.getElementById('char-base-tr'); // New
+    const charSpeedInput = document.getElementById('char-speed'); // <<< ADDED Speed Input Ref
     // Ryoko Mode References
     const ryokoCheckbox = document.getElementById('ryoko-checkbox');
     const ryokoEquationContainer = document.getElementById('ryoko-equation-input-container');
@@ -697,17 +716,18 @@
     const addFormButton = document.getElementById('addFormButton');
     // Form List Container
     const formListContainer = document.getElementById('formListContainer');
-    // Stats Panel AC/TR Displays
+    // Stats Panel AC/TR/Speed Displays
     const statFormAcBonusEl = document.getElementById('stat-form-ac-bonus');
     const statFormTrBonusEl = document.getElementById('stat-form-tr-bonus');
     const statTotalAcEl = document.getElementById('stat-total-ac');
     const statTotalTrEl = document.getElementById('stat-total-tr');
+    const statSpeedEl = document.getElementById('stat-speed'); // <<< ADDED Speed Stat Ref
 
     // --- Global State & Constants ---
     const FIREBASE_SAVE_PATH_BASE = 'calculatorStates';
     let currentUser = null; // Will hold user info (like uid) when signed in
     let totalDamageDealt = 0, totalEnergySpent = 0, attackCount = 0, highestDamage = 0;
-    const LOCAL_STORAGE_KEY = 'energyCalculatorState_v1.4_new_energies'; // Incremented version
+    const LOCAL_STORAGE_KEY = 'energyCalculatorState_v1.5_speed'; // Incremented version
     let poolAnimationTimeoutId = null;
     // UPDATED: Added new energy types
     const ALL_ENERGY_TYPES = ['ki', 'nen', 'chakra', 'magic', 'cursed', 'reiatsu', 'haki', 'alchemy', 'nature', 'force', 'origin', 'fundamental', 'other'];
@@ -729,20 +749,30 @@
 
     // UPDATED: Added details for new energy types
     const ENERGY_TYPE_DETAILS = {
-        ki:          { name: 'Ki',          color: 'ki',          colorDark: 'ki-dark',          gradientTo: 'to-orange-100',   focusRing: 'focus:ring-ki-focus',          staticGlow: 'static-glow-ki',          pulseGlow: 'animate-pulse-glow-ki',          border: 'border-l-ki' },
-        nen:         { name: 'Nen',         color: 'nen',         colorDark: 'nen-dark',         gradientTo: 'to-blue-100',     focusRing: 'focus:ring-nen-focus',         staticGlow: 'static-glow-nen',         pulseGlow: 'animate-pulse-glow-nen',         border: 'border-l-nen' },
-        chakra:      { name: 'Chakra',      color: 'chakra',      colorDark: 'chakra-dark',      gradientTo: 'to-purple-100',   focusRing: 'focus:ring-chakra-focus',      staticGlow: 'static-glow-chakra',      pulseGlow: 'animate-pulse-glow-chakra',      border: 'border-l-chakra' },
-        magic:       { name: 'Magic',       color: 'magic',       colorDark: 'magic-dark',       gradientTo: 'to-teal-100',     focusRing: 'focus:ring-magic-focus',       staticGlow: 'static-glow-magic',       pulseGlow: 'animate-pulse-glow-magic',       border: 'border-l-magic' },
-        cursed:      { name: 'Cursed',      color: 'cursed',      colorDark: 'cursed-dark',      gradientTo: 'to-red-100',      focusRing: 'focus:ring-cursed-focus',      staticGlow: 'static-glow-cursed',      pulseGlow: 'animate-pulse-glow-cursed',      border: 'border-l-cursed' },
-        reiatsu:     { name: 'Reiatsu',     color: 'reiatsu',     colorDark: 'reiatsu-dark',     gradientTo: 'to-slate-100',    focusRing: 'focus:ring-reiatsu-focus',     staticGlow: 'static-glow-reiatsu',     pulseGlow: 'animate-pulse-glow-reiatsu',     border: 'border-l-reiatsu' },
-        haki:        { name: 'Haki',        color: 'haki',        colorDark: 'haki-dark',        gradientTo: 'to-gray-100',     focusRing: 'focus:ring-haki-focus',        staticGlow: 'static-glow-haki',        pulseGlow: 'animate-pulse-glow-haki',        border: 'border-l-haki' },
-        alchemy:     { name: 'Alchemy',     color: 'alchemy',     colorDark: 'alchemy-dark',     gradientTo: 'to-amber-100',    focusRing: 'focus:ring-alchemy-focus',     staticGlow: 'static-glow-alchemy',     pulseGlow: 'animate-pulse-glow-alchemy',     border: 'border-l-alchemy' },
-        nature:      { name: 'Nature',      color: 'nature',      colorDark: 'nature-dark',      gradientTo: 'to-lime-100',     focusRing: 'focus:ring-nature-focus',      staticGlow: 'static-glow-nature',      pulseGlow: 'animate-pulse-glow-nature',      border: 'border-l-nature' },
-        force:       { name: 'Force',       color: 'force',       colorDark: 'force-dark',       gradientTo: 'to-fuchsia-100',  focusRing: 'focus:ring-force-focus',       staticGlow: 'static-glow-force',       pulseGlow: 'animate-pulse-glow-force',       border: 'border-l-force' },
+        ki:         { name: 'Ki',           color: 'ki',           colorDark: 'ki-dark',           gradientTo: 'to-orange-100',   focusRing: 'focus:ring-ki-focus',           staticGlow: 'static-glow-ki',           pulseGlow: 'animate-pulse-glow-ki',           border: 'border-l-ki' },
+        nen:         { name: 'Nen',           color: 'nen',           colorDark: 'nen-dark',           gradientTo: 'to-blue-100',     focusRing: 'focus:ring-nen-focus',           staticGlow: 'static-glow-nen',           pulseGlow: 'animate-pulse-glow-nen',           border: 'border-l-nen' },
+        chakra:      { name: 'Chakra',        color: 'chakra',        colorDark: 'chakra-dark',        gradientTo: 'to-purple-100',   focusRing: 'focus:ring-chakra-focus',        staticGlow: 'static-glow-chakra',        pulseGlow: 'animate-pulse-glow-chakra',        border: 'border-l-chakra' },
+        magic:       { name: 'Magic',         color: 'magic',         colorDark: 'magic-dark',         gradientTo: 'to-teal-100',     focusRing: 'focus:ring-magic-focus',         staticGlow: 'static-glow-magic',         pulseGlow: 'animate-pulse-glow-magic',         border: 'border-l-magic' },
+        cursed:      { name: 'Cursed',        color: 'cursed',        colorDark: 'cursed-dark',        gradientTo: 'to-red-100',      focusRing: 'focus:ring-cursed-focus',        staticGlow: 'static-glow-cursed',        pulseGlow: 'animate-pulse-glow-cursed',        border: 'border-l-cursed' },
+        reiatsu:     { name: 'Reiatsu',       color: 'reiatsu',       colorDark: 'reiatsu-dark',       gradientTo: 'to-slate-100',    focusRing: 'focus:ring-reiatsu-focus',       staticGlow: 'static-glow-reiatsu',       pulseGlow: 'animate-pulse-glow-reiatsu',       border: 'border-l-reiatsu' },
+        haki:        { name: 'Haki',          color: 'haki',          colorDark: 'haki-dark',          gradientTo: 'to-gray-100',     focusRing: 'focus:ring-haki-focus',          staticGlow: 'static-glow-haki',          pulseGlow: 'animate-pulse-glow-haki',          border: 'border-l-haki' },
+        alchemy:     { name: 'Alchemy',       color: 'alchemy',       colorDark: 'alchemy-dark',       gradientTo: 'to-amber-100',    focusRing: 'focus:ring-alchemy-focus',       staticGlow: 'static-glow-alchemy',       pulseGlow: 'animate-pulse-glow-alchemy',       border: 'border-l-alchemy' },
+        nature:      { name: 'Nature',        color: 'nature',        colorDark: 'nature-dark',        gradientTo: 'to-lime-100',     focusRing: 'focus:ring-nature-focus',        staticGlow: 'static-glow-nature',        pulseGlow: 'animate-pulse-glow-nature',        border: 'border-l-nature' },
+        force:       { name: 'Force',         color: 'force',         colorDark: 'force-dark',         gradientTo: 'to-fuchsia-100',  focusRing: 'focus:ring-force-focus',         staticGlow: 'static-glow-force',         pulseGlow: 'animate-pulse-glow-force',         border: 'border-l-force' },
         // NEW Energy Type Details
-        origin:      { name: 'Origin',      color: 'origin',      colorDark: 'origin-dark',      gradientTo: 'to-indigo-100',   focusRing: 'focus:ring-origin-focus',      staticGlow: 'static-glow-origin',      pulseGlow: 'animate-pulse-glow-origin',      border: 'border-l-origin' },
-        fundamental: { name: 'Fundamental', color: 'fundamental', colorDark: 'fundamental-dark', gradientTo: 'to-gray-100',     focusRing: 'focus:ring-fundamental-focus', staticGlow: 'static-glow-fundamental', pulseGlow: 'animate-pulse-glow-fundamental', border: 'border-l-fundamental' },
-        other:       { name: 'Other',       color: 'other',       colorDark: 'other-dark',       gradientTo: 'to-amber-100',    focusRing: 'focus:ring-other-focus',       staticGlow: 'static-glow-other',       pulseGlow: 'animate-pulse-glow-other',       border: 'border-l-other' },
+        origin:      { name: 'Origin',        color: 'origin',        colorDark: 'origin-dark',        gradientTo: 'to-indigo-100',   focusRing: 'focus:ring-origin-focus',        staticGlow: 'static-glow-origin',        pulseGlow: 'animate-pulse-glow-origin',        border: 'border-l-origin' },
+        fundamental: { name: 'Fundamental',   color: 'fundamental',   colorDark: 'fundamental-dark',   gradientTo: 'to-gray-100',     focusRing: 'focus:ring-fundamental-focus',   staticGlow: 'static-glow-fundamental',   pulseGlow: 'animate-pulse-glow-fundamental',   border: 'border-l-fundamental' },
+        other:       { name: 'Other',         color: 'other',         colorDark: 'other-dark',         gradientTo: 'to-amber-100',    focusRing: 'focus:ring-other-focus',         staticGlow: 'static-glow-other',         pulseGlow: 'animate-pulse-glow-other',         border: 'border-l-other' },
+    };
+
+    // <<< ADDED Speed Stat Details >>>
+    const SPEED_DETAILS = {
+        name: 'Speed',
+        color: 'sky-500',      // Tailwind bg-sky-500
+        colorDark: 'sky-600',  // Tailwind hover:bg-sky-600
+        focusRing: 'focus:ring-speed-focus', // Defined in tailwind.config
+        // gradientTo: 'to-sky-100', // If needed for background gradients
+        // pulseGlow: 'animate-pulse-glow-speed' // Animation class
     };
 
 
@@ -791,7 +821,7 @@
             energySlider: document.getElementById(`${type}-energy-slider`),     // In sliders container
             sliderValueDisplay: document.getElementById(`${type}-slider-value-display`), // In sliders container
             formSelectContainer: poolDiv.querySelector('.form-select-container'), // NEW
-            formSelect: poolDiv.querySelector('.form-select'),                   // NEW
+            formSelect: poolDiv.querySelector('.form-select'),                 // NEW
         };
     }
     // UPDATED: Added calculations for new energy types
@@ -993,6 +1023,10 @@
         if (statFormTrBonusEl) statFormTrBonusEl.textContent = formatSimpleNumber(formTrBonus);
         if (statTotalAcEl) statTotalAcEl.textContent = formatSimpleNumber(baseAC + formAcBonus);
         if (statTotalTrEl) statTotalTrEl.textContent = formatSimpleNumber(baseTR + formTrBonus);
+        // <<< ADDED Speed Stat Update >>>
+        if (statSpeedEl && charSpeedInput) {
+             statSpeedEl.textContent = formatStatNumber(safeParseFloat(charSpeedInput.value, 0));
+        }
     }
 
 
@@ -1074,6 +1108,21 @@
                     }
                 });
 
+                // <<< ADDED SPEED DAMAGE CALCULATION START >>>
+                let speedDamage = 0;
+                const speedSlider = document.getElementById('speed-slider');
+                const baseSpeed = safeParseFloat(charSpeedInput?.value, 0);
+                if (speedSlider && baseSpeed > 0) {
+                    const sliderPercent = safeParseFloat(speedSlider.value, 0);
+                    if (sliderPercent > 0) {
+                        const speedUsed = baseSpeed * (sliderPercent / 100);
+                        speedDamage = speedUsed * 1; // 1:1 conversion
+                        finalDamage += speedDamage; // Add to total damage AT THE END
+                    }
+                }
+                // <<< ADDED SPEED DAMAGE CALCULATION END >>>
+
+
                 // Apply Kaioken Health Strain (unchanged)
                 healthDepleted = false;
                 if (energyType === 'ki' && kaiokenCheckbox.checked) {
@@ -1097,17 +1146,25 @@
 
                 // Update overall stats
                 totalDamageDealt += finalDamage;
-                totalEnergySpent += totalEnergyUsedFromSliders;
+                totalEnergySpent += totalEnergyUsedFromSliders; // Note: speed isn't tracked here, only energy
                 attackCount++;
                 if (finalDamage > highestDamage) {
                     highestDamage = finalDamage;
                 }
-                updateStatsDisplay(); // Update stats panel including AC/TR
+                updateStatsDisplay(); // Update stats panel including AC/TR/Speed
 
                 // Display results
                 resultValueEl.textContent = formatSimpleNumber(finalDamage);
-                resultTotalEnergyUsedEl.textContent = formatStatNumber(totalEnergyUsedFromSliders);
-                resultTotalExtraDamageEl.textContent = formatStatNumber(totalExtraDamageFromEnergy);
+                resultTotalEnergyUsedEl.textContent = formatStatNumber(totalEnergyUsedFromSliders); // Only energy used
+                // <<< UPDATED Extra Damage Display >>>
+                const totalExtraDamage = totalExtraDamageFromEnergy + speedDamage;
+                resultTotalExtraDamageEl.textContent = formatStatNumber(totalExtraDamage);
+                // Optional: Modify the label text if you want to be more specific
+                const extraDamageLabel = resultTotalExtraDamageEl.closest('p')?.querySelector('strong');
+                if (extraDamageLabel) {
+                    extraDamageLabel.textContent = 'Total Extra Damage (Energy + Speed):';
+                }
+
                 displayAllFormats(finalDamage);
                 updateEquationDisplay(); // Update equation after everything
                 resultDiv.classList.remove('hidden', 'bg-error-light', 'border-error', 'text-error-dark');
@@ -1157,6 +1214,7 @@
             charVitality: charVitalityInput?.value || '', charSoulPower: charSoulPowerInput?.value || '', charSoulHp: charSoulHpInput?.value || '',
             charBaseAc: charBaseAcInput?.value || '10', // Save Base AC
             charBaseTr: charBaseTrInput?.value || '5',   // Save Base TR
+            charSpeed: charSpeedInput?.value || '',      // <<< ADDED Speed Save
             ryokoCheckboxState: ryokoCheckbox?.checked || false,
             ryokoEquationValue: ryokoEquationInput?.value || '',
             activeView: characterStatsScreen?.classList.contains('hidden') ? 'calculator' : 'stats',
@@ -1166,6 +1224,10 @@
             calculatorState: calculatorState, // Save selected forms state
         };
         ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); if (els) { state.energyPools[type] = { maxMultiplier: els.maxMultiplierEl?.value || '1', currentEnergy: els.currentEnergyEl?.textContent || '0', damagePerPower: els.damagePerPowerEl?.value || '1', regenPercent: els.regenPercentEl?.value || '' }; state.sliderPercentages[type] = els.energySlider?.value || '0'; } });
+        // <<< ADDED Save Speed Slider Percentage >>>
+        const speedSlider = document.getElementById('speed-slider');
+        state.speedSliderPercentage = speedSlider?.value || '0';
+
         dynamicModifiersContainer.querySelectorAll('.dynamic-box').forEach(box => { const nameInput = box.querySelector('.modifier-name-input'); const valueInput = box.querySelector('.modifier-value-input'); const typeOption = box.querySelector('.modifier-type-option.active'); if (nameInput && valueInput && typeOption) { state.dynamicModifiers.push({ name: nameInput.value, value: valueInput.value, type: typeOption.dataset.value }); } });
         return state;
     }
@@ -1179,7 +1241,8 @@
         if (charSoulPowerInput) charSoulPowerInput.value = state.charSoulPower || '';
         if (charSoulHpInput) charSoulHpInput.value = state.charSoulHp || '';
         if (charBaseAcInput) charBaseAcInput.value = state.charBaseAc || '10'; // Restore Base AC
-        if (charBaseTrInput) charBaseTrInput.value = state.charBaseTr || '5';   // Restore Base TR
+        if (charBaseTrInput) charBaseTrInput.value = state.charBaseTr || '5';  // Restore Base TR
+        if (charSpeedInput) charSpeedInput.value = state.charSpeed || '';     // <<< ADDED Restore Speed
 
         // Restore Ryoko state
         if (ryokoCheckbox) ryokoCheckbox.checked = state.ryokoCheckboxState || false;
@@ -1235,6 +1298,15 @@
 
         // Restore sliders
         if (state.sliderPercentages) { ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); if (els?.energySlider) { els.energySlider.value = state.sliderPercentages[type] || '0'; updateSingleSliderDisplay(type); } updateSliderVisibility(type); }); }
+        // <<< ADDED Restore Speed Slider >>>
+        const speedSlider = document.getElementById('speed-slider');
+        if (speedSlider && state.speedSliderPercentage) {
+            speedSlider.value = state.speedSliderPercentage || '0';
+        }
+        // Update speed slider UI AFTER potentially restoring value
+        updateSpeedSliderVisibility(); // Check if it should exist/be visible
+        updateSpeedSliderDisplay();    // Update text display
+
 
         // Restore dynamic modifiers
         dynamicModifiersContainer.innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>'; dynamicModifierCount = 0; if (state.dynamicModifiers && Array.isArray(state.dynamicModifiers)) { state.dynamicModifiers.forEach(modData => addDynamicModifier(modData)); }
@@ -1250,18 +1322,18 @@
         ALL_ENERGY_TYPES.forEach(type => { updateSliderLimitAndStyle(type); });
         updateAttackButtonStates(energyTypeSelect.value);
 
-        // Restore UI State AFTER data is loaded
-        renderFormList(); // Display loaded forms
-        populateFormDropdowns(); // Populate dropdowns based on loaded forms & state
-        showSelectedEnergyPool(); // Show correct pool, applies form effects
-        updateStatsDisplay(); // Update stats panel (includes AC/TR)
-        updateEquationDisplay();
+        // Restore UI State AFTER data is loaded (Order matters!)
+        renderFormList();         // Display loaded forms first
+        populateFormDropdowns();  // Populate dropdowns based on loaded forms & state
+        showSelectedEnergyPool(); // Show correct pool, recalculates energy, applies form effects
+        updateStatsDisplay();     // Update stats panel (includes AC/TR/Speed)
+        updateEquationDisplay();  // Update equation display last
 
         // Restore active view
         if (state.activeView === 'stats') { showCharacterStatsView(); }
         else { showCalculatorView(); }
     }
-   // *** NEW ASYNC Firebase State Functions (MODIFIED FOR AUTH) ***
+    // *** Firebase State Functions (MODIFIED FOR AUTH) ***
     async function saveState() {
          if (!currentUser) { // Check if user is signed in
              showMessage('You must be signed in to save state.', 'error');
@@ -1270,7 +1342,7 @@
          try {
              const state = gatherState(); // Assumes gatherState is defined elsewhere
              // Construct path using the user's unique ID
-             const userSavePath = `${FIREBASE_SAVE_PATH_BASE}/${currentUser.uid}`; // Corrected template literal syntax
+             const userSavePath = `${FIREBASE_SAVE_PATH_BASE}/${currentUser.uid}`;
              const dbRef = window.firebaseDbRef(window.firebaseDb, userSavePath);
              await window.firebaseDbSet(dbRef, state);
              showMessage('State saved successfully to Firebase!', 'success');
@@ -1278,7 +1350,7 @@
              console.error("Firebase save error:", error);
              showMessage(`Failed to save state to Firebase. ${error.message}`, 'error');
          }
-       }
+        }
 
     async function loadState() {
          if (!currentUser) { // Check if user is signed in
@@ -1286,7 +1358,7 @@
              return false; // Can't load without a user
          }
          // Construct path using the user's unique ID
-         const userSavePath = `${FIREBASE_SAVE_PATH_BASE}/${currentUser.uid}`; // Corrected template literal syntax
+         const userSavePath = `${FIREBASE_SAVE_PATH_BASE}/${currentUser.uid}`;
          try {
              const dbRef = window.firebaseDbRef(window.firebaseDb, userSavePath);
              const snapshot = await window.firebaseDbGet(dbRef);
@@ -1311,7 +1383,7 @@
              showMessage(`Failed to load state from Firebase. ${error.message}`, 'error');
              return false;
          }
-       }
+        }
 
     async function clearState() {
          if (!currentUser) { // Check if user is signed in
@@ -1320,7 +1392,7 @@
          }
          if (confirm('Are you sure you want to clear your saved state FROM FIREBASE? This cannot be undone.')) {
              // Construct path using the user's unique ID
-             const userSavePath = `${FIREBASE_SAVE_PATH_BASE}/${currentUser.uid}`; // Corrected template literal syntax
+             const userSavePath = `${FIREBASE_SAVE_PATH_BASE}/${currentUser.uid}`;
              try {
                  const dbRef = window.firebaseDbRef(window.firebaseDb, userSavePath);
                  await window.firebaseDbRemove(dbRef);
@@ -1331,8 +1403,7 @@
                   showMessage(`Failed to clear state from Firebase. ${error.message}`, 'error');
              }
          }
-       }
-    // *** END OF REPLACEMENT STATE FUNCTIONS ***
+        }
     // *** ADDED FUNCTIONS FOR GOOGLE SIGN-IN / SIGN-OUT ***
     async function handleGoogleSignIn() {
         const provider = new window.firebaseGoogleAuthProvider();
@@ -1368,7 +1439,7 @@
             return;
         }
         energyPoolsContainer.innerHTML = '';
-        slidersGrid.innerHTML = '';
+        slidersGrid.innerHTML = ''; // Clear sliders grid too
 
         ALL_ENERGY_TYPES.forEach(type => {
             const details = ENERGY_TYPE_DETAILS[type];
@@ -1443,8 +1514,116 @@
             }
         });
         console.log("Energy sections generated from templates.");
+        // Speed slider is generated separately by generateSpeedSlider() when needed
     }
 
+    // <<< ADDED Speed Slider Generation/Update Functions >>>
+    // --- Speed Slider Logic ---
+    function generateSpeedSlider() {
+        if (!energySliderTemplate || !slidersGrid) {
+            console.error("Slider template or grid container not found! Cannot generate speed slider.");
+            return;
+        }
+
+        // Check if speed slider already exists to prevent duplicates
+        if (document.getElementById('speed-slider-section')) {
+            return;
+        }
+
+        const baseSpeed = safeParseFloat(charSpeedInput?.value, 0);
+        // NOTE: Visibility check is now primary in updateSpeedSliderVisibility
+        // We generate it here assuming it *might* be needed soon,
+        // but it starts hidden via template class.
+
+        const sliderClone = energySliderTemplate.content.cloneNode(true);
+        const sliderSection = sliderClone.querySelector('.energy-slider-section');
+        if (sliderSection) {
+            sliderSection.id = `speed-slider-section`;
+            sliderSection.dataset.type = 'speed'; // Identify type
+            // Keep initial 'hidden' class from template
+
+            const sliderLabel = sliderSection.querySelector('.slider-label');
+            if (sliderLabel) {
+                sliderLabel.htmlFor = `speed-slider`;
+                sliderLabel.textContent = `${SPEED_DETAILS.name} Usage (%):`;
+            }
+            const energySlider = sliderSection.querySelector('.energy-slider');
+            if (energySlider) {
+                energySlider.id = `speed-slider`; // Use specific ID for CSS
+                energySlider.dataset.type = 'speed';
+                // Apply specific speed styling if needed beyond thumb color (already handled by CSS ID)
+            }
+            const valueDisplay = sliderSection.querySelector('.energy-slider-value-display');
+            if (valueDisplay) {
+                valueDisplay.id = `speed-slider-value-display`;
+            }
+            slidersGrid.appendChild(sliderClone);
+            console.log("Speed slider DOM structure generated (initially hidden).");
+            updateSpeedSliderDisplay(); // Initialize display text
+        } else {
+            console.error(`Could not find .energy-slider-section in template clone for speed`);
+        }
+    }
+
+    function updateSpeedSliderVisibility() {
+        let speedSliderSection = document.getElementById('speed-slider-section');
+        const baseSpeed = safeParseFloat(charSpeedInput?.value, 0);
+
+        if (baseSpeed > 0) {
+            // If speed > 0, ensure slider exists and is visible
+            if (!speedSliderSection) {
+                generateSpeedSlider(); // Generate it if it doesn't exist yet
+                speedSliderSection = document.getElementById('speed-slider-section'); // Re-select after generation
+            }
+            if (speedSliderSection) { // Check if generation was successful
+                 speedSliderSection.classList.remove('hidden');
+            }
+        } else {
+            // If speed is 0 or less, hide the slider if it exists
+            if (speedSliderSection) {
+                speedSliderSection.classList.add('hidden');
+                 // Optionally reset slider value when hiding
+                 const speedSlider = document.getElementById('speed-slider');
+                 if(speedSlider) speedSlider.value = 0;
+                 updateSpeedSliderDisplay(); // Update display to show 0
+            }
+        }
+    }
+
+    function updateSpeedSliderDisplay() {
+        const sliderSection = document.getElementById('speed-slider-section');
+        // No need to check visibility here, just update if elements exist
+        // if (!sliderSection || sliderSection.classList.contains('hidden')) {
+        //      return;
+        // }
+
+        const slider = document.getElementById('speed-slider');
+        const valueDisplay = document.getElementById('speed-slider-value-display');
+        const baseSpeed = safeParseFloat(charSpeedInput?.value, 0);
+
+        if (!slider || !valueDisplay || !charSpeedInput) {
+             // Don't spam console if slider just hasn't been generated yet
+             // console.error("Speed slider elements not found for display update.");
+            return; // Exit if elements aren't ready
+        }
+
+        const percentSpan = valueDisplay.querySelector('.slider-percent-value');
+        const detailsSpan = valueDisplay.querySelector('.slider-details-value');
+
+        if (!percentSpan || !detailsSpan) {
+            console.error("Speed slider display spans not found.");
+            return;
+        }
+
+        const sliderPercent = parseInt(slider.value);
+        // No attack reserve for speed, use full percentage
+        const speedUsed = baseSpeed * (sliderPercent / 100);
+        const extraDamage = speedUsed * 1; // 1:1 conversion
+
+        percentSpan.textContent = `${sliderPercent}%`;
+        detailsSpan.textContent = `(S: ${formatStatNumber(speedUsed)}, D: ${formatStatNumber(extraDamage)})`;
+    }
+    // <<< END Speed Slider Functions >>>
 
     // --- Equation Display Function ---
     function updateEquationDisplay() {
@@ -1549,16 +1728,40 @@
                  equationHTML += op('+') + group(additiveTerms.join(op('+')));
              }
 
-             equationDisplayEl.innerHTML = equationHTML;
+             // <<< ADDED SPEED TERM TO EQUATION START >>>
+             const speedSliderEq = document.getElementById('speed-slider');
+             const baseSpeedEq = safeParseFloat(charSpeedInput?.value, 0);
+             if (speedSliderEq && baseSpeedEq > 0) {
+                 const sliderPercentEq = safeParseFloat(speedSliderEq.value, 0);
+                 if (sliderPercentEq > 0) {
+                      const speedUsedEq = baseSpeedEq * (sliderPercentEq / 100);
+                      const speedDamageEq = speedUsedEq * 1; // 1:1 conversion
+                      if (speedDamageEq !== 0) {
+                         // Group previous calculation if it contains operators
+                         if (equationHTML.includes(op('*')) || equationHTML.includes(op('+'))) {
+                              equationHTML = group(equationHTML);
+                         }
+                         // Use speed-slider as the target ID for linking
+                         equationHTML += op('+') + num(speedDamageEq, 'speed-slider', `${formatSimpleNumber(speedUsedEq)} Speed Used`);
+                      }
+                 }
+             }
+             // <<< ADDED SPEED TERM TO EQUATION END >>>
+
+             equationDisplayEl.innerHTML = equationHTML; // Assign the final HTML
          } catch (error) {
              console.error("Error updating equation:", error);
              equationDisplayEl.innerHTML = '<span class="text-error-dark">Could not generate equation.</span>';
          }
-       }
+        }
 
 
     // --- Click Handler for Equation Numbers ---
-    function handleEquationClick(event) { const target = event.target; if (target.classList.contains('equation-number') && target.dataset.targetId) { const targetId = target.dataset.targetId; const sourceElement = document.getElementById(targetId); if (sourceElement) { sourceElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); let elementToPulse = sourceElement; if (sourceElement.tagName === 'SPAN' && sourceElement.classList.contains('readonly-display')) { elementToPulse = sourceElement.closest('.energy-pool') || sourceElement; } else if (sourceElement.type === 'range') { elementToPulse = sourceElement.closest('.energy-slider-section') || sourceElement; } else if (sourceElement.classList.contains('modifier-value-input')) { elementToPulse = sourceElement.closest('.dynamic-box') || sourceElement; } triggerAnimation(elementToPulse, 'pulse-source'); if (sourceElement.tagName === 'INPUT' && !sourceElement.readOnly && sourceElement.type !== 'range') { sourceElement.focus(); } const energyTypeMatch = targetId.match(/^([a-z]+)-(damage-per-power|energy-slider|max-multiplier)/); if (energyTypeMatch) { const energyType = energyTypeMatch[1]; if (ALL_ENERGY_TYPES.includes(energyType) && energyTypeSelect.value !== energyType) { console.log(`Switching view to ${energyType} pool triggered by equation click...`); energyTypeSelect.value = energyType; showSelectedEnergyPool(); } } } else { console.warn(`Equation link target element not found: #${targetId}`); } } }
+    function handleEquationClick(event) { const target = event.target; if (target.classList.contains('equation-number') && target.dataset.targetId) { const targetId = target.dataset.targetId; const sourceElement = document.getElementById(targetId); if (sourceElement) { sourceElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); let elementToPulse = sourceElement; if (sourceElement.tagName === 'SPAN' && sourceElement.classList.contains('readonly-display')) { elementToPulse = sourceElement.closest('.energy-pool') || sourceElement; } else if (sourceElement.type === 'range') { elementToPulse = sourceElement.closest('.energy-slider-section') || sourceElement; } else if (sourceElement.classList.contains('modifier-value-input')) { elementToPulse = sourceElement.closest('.dynamic-box') || sourceElement; } // Special case for speed slider ID trigger
+            else if (targetId === 'speed-slider') {
+                 elementToPulse = document.getElementById('speed-slider-section') || sourceElement;
+            }
+             triggerAnimation(elementToPulse, 'pulse-source'); if (sourceElement.tagName === 'INPUT' && !sourceElement.readOnly && sourceElement.type !== 'range') { sourceElement.focus(); } const energyTypeMatch = targetId.match(/^([a-z]+)-(damage-per-power|energy-slider|max-multiplier)/); if (energyTypeMatch) { const energyType = energyTypeMatch[1]; if (ALL_ENERGY_TYPES.includes(energyType) && energyTypeSelect.value !== energyType) { console.log(`Switching view to ${energyType} pool triggered by equation click...`); energyTypeSelect.value = energyType; showSelectedEnergyPool(); } } } else { console.warn(`Equation link target element not found: #${targetId}`); } } }
 
     // --- Tab Switching Logic ---
     function showCharacterStatsView() { if (mainCalculatorContent) mainCalculatorContent.classList.add('hidden'); if (characterStatsScreen) characterStatsScreen.classList.remove('hidden'); if (mainTitle) mainTitle.textContent = 'Character Stats'; if (showCharacterStatsBtn) showCharacterStatsBtn.textContent = 'Energy Calculator'; if (characterStatsScreen) triggerAnimation(characterStatsScreen, 'fadeIn'); }
@@ -1567,7 +1770,7 @@
 
     // --- Event Listener Helper ---
     function handleStatChange() {
-        // Update Base AC/TR in stats panel display immediately
+        // Update Base AC/TR/Speed in stats panel display immediately
         updateStatsDisplay();
         // Recalculate all energy pools as base stats affect them
         ALL_ENERGY_TYPES.forEach(type => calculateAndResetEnergy(type));
@@ -1575,6 +1778,9 @@
         applyActiveFormEffects();
         // Update equation
         updateEquationDisplay();
+        // <<< ADDED Speed Slider Updates >>>
+        updateSpeedSliderVisibility(); // Show/hide slider based on new speed value
+        updateSpeedSliderDisplay();   // Update slider text (S: ..., D: ...)
     }
 
     // --- Ryoko Mode Logic ---
@@ -1788,8 +1994,8 @@
 
 
                     // Update UI
-                    renderFormList();       // Refresh the list in the stats panel
-                    populateFormDropdowns();    // Refresh dropdowns in energy pools
+                    renderFormList();        // Refresh the list in the stats panel
+                    populateFormDropdowns(); // Refresh dropdowns in energy pools
 
                     // If the deleted form was active for the currently viewed energy type,
                     // re-apply effects (which will now be 'None' or the default)
@@ -1829,6 +2035,7 @@
         if (charSoulHpInput) charSoulHpInput.value = '';
         if (charBaseAcInput) charBaseAcInput.value = '10';
         if (charBaseTrInput) charBaseTrInput.value = '5';
+        if (charSpeedInput) charSpeedInput.value = ''; // <<< Reset Speed Input
         if (ryokoCheckbox) ryokoCheckbox.checked = false;
         if (ryokoEquationInput) ryokoEquationInput.value = '';
         handleRyokoCheckboxChange();
@@ -1847,6 +2054,8 @@
         showSelectedEnergyPool(); // Show default pool (Ki)
         updateStatsDisplay(); // Update stats panel
         updateEquationDisplay();
+        updateSpeedSliderVisibility(); // <<< Update Speed Slider Visibility
+        updateSpeedSliderDisplay();   // <<< Update Speed Slider Display
     }
     function initializeLoadedStateUI() {
         console.log("Initializing UI based on loaded state...");
@@ -1855,13 +2064,14 @@
         renderFormList();
         populateFormDropdowns();
          if (mainCalculatorContent?.classList.contains('hidden')) {
-            showCharacterStatsView();
+             showCharacterStatsView();
          } else {
-            showCalculatorView();
+             showCalculatorView();
          }
-        showSelectedEnergyPool();
-        updateStatsDisplay();
-        updateEquationDisplay();
+        showSelectedEnergyPool(); // This also calls applyActiveFormEffects internally
+        // updateStatsDisplay(); // Called within applyState -> showSelectedEnergyPool -> applyActiveFormEffects
+        // updateEquationDisplay(); // Called within applyState -> showSelectedEnergyPool -> applyActiveFormEffects
+        // Speed slider visibility/display updates are handled within applyState now
     }
 
     // --- Event Listeners Setup ---
@@ -1880,8 +2090,8 @@
             }
         });
 
-        // Character Stat inputs listener (including Base AC/TR)
-        const characterStatInputs = [charBaseHealthInput, charVitalityInput, charSoulPowerInput, charSoulHpInput, charBaseAcInput, charBaseTrInput];
+        // <<< UPDATED Character Stat inputs listener (includes Speed) >>>
+        const characterStatInputs = [charBaseHealthInput, charVitalityInput, charSoulPowerInput, charSoulHpInput, charBaseAcInput, charBaseTrInput, charSpeedInput];
         characterStatInputs.forEach(input => { if (input) { input.addEventListener('input', handleStatChange); } });
 
         // Specific handling for Character Base Multiplier and Ryoko Mode
@@ -1894,8 +2104,6 @@
         if (dynamicModifiersContainer) {
              // Listener for dynamic modifier boxes (remove, type change, input)
              // Note: addListenersToModifierBox is called when a box is created, attaching direct listeners then.
-             // Delegation isn't strictly necessary here if addListenersToModifierBox covers everything.
-             // However, if you ever added elements inside .dynamic-box later, delegation would be useful.
         }
 
         if (energyPoolsContainer) {
@@ -1924,21 +2132,28 @@
         }
 
         if (slidersGrid) {
-             slidersGrid.addEventListener('input', (event) => {
-                 if (event.target.classList.contains('energy-slider')) {
+            slidersGrid.addEventListener('input', (event) => {
+                if (event.target.classList.contains('energy-slider')) {
+                    const slider = event.target;
+                    const currentType = slider.dataset.type;
+                    const activeAttack = activeAttacks[currentType] || null;
+                    let limitPercent = 100;
+                    if (activeAttack === 'super') limitPercent = 95;
+                    else if (activeAttack === 'ultimate') limitPercent = 90;
+                    if (parseInt(slider.value) > limitPercent) {
+                        slider.value = limitPercent;
+                    }
+                    updateSingleSliderDisplay(currentType);
+                    updateEquationDisplay();
+                }
+                 // <<< ADDED Speed Slider Listener >>>
+                 else if (event.target.id === 'speed-slider') {
                      const slider = event.target;
-                     const currentType = slider.dataset.type;
-                     const activeAttack = activeAttacks[currentType] || null;
-                     let limitPercent = 100;
-                     if (activeAttack === 'super') limitPercent = 95;
-                     else if (activeAttack === 'ultimate') limitPercent = 90;
-                     if (parseInt(slider.value) > limitPercent) {
-                         slider.value = limitPercent;
-                     }
-                     updateSingleSliderDisplay(currentType);
-                     updateEquationDisplay();
+                     // No attack reserve for speed, no limit check needed here
+                     updateSpeedSliderDisplay(); // Update display (S: ..., D: ...)
+                     updateEquationDisplay(); // Update main equation
                  }
-             });
+            });
         }
 
         // --- Auth buttons ---
@@ -2038,9 +2253,10 @@
 
 
     // --- Initialization Sequence ---
-    console.log("DOM Loaded, Firebase ready. Initializing Energy Calculator v11.1 (New Energies)...");
+    console.log("DOM Loaded, Firebase ready. Initializing Energy Calculator v11.2 (Speed Stat)...");
 
-    generateEnergySections(); // 1. Create the HTML elements needed
+    generateEnergySections(); // 1. Create the HTML elements for energy pools/sliders
+    // Speed slider structure is generated later if needed by generateSpeedSlider()
     setupEventListeners();    // 2. Attach listeners to elements ONCE
 
 
@@ -2078,7 +2294,8 @@
                  showMessage('Welcome! No saved state found, starting fresh.', 'info');
             } else {
                 console.log("Saved state loaded from Firebase for user.");
-                 initializeLoadedStateUI(); // Updates UI components to reflect loaded state
+                 // initializeLoadedStateUI(); // applyState now handles most UI updates needed after load
+                 // Key UI updates are now triggered within applyState itself
                  showMessage(`Welcome back, ${currentUser.displayName || 'User'}! State loaded.`, 'success');
             }
 
