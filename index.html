@@ -2379,18 +2379,18 @@ document.addEventListener('firebaseReady', async () => {
          // renderFormList();
          // renderActiveFormsSection();
     }
-    // --- Event Listeners Setup ---
+    // --- ---
     // NOTE: This function should be called ONLY ONCE after initial HTML generation and DOM references are set.
     function setupEventListeners() {
         console.log("Setting up event listeners...");
-
+        const slidersGrid = document.getElementById('sliders-grid');
         // --- Static element listeners ---
         if (energyTypeSelect) {
              energyTypeSelect.addEventListener('change', () => {
                  console.log('DROPDOWN CHANGED to:', energyTypeSelect.value); // Log for debugging
                  showSelectedEnergyPool();
                  // updateEquationDisplay(); // Called within showSelectedEnergyPool -> applyActiveFormEffects now
-             });
+             }); 
         }
         if (calculateBtn) {
              calculateBtn.addEventListener('click', () => {
@@ -2786,7 +2786,6 @@ function generateEnergySections() {
         // Speed slider is generated separately by generateSpeedSlider() when needed
     }
 
-    console.log("Event listeners setup complete.");
 
     // 1. Generate base DOM structure for energy sections (pools/sliders)
     generateEnergySections();
