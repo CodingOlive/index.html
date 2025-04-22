@@ -2790,8 +2790,8 @@ function generateEnergySections() {
 
     // 1. Generate base DOM structure for energy sections (pools/sliders)
     generateEnergySections();
-    // Note: Speed slider DOM is generated only *if needed* by updateSpeedSliderVisibility,
-    // which is called later during initialization or state application.
+ // 1. Generate base DOM structure
+    console.log('>>> Checking slidersGrid right after generate:', document.getElementById('sliders-grid')); // <<< ADD THIS LINE
 
     // 2. Attach all static and dynamic event listener
     setupEventListeners();
