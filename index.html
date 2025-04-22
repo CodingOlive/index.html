@@ -267,23 +267,29 @@
         .form-creator-input { @apply focus:ring-form-creator-focus; }
         .form-creator-button { @apply px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-150 ease-in-out text-sm font-semibold shadow-sm active:scale-95; }
 
-        /* Form List Styles */
+        /* Form List Styles (Stats Panel) */
         .form-list-group h4 { @apply text-sm font-semibold text-gray-600 mt-2 mb-1 border-b border-gray-200 pb-1; }
-        /* Updated form-list-item style to accommodate delete button */
         .form-list-item {
              @apply inline-block text-xs bg-gray-100 text-gray-700 border border-gray-300 rounded px-1.5 py-0.5 mr-1 mb-1;
         }
 
-        /* Styling for the new Active Forms section */
+        /* Active Forms Section Styling (Main Area) */
         #active-forms-section {
             @apply border-l-purple-400 bg-purple-50/50; /* Match color with form creator, add slight bg */
         }
         #active-forms-list label:hover {
-             @apply text-purple-700 cursor-pointer;
+             @apply text-purple-700 cursor-pointer; /* Indicate interactivity */
         }
         #active-forms-list {
-             @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4 gap-y-1; /* Grid layout for checkboxes */
+             @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-1; /* Responsive grid layout */
         }
+        #active-forms-list > div {
+             @apply min-w-0; /* Prevent grid blowout */
+        }
+         #active-forms-list label {
+             @apply truncate; /* Truncate long form names */
+         }
+
 
     </style>
 </head>
@@ -323,9 +329,10 @@
                     Active Forms
                     <span class="flex-grow h-px bg-gray-200 ml-3"></span>
                 </h3>
-                <div id="active-forms-list" class="space-y-2 max-h-48 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4 gap-y-1"> <p class="text-gray-500 text-sm col-span-full">No forms created yet.</p> </div>
+                <div id="active-forms-list" class="space-y-2 max-h-48 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-1"> <p class="text-gray-500 text-sm col-span-full">No forms created yet.</p> </div>
             </div>
-            <div class="form-group mb-5"> <label for="energy-type" class="lbl">Energy Type Focus:</label> <select id="energy-type" aria-label="Select focused energy type" class="slct focus:ring-success">
+            <div class="form-group mb-5">
+                <label for="energy-type" class="lbl">Energy Type Focus:</label> <select id="energy-type" aria-label="Select focused energy type" class="slct focus:ring-success">
                     <option value="ki">Ki Energy</option>
                     <option value="nen">Nen Energy</option>
                     <option value="chakra">Chakra Energy</option>
@@ -356,12 +363,12 @@
                </div>
                <p id="attack-status-message" class="text-xs text-gray-500 mt-2 min-h-[1.25rem]"></p>
               </div>
-                <div id="all-sliders-container" class="bg-white p-5 mb-5 rounded-lg shadow-sm">
+              <div id="all-sliders-container" class="bg-white p-5 mb-5 rounded-lg shadow-sm">
                  <h3 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Usage Sliders</h3>
                  <div id="sliders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                      </div>
               </div>
-                <button id="calculate-btn" aria-label="Calculate final damage value" class="w-full px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 ease-in-out text-lg font-semibold shadow-md mb-5 active:scale-95">
+              <button id="calculate-btn" aria-label="Calculate final damage value" class="w-full px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 ease-in-out text-lg font-semibold shadow-md mb-5 active:scale-95">
                Calculate Damage
               </button>
 
@@ -386,7 +393,7 @@
                </div>
               </div>
 
-          </div> 
+          </div>
             <div id="stats-panel" class="stats-panel md:w-1/4 lg:w-1/5 p-5 bg-white rounded-lg shadow-sm self-start sticky top-6 border-stats-border">
               <h3 id="stats-panel-header" class="stats-panel-header text-xl font-semibold mb-4 flex items-center text-stats-header">
                   Stats
@@ -438,7 +445,7 @@
                </div>
               </div>
           </div> </div> </div> 
-    <div id="character-stats-screen" class="hidden bg-white p-6 rounded-lg shadow-md max-w-7xl mx-auto mt-6 border border-gray-200">
+<div id="character-stats-screen" class="hidden bg-white p-6 rounded-lg shadow-md max-w-7xl mx-auto mt-6 border border-gray-200">
       <div class="flex justify-between items-center mb-4 border-b pb-2">
           <h2 class="text-2xl font-bold text-gray-700">Character Stats</h2>
       </div>
@@ -586,7 +593,7 @@
           </div>
       </div>
   </div> 
-<template id="energy-pool-template">
+    <template id="energy-pool-template">
         <div class="energy-pool bg-gradient-to-br from-white p-5 mb-5 rounded-lg shadow-sm border-l-4" style="display: none;">
             <h3 class="text-xl font-semibold mb-4 flex items-center">
                 <span class="pool-title">Energy Pool Title</span>
@@ -641,7 +648,7 @@
         // === Your Specific Firebase Configuration ===
         // IMPORTANT: Replace "YOUR_API_KEY" with your actual Firebase API key!
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", // Replace with your actual API key
+            apiKey: "AIzaSyAbYQWbMQBHOdT-PxwIXeDFvLgEXlX7PhY", // Replace with your actual API key
             authDomain: "dndfortheboys-d88d9.firebaseapp.com",
             databaseURL: "https://dndfortheboys-d88d9-default-rtdb.firebaseio.com",
             projectId: "dndfortheboys-d88d9",
@@ -673,7 +680,7 @@
         console.log("Firebase Initialized (v9+ Modular with Auth)");
         document.dispatchEvent(new Event('firebaseReady'));
     </script>
-    <script>
+<script>
 document.addEventListener('firebaseReady', async () => {
     // --- DOM Element References ---
     const energyTypeSelect = document.getElementById('energy-type');
@@ -695,7 +702,7 @@ document.addEventListener('firebaseReady', async () => {
     const addDynamicBoxBtn = document.getElementById('add-dynamic-box');
     const baseDamageInput = document.getElementById('base-damage');
     const baseMultiplierInput = document.getElementById('base-multiplier');
-    const formMultiplierInput = document.getElementById('form-multiplier'); // Main display, now readonly
+    const formMultiplierInput = document.getElementById('form-multiplier'); // Main display, read-only
     const attackCompressionPointsInput = document.getElementById('attack-compression-points');
     const statsPanel = document.getElementById('stats-panel');
     const statsPanelHeader = document.getElementById('stats-panel-header');
@@ -718,7 +725,6 @@ document.addEventListener('firebaseReady', async () => {
     const superAttackBtn = document.getElementById('super-attack-btn');
     const ultimateAttackBtn = document.getElementById('ultimate-attack-btn');
     const attackStatusMessage = document.getElementById('attack-status-message');
-    // Tab Switching References
     const showCharacterStatsBtn = document.getElementById('show-character-stats-btn');
     const characterStatsScreen = document.getElementById('character-stats-screen');
     const mainCalculatorContent = document.getElementById('main-calculator-content');
@@ -758,7 +764,7 @@ document.addEventListener('firebaseReady', async () => {
     // Form List Container (Stats Panel)
     const formListContainer = document.getElementById('formListContainer');
     // Active Forms Section (NEW - Main Area)
-    const activeFormsListContainer = document.getElementById('active-forms-list');
+    const activeFormsListContainer = document.getElementById('active-forms-list'); // <<< New Ref
     // Stats Panel AC/TR/Speed Displays
     const statFormAcBonusEl = document.getElementById('stat-form-ac-bonus');
     const statFormTrBonusEl = document.getElementById('stat-form-tr-bonus');
@@ -779,13 +785,18 @@ document.addEventListener('firebaseReady', async () => {
     const ATTACK_RESERVE_COLOR = '#fed7aa';
     const SLIDER_TRACK_COLOR = '#e5e7eb';
     const DEFAULT_RYOKO_EQUATION = '((11250000 * 19 * 10 * 25 * 5 * 10 * 5 * 470) / 2) * 110';
-    let characterForms = []; // Holds all defined form objects { id, name, formMultiplier, poolMaxMultiplier, energyType, affectsResistances, acBonus, trBonus, enableFormBuff, formBuffValue, formBuffType, enablePoolBuff, poolBuffValue, poolBuffType }
 
-    // NEW: State for active forms and combined bonuses
+    // Holds all defined form objects: { id, name, formMultiplier, poolMaxMultiplier, energyType, affectsResistances, acBonus, trBonus, enableFormBuff, formBuffValue, formBuffType, enablePoolBuff, poolBuffValue, poolBuffType }
+    let characterForms = [];
+
+    // State for active forms and combined bonuses derived from them
     let calculatorState = {
         activeFormIds: [], // Array of IDs for checked forms
-        appliedAcBonus: 0,      // Combined AC from active forms
-        appliedTrueResistanceBonus: 0 // Combined TR from active forms
+        appliedAcBonus: 0,      // Combined AC from active forms, updated by applyActiveFormEffects
+        appliedTrueResistanceBonus: 0, // Combined TR from active forms, updated by applyActiveFormEffects
+        activeView: 'calculator' // Track current view ('calculator' or 'stats')
+        // Selected Energy Type Focus is read directly from dropdown
+        // Slider percentages are read directly or saved separately in gatherState/applyState
     };
 
     const ENERGY_TYPE_DETAILS = { /* ... Unchanged ... */
@@ -807,16 +818,14 @@ document.addEventListener('firebaseReady', async () => {
     function formatStatNumber(num) { if (typeof num !== 'number' || isNaN(num)) return '0'; const absNum = Math.abs(num); if (absNum >= 1e9) { return num.toExponential(2); } if (absNum >= 1e6) { let shortNum = num / 1e6; let formatted = shortNum.toLocaleString('en-US', { minimumFractionDigits: absNum < 10e6 ? 2 : 1, maximumFractionDigits: absNum < 10e6 ? 2 : 1 }); formatted = formatted.replace(/\.0$/, ''); return formatted + 'M'; } if (absNum >= 1e3) { let shortNum = num / 1e3; let formatted = shortNum.toLocaleString('en-US', { minimumFractionDigits: absNum < 10e3 ? 2 : 1, maximumFractionDigits: absNum < 10e3 ? 2 : 1 }); formatted = formatted.replace(/\.0$/, ''); return formatted + 'K'; } if (absNum < 1000) { return num.toLocaleString('en-US', { maximumFractionDigits: 2 }); } return num.toLocaleString('en-US'); }
     function parseFormattedNumber(str) { if (typeof str !== 'string' && typeof str !== 'number') return 0; if (typeof str === 'number') return isNaN(str) ? 0 : str; str = str.trim().toUpperCase().replace(/,/g, ''); if (str.includes('E')) { const num = parseFloat(str); return isNaN(num) ? 0 : num; } const lastChar = str.slice(-1); const numPart = parseFloat(str.slice(0, -1)); const fullNum = parseFloat(str); if (!isNaN(fullNum) && !['K', 'M', 'B', 'T', 'Q'].includes(lastChar)) { return fullNum; } if (isNaN(numPart) && ['K', 'M', 'B', 'T', 'Q'].includes(lastChar)) return 0; switch (lastChar) { case 'K': return numPart * 1e3; case 'M': return numPart * 1e6; case 'B': return numPart * 1e9; case 'T': return numPart * 1e12; case 'Q': return numPart * 1e15; default: return isNaN(fullNum) ? 0 : fullNum; } }
     function escapeHtml(unsafe) { if (typeof unsafe !== 'string') return ''; return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
-// --- Energy Pool Logic ---
+    // --- Energy Pool Logic ---
     function getEnergyElements(type) {
         if (!ALL_ENERGY_TYPES.includes(type)) {
-            console.error("Invalid energy type requested:", type);
+            // console.error("Invalid energy type requested:", type); // Reduced console noise
             return null;
         }
         const poolDiv = document.getElementById(`${type}-pool`);
         if (!poolDiv) {
-            // Don't log error if pool just hasn't been generated yet during init
-            // console.warn(`Pool div not found for type: ${type}`);
             return null;
         }
         // Note: Removed formSelectContainer and formSelect from returned object
@@ -868,10 +877,10 @@ document.addEventListener('firebaseReady', async () => {
             }
         }
     }
-    function calculateAndResetEnergy(type) { // For Energy Pools
+    function calculateAndResetEnergy(type) { // For Energy Pools - Called by showSelectedEnergyPool and handleStatChange
         const els = getEnergyElements(type);
         if (!els?.baseMaxEnergyEl || !els?.maxMultiplierEl || !els?.totalEnergyEl || !els?.currentEnergyEl) {
-            // console.error(`Elements missing for energy calculation/reset: ${type}`);
+             // console.warn(`Elements missing for energy calc/reset: ${type}`); // Reduce noise
             return 0; // Return 0 if elements not ready
         }
 
@@ -881,36 +890,36 @@ document.addEventListener('firebaseReady', async () => {
         // Read Character Base Multiplier (potentially overridden by Ryoko)
         const characterBaseMultiplier = safeParseFloat(charBaseMultiplierInput.value, 1);
 
-        // *** Pool Max Multiplier is now set by applyActiveFormEffects ***
-        // We still read the current value from the input for calculation,
-        // but don't reset it here based on form selection anymore.
+        // Pool Max Multiplier is now set externally by applyActiveFormEffects into the input.
+        // We just read the input's current value here for calculation.
         const poolMaxMultiplier = safeParseFloat(els.maxMultiplierEl.value, 1);
 
         const totalEnergy = baseMaxEnergy * characterBaseMultiplier * poolMaxMultiplier;
         if (els.totalEnergyEl) els.totalEnergyEl.textContent = formatStatNumber(totalEnergy);
-        // Only reset current energy if the total energy is positive. Avoids NaN issues.
+
+        // Adjust current energy: Cap it at the new total, or set to 0 if total is 0.
         if (els.currentEnergyEl) {
              const currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent);
-             // Reset to total only if total > 0, otherwise set to 0
-             // Also cap existing current energy if total decreased.
-             els.currentEnergyEl.textContent = formatStatNumber(totalEnergy > 0 ? Math.min(currentEnergy, totalEnergy) : 0);
-             // If we ALWAYS want to reset to max on recalc (like after form change):
-             // els.currentEnergyEl.textContent = formatStatNumber(totalEnergy);
+             const newTotal = totalEnergy; // Use the calculated total
+             // Set current to the minimum of its previous value and the new total, but not less than 0.
+             els.currentEnergyEl.textContent = formatStatNumber(Math.max(0, Math.min(currentEnergy, newTotal)));
+             // If you always want to reset to max when recalculating (e.g., after form change):
+             // els.currentEnergyEl.textContent = formatStatNumber(newTotal);
         }
 
-
-        updateSliderVisibility(type);
-        updateSingleSliderDisplay(type);
+        updateSliderVisibility(type); // Ensure slider visibility matches if total energy became 0
+        updateSingleSliderDisplay(type); // Update slider text based on potentially changed current energy
         return totalEnergy;
     }
     function regenerateEnergy(type) { const els = getEnergyElements(type); if (!els?.totalEnergyEl || !els?.currentEnergyEl || !els?.regenPercentEl) { console.error(`Elements missing for energy regeneration: ${type}`); return; } const totalEnergy = parseFormattedNumber(els.totalEnergyEl.textContent); let currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent); const regenPercent = safeParseFloat(els.regenPercentEl.value, 0); if (totalEnergy <= 0) { showMessage('Total Energy must be positive (check character stats and multiplier) to regenerate.', 'error'); return; } if (regenPercent <= 0) { showMessage('Regen Rate must be positive.', 'error'); return; } const regenAmount = totalEnergy * (regenPercent / 100); let newEnergy = Math.min(currentEnergy + regenAmount, totalEnergy); els.currentEnergyEl.textContent = formatStatNumber(newEnergy); showMessage(`${formatStatNumber(regenAmount)} ${type} regenerated. Current: ${formatStatNumber(newEnergy)}`, 'success'); triggerAnimation(els.currentEnergyEl, 'flash-green'); updateSingleSliderDisplay(type); updateStatsDisplay(); }
-// --- Kaioken Styling --- / --- Health Update ---
+    // --- Kaioken Styling --- / --- Health Update ---
     function applyKaiokenStyle() { if (!statsPanel || !statsPanelHeader) return; statsPanel.classList.remove('border-stats-border'); statsPanel.classList.add('border-kaioken-border', 'animate-kaioken-glow'); statsPanelHeader.classList.remove('text-stats-header'); statsPanelHeader.classList.add('text-kaioken-header'); }
     function removeKaiokenStyle() { if (!statsPanel || !statsPanelHeader) return; statsPanel.classList.add('border-stats-border'); statsPanel.classList.remove('border-kaioken-border', 'animate-kaioken-glow'); statsPanelHeader.classList.add('text-stats-header'); statsPanelHeader.classList.remove('text-kaioken-header'); }
     function updateCurrentHealthDisplay() { if (!currentHealthEl || !maxHealthInput) return; const maxHealth = safeParseFloat(maxHealthInput.value, 0); let currentHealth = parseFormattedNumber(currentHealthEl.textContent); if ((energyTypeSelect.value === 'ki' && kaiokenCheckbox.checked) || currentHealth === -1 || currentHealth > maxHealth || currentHealthEl.textContent.trim() === '' || currentHealthEl.textContent === '0') { currentHealthEl.textContent = formatStatNumber(maxHealth); } }
     function regenerateHealth() { if (!maxHealthInput || !currentHealthEl) { console.error("Health elements missing for regeneration."); return; } const maxHealth = safeParseFloat(maxHealthInput.value, 0); currentHealthEl.textContent = formatStatNumber(maxHealth); showMessage('Health fully regenerated!', 'success'); triggerAnimation(currentHealthEl, 'flash-green'); }
 // --- Show/Hide Logic & Pool Animation ---
     function showSelectedEnergyPool() {
+        console.log("--- Running showSelectedEnergyPool ---"); // Debug log
         const selectedType = energyTypeSelect.value;
         const details = ENERGY_TYPE_DETAILS[selectedType];
         let newlyVisiblePool = null;
@@ -933,7 +942,7 @@ document.addEventListener('firebaseReady', async () => {
 
         // Apply active form effects BEFORE calculating energy for the selected type
         // This ensures the correct pool multipliers are considered by calculateAndResetEnergy
-        applyActiveFormEffects();
+        applyActiveFormEffects(); // This now reads global state and sets relevant multipliers
 
         // Calculate and reset energy for the selected type (uses multipliers set by applyActiveFormEffects)
         calculateAndResetEnergy(selectedType);
@@ -941,6 +950,7 @@ document.addEventListener('firebaseReady', async () => {
         // Show the selected pool
         const poolToShowEls = getEnergyElements(selectedType);
         if (poolToShowEls?.poolDiv && details) {
+            console.log("   Attempting to show pool div:", poolToShowEls.poolDiv.id); // Debug log
             poolToShowEls.poolDiv.style.display = 'block';
             newlyVisiblePool = poolToShowEls.poolDiv;
             poolToShowEls.poolDiv.classList.add('animate__animated', 'animate__fadeIn');
@@ -963,6 +973,8 @@ document.addEventListener('firebaseReady', async () => {
                 }
                 poolAnimationTimeoutId = null;
             }, 5000); // 5 second pulse duration
+        } else {
+            console.error("   Could not find pool elements or details for:", selectedType); // Debug log
         }
 
         // Kaioken visibility (unchanged)
@@ -988,9 +1000,9 @@ document.addEventListener('firebaseReady', async () => {
         updateSliderLimitAndStyle(selectedType); // Handles reserve gradients on energy sliders
         updateStatsDisplay(); // Update general stats display (like current energy)
         updateEquationDisplay(); // Update equation display
-
+        console.log("--- Finished showSelectedEnergyPool ---"); // Debug log
     }
-// --- Attack Logic ---
+    // --- Attack Logic ---
     function updateAttackButtonStates(type) { const currentAttack = activeAttacks[type] || null; superAttackBtn.classList.toggle('active', currentAttack === 'super'); ultimateAttackBtn.classList.toggle('active', currentAttack === 'ultimate'); let statusClasses = 'text-xs mt-2 min-h-[1.25rem]'; if (currentAttack === 'super') { attackStatusMessage.textContent = `Super Attack active for ${ENERGY_TYPE_DETAILS[type]?.name || type}. Slider limited to 95%.`; attackStatusMessage.className = `${statusClasses} text-blue-600`; } else if (currentAttack === 'ultimate') { attackStatusMessage.textContent = `Ultimate Attack active for ${ENERGY_TYPE_DETAILS[type]?.name || type}. Slider limited to 90%.`; attackStatusMessage.className = `${statusClasses} text-purple-600`; } else { attackStatusMessage.textContent = ''; attackStatusMessage.className = `${statusClasses} text-gray-500`; } }
     function updateSliderLimitAndStyle(type) { const els = getEnergyElements(type); if (!els?.energySlider) return; const slider = els.energySlider; const activeAttack = activeAttacks[type] || null; let limitPercent = 100; let gradientStyle = `linear-gradient(to right, ${SLIDER_TRACK_COLOR} 100%, ${ATTACK_RESERVE_COLOR} 100%)`; if (activeAttack === 'super') { limitPercent = 95; gradientStyle = `linear-gradient(to right, ${SLIDER_TRACK_COLOR} ${limitPercent}%, ${ATTACK_RESERVE_COLOR} ${limitPercent}%)`; } else if (activeAttack === 'ultimate') { limitPercent = 90; gradientStyle = `linear-gradient(to right, ${SLIDER_TRACK_COLOR} ${limitPercent}%, ${ATTACK_RESERVE_COLOR} ${limitPercent}%)`; } slider.style.background = gradientStyle; if (parseInt(slider.value) > limitPercent) { slider.value = limitPercent; } updateSingleSliderDisplay(type); }
     function handleAttackButtonClick(event) { const button = event.currentTarget; const attackType = button.dataset.attackType; const selectedEnergyType = energyTypeSelect.value; const currentAttackForType = activeAttacks[selectedEnergyType] || null; const newAttackState = (currentAttackForType === attackType) ? null : attackType; activeAttacks[selectedEnergyType] = newAttackState; updateAttackButtonStates(selectedEnergyType); updateSliderLimitAndStyle(selectedEnergyType); triggerAnimation(button, 'pulse'); }
@@ -1125,6 +1137,8 @@ document.addEventListener('firebaseReady', async () => {
         const baseSpeed = safeParseFloat(charSpeedInput?.value, 0);
 
         if (!slider || !valueDisplay || !charSpeedInput) {
+            // Don't spam console if slider just hasn't been generated yet
+            // console.warn("Speed slider elements not found for display update.");
             return; // Exit if elements aren't ready
         }
 
@@ -1150,7 +1164,7 @@ document.addEventListener('firebaseReady', async () => {
     function renderActiveFormsSection() {
         const container = document.getElementById('active-forms-list');
         if (!container) {
-             console.error("Active forms container not found.");
+             console.error("Active forms container not found (#active-forms-list).");
              return;
         }
         container.innerHTML = ''; // Clear previous checkboxes
@@ -1177,7 +1191,7 @@ document.addEventListener('firebaseReady', async () => {
             checkbox.value = form.id;
             checkbox.checked = isChecked;
             checkbox.className = 'h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 flex-shrink-0'; // Prevent checkbox shrinking
-            checkbox.addEventListener('change', handleActiveFormChange); // Add listener
+            checkbox.addEventListener('change', handleActiveFormChange); // Add listener directly
 
             const label = document.createElement('label');
             label.htmlFor = checkbox.id;
@@ -1185,7 +1199,11 @@ document.addEventListener('firebaseReady', async () => {
             // Allow label to truncate if needed
             label.className = 'text-sm text-gray-700 select-none truncate hover:text-purple-700 cursor-pointer';
             // Add tooltip showing form details (important now with buffs)
-            label.title = `Form Mult: ${formatSimpleNumber(form.formMultiplier)}, Pool Mult: ${formatSimpleNumber(form.poolMaxMultiplier)}${form.energyType !== 'None' ? ` (${form.energyType})` : ''}${form.affectsResistances ? `, AC: ${formatSimpleNumber(form.acBonus)}, TR: ${formatSimpleNumber(form.trueResistanceBonus)}` : ''}`;
+             let tooltip = `Form Mult: ${formatSimpleNumber(form.formMultiplier)}, Pool Mult: ${formatSimpleNumber(form.poolMaxMultiplier)}${form.energyType !== 'None' ? ` (${form.energyType})` : ''}${form.affectsResistances ? `, AC: ${formatSimpleNumber(form.acBonus)}, TR: ${formatSimpleNumber(form.trueResistanceBonus)}` : ''}`;
+             if (form.enableFormBuff) tooltip += ` | FM Buff: ${form.formBuffType === 'add' ? '+' : 'x'}${form.formBuffValue}/calc`;
+             if (form.enablePoolBuff) tooltip += ` | PM Buff: ${form.poolBuffType === 'add' ? '+' : 'x'}${form.poolBuffValue}/calc`;
+             label.title = tooltip;
+
 
             div.appendChild(checkbox);
             div.appendChild(label);
@@ -1219,7 +1237,6 @@ document.addEventListener('firebaseReady', async () => {
         // Also update equation display when active forms change
         updateEquationDisplay();
     }
-
     // REWRITTEN: Applies combined effects from globally selected forms
     function applyActiveFormEffects() {
         console.log("Applying active form effects...");
@@ -1228,6 +1245,9 @@ document.addEventListener('firebaseReady', async () => {
         let combinedAcBonus = 0;
         let combinedTrBonus = 0;
 
+        // Initialize pool multipliers to 1 for all types
+        ALL_ENERGY_TYPES.forEach(type => { combinedPoolMultipliers[type] = 1; });
+
         // Ensure activeFormIds exists
         const activeIds = calculatorState.activeFormIds || [];
         console.log("Processing active form IDs:", activeIds);
@@ -1235,7 +1255,7 @@ document.addEventListener('firebaseReady', async () => {
         activeIds.forEach(formId => {
             const form = characterForms.find(f => f.id === formId);
             if (form) {
-                console.log(`Processing form: ${form.name}`);
+                // console.log(`Processing form: ${form.name}`); // Optional log
                 // Combine Form Multiplier (Multiplicative)
                 combinedFormMultiplier *= form.formMultiplier;
 
@@ -1262,29 +1282,39 @@ document.addEventListener('firebaseReady', async () => {
             }
         });
 
-        console.log("Combined Form Multiplier:", combinedFormMultiplier);
-        console.log("Combined Pool Multipliers:", combinedPoolMultipliers);
-        console.log("Combined AC Bonus:", combinedAcBonus);
-        console.log("Combined TR Bonus:", combinedTrBonus);
-
         // --- Apply Combined Effects to UI and State ---
 
         // Apply combined Form Multiplier to the main input
         if (formMultiplierInput) {
-            formMultiplierInput.value = formatSimpleNumber(combinedFormMultiplier);
-            // Only pulse if value changed significantly (optional visual cue)
-            // triggerAnimation(formMultiplierInput, 'pulse-source');
+            const currentVal = safeParseFloat(formMultiplierInput.value);
+            const newVal = safeParseFloat(combinedFormMultiplier);
+            if (currentVal !== newVal) {
+                 formMultiplierInput.value = formatSimpleNumber(newVal);
+                 triggerAnimation(formMultiplierInput, 'pulse-source'); // Pulse effect on change
+                 console.log("Applied combined Form Multiplier:", newVal);
+            }
         }
 
-        // Apply combined Pool Max Multipliers to respective energy pool inputs
+        // Apply combined Pool Max Multipliers to respective energy pool inputs & Recalculate Energy
         ALL_ENERGY_TYPES.forEach(type => {
              const els = getEnergyElements(type);
              if (els && els.maxMultiplierEl) {
                   // Use the specific combined multiplier for this type, or default to 1 if none applied
                   const applicableMultiplier = combinedPoolMultipliers[type] || 1;
-                  els.maxMultiplierEl.value = formatSimpleNumber(applicableMultiplier);
-                  // Recalculate energy for this pool AFTER setting the multiplier
-                  calculateAndResetEnergy(type);
+                  const currentPoolMultVal = safeParseFloat(els.maxMultiplierEl.value);
+                  const newPoolMultVal = safeParseFloat(applicableMultiplier);
+
+                  if (currentPoolMultVal !== newPoolMultVal) {
+                       els.maxMultiplierEl.value = formatSimpleNumber(newPoolMultVal);
+                       console.log(`Applied Pool Max Multiplier ${newPoolMultVal} to ${type}`);
+                       // Recalculate energy for this pool AFTER setting the multiplier
+                       calculateAndResetEnergy(type);
+                       triggerAnimation(els.maxMultiplierEl, 'pulse-source'); // Pulse effect on change
+                  } else {
+                      // Even if multiplier didn't change, ensure energy calculation uses latest base stats
+                      // This is important if base stats changed but forms didn't
+                      calculateAndResetEnergy(type);
+                  }
              }
         });
 
@@ -1293,12 +1323,12 @@ document.addEventListener('firebaseReady', async () => {
          calculatorState.appliedAcBonus = combinedAcBonus;
          calculatorState.appliedTrueResistanceBonus = combinedTrBonus;
 
-         // Update dependent UI (stats panel will read from calculatorState)
-         updateStatsDisplay(); // This will now show correct AC/TR totals based on calculatorState
-         // Equation display is updated separately when needed
+         // Update stats display AFTER applying all effects and recalculating pools
+         updateStatsDisplay();
+         // Equation display is updated separately when forms change via handleActiveFormChange or other triggers
+         console.log("Finished applying active form effects.");
     }
-
-    // Renders the list in the Stats Panel (content unchanged, but call points might change)
+    // Renders the list in the Stats Panel (UPDATED tooltip for buffs)
     function renderFormList() {
         if (!formListContainer) return;
         formListContainer.innerHTML = ''; // Clear current list
@@ -1391,7 +1421,7 @@ document.addEventListener('firebaseReady', async () => {
 
                     // Update UI
                     renderFormList();           // Refresh the list in the stats panel
-                    renderActiveFormsSection(); // Refresh the checkboxes in the main section
+                    renderActiveFormsSection(); // <<< Refresh the checkboxes in the main section
                     applyActiveFormEffects();   // Re-apply effects based on potentially changed active forms
                     updateEquationDisplay();    // Update equation based on new effects
 
@@ -1403,6 +1433,7 @@ document.addEventListener('firebaseReady', async () => {
     // --- Calculation Logic ---
 
     // Updates the text display below an energy slider (e.g., E: 100, D: 100.00)
+    // This is also used by the speed slider display update function.
     function updateSingleSliderDisplay(type) {
          const els = getEnergyElements(type);
          if (!els?.energySlider || !els?.sliderValueDisplay || !els?.currentEnergyEl || !els?.damagePerPowerEl) {
@@ -1430,7 +1461,6 @@ document.addEventListener('firebaseReady', async () => {
          percentSpan.textContent = `${sliderPercent}%`; // Display the actual slider %
          detailsSpan.textContent = `(E: ${formatStatNumber(actualEnergyUsed)}, D: ${formatStatNumber(extraDamage)})`;
      }
-
     // Main calculation function
     function performCalculation() {
         showLoading(true);
@@ -1438,7 +1468,7 @@ document.addEventListener('firebaseReady', async () => {
             let finalDamage = 0;
             let healthDepleted = false;
             let speedDamage = 0; // Initialize speedDamage for this calculation
-            let formsToUpdateForBuffs = []; // Track which forms were active and might need buffs
+            // We'll apply buffs at the end, no need to track specific forms here initially
 
             try {
                 // --- 1. Base Damage Calculation ---
@@ -1456,6 +1486,7 @@ document.addEventListener('firebaseReady', async () => {
                     compressionMultiplierValue = Math.max(1, (compressionPoints * 1.5) + (Math.floor(compressionPoints / 10) * 3));
                 }
                 finalDamage = baseDamagePart * compressionMultiplierValue;
+                console.log(`After Base/Form/Compression: ${finalDamage}`); // Debug Log
 
                 // --- 2. Apply Dynamic Multiplicative Factors ---
                 document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach(modifierDiv => {
@@ -1463,9 +1494,13 @@ document.addEventListener('firebaseReady', async () => {
                     const typeOption = modifierDiv.querySelector('.modifier-type-option.active');
                     if (valueInput && typeOption && typeOption.dataset.value === 'multiplicative') {
                         const modifierValue = safeParseFloat(valueInput.value, 1);
-                        finalDamage *= modifierValue;
+                         if (modifierValue !== 1) { // Only log if it changes something
+                            console.log(`Applying Multiplicative Modifier: x${modifierValue}`); // Debug Log
+                            finalDamage *= modifierValue;
+                         }
                     }
                 });
+                console.log(`After Multiplicative Mods: ${finalDamage}`); // Debug Log
 
                 // --- 3. Calculate and Add Energy Damage (and deplete energy) ---
                 let totalEnergyUsedFromSliders = 0;
@@ -1482,37 +1517,45 @@ document.addEventListener('firebaseReady', async () => {
 
                         if (effectivePercent > 0) {
                             const currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent);
-                            const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1);
-                            const energyUsedThisType = currentEnergy * (effectivePercent / 100);
-                            const actualEnergyUsed = Math.min(energyUsedThisType, currentEnergy);
-                            const extraDamageThisType = actualEnergyUsed * damagePerPower;
+                            if (currentEnergy > 0) { // Only calculate if there's energy to use
+                                const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1);
+                                const energyUsedThisType = currentEnergy * (effectivePercent / 100);
+                                const actualEnergyUsed = Math.min(energyUsedThisType, currentEnergy);
+                                const extraDamageThisType = actualEnergyUsed * damagePerPower;
 
-                            totalEnergyUsedFromSliders += actualEnergyUsed;
-                            totalExtraDamageFromEnergy += extraDamageThisType;
+                                totalEnergyUsedFromSliders += actualEnergyUsed;
+                                totalExtraDamageFromEnergy += extraDamageThisType;
+                                console.log(`Energy Damage (${type}): Used ${actualEnergyUsed}, Added ${extraDamageThisType}`); // Debug Log
 
-                            // Deplete energy
-                            let newCurrentEnergyThisType = Math.max(0, currentEnergy - actualEnergyUsed);
-                            els.currentEnergyEl.textContent = formatStatNumber(newCurrentEnergyThisType);
-                            if (newCurrentEnergyThisType < currentEnergy) {
-                                triggerAnimation(els.currentEnergyEl, 'flash-red');
+                                // Deplete energy
+                                let newCurrentEnergyThisType = Math.max(0, currentEnergy - actualEnergyUsed);
+                                els.currentEnergyEl.textContent = formatStatNumber(newCurrentEnergyThisType);
+                                if (newCurrentEnergyThisType < currentEnergy) {
+                                    triggerAnimation(els.currentEnergyEl, 'flash-red');
+                                }
+                                updateSingleSliderDisplay(type); // Update display after depletion
                             }
-                            updateSingleSliderDisplay(type); // Update display after depletion
                         }
                     }
                 });
                 finalDamage += totalExtraDamageFromEnergy; // Add energy damage
-
-                // --- 4. Apply Dynamic Additive Factors ---
+                console.log(`After Energy Damage: ${finalDamage}`); // Debug Log
+            // --- 4. Apply Dynamic Additive Factors ---
                 document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach(modifierDiv => {
                     const valueInput = modifierDiv.querySelector('.modifier-value-input');
                     const typeOption = modifierDiv.querySelector('.modifier-type-option.active');
                     if (valueInput && typeOption && typeOption.dataset.value === 'additive') {
                         const modifierValue = safeParseFloat(valueInput.value, 0);
-                        finalDamage += modifierValue;
+                        if (modifierValue !== 0) { // Only log if it changes something
+                            console.log(`Applying Additive Modifier: +${modifierValue}`); // Debug Log
+                            finalDamage += modifierValue;
+                        }
                     }
                 });
+                 console.log(`After Additive Mods: ${finalDamage}`); // Debug Log
 
                 // --- 5. Calculate and Add Speed Damage ---
+                speedDamage = 0; // Reset for this calculation
                 const speedSlider = document.getElementById('speed-slider');
                 const baseSpeed = safeParseFloat(charSpeedInput?.value, 0);
                 if (speedSlider && baseSpeed > 0) {
@@ -1521,12 +1564,14 @@ document.addEventListener('firebaseReady', async () => {
                         const speedUsed = baseSpeed * (sliderPercent / 100);
                         speedDamage = speedUsed * 1; // 1:1 conversion
                         finalDamage += speedDamage; // Add speed damage
+                         console.log(`Speed Damage: Used ${speedUsed}, Added ${speedDamage}`); // Debug Log
                     }
                 }
+                 console.log(`After Speed Damage: ${finalDamage}`); // Debug Log
 
                 // --- 6. Apply Kaioken Health Strain ---
                 healthDepleted = false;
-                if (energyType === 'ki' && kaiokenCheckbox.checked) {
+                if (energyType === 'ki' && kaiokenCheckbox.checked) { // Only check if focused energy is Ki
                     const currentHealthVal = parseFormattedNumber(currentHealthEl.textContent);
                     if (currentHealthVal > 0) {
                         const maxHealth = safeParseFloat(maxHealthInput.value, 0);
@@ -1535,98 +1580,135 @@ document.addEventListener('firebaseReady', async () => {
                             const strainCost = maxHealth * (kaiokenStrainPercent / 100);
                             let newHealth = Math.max(0, currentHealthVal - strainCost);
                             currentHealthEl.textContent = formatStatNumber(newHealth);
+                             console.log(`Kaioken Strain: Cost ${strainCost}, New Health ${newHealth}`); // Debug Log
                             if (newHealth < currentHealthVal) { triggerAnimation(currentHealthEl, 'flash-red'); }
-                            if (newHealth === 0) { healthDepleted = true; }
+                            if (newHealth === 0) { healthDepleted = true; console.warn("Health depleted by Kaioken!"); }
                         }
                     }
                 }
 
                 // --- 7. Update Overall Stats ---
+                // Ensure finalDamage is not negative before adding to totals
+                finalDamage = Math.max(0, finalDamage);
                 totalDamageDealt += finalDamage;
                 totalEnergySpent += totalEnergyUsedFromSliders; // Speed usage isn't tracked in "Energy Spent"
                 attackCount++;
-                if (finalDamage > highestDamage) { highestDamage = finalDamage; }
+                if (finalDamage > highestDamage) {
+                    highestDamage = finalDamage;
+                }
                 updateStatsDisplay(); // Update stats panel BEFORE potentially applying buffs
-
                 // --- 8. *** APPLY FORM BUFFS (for NEXT turn) *** ---
                 // Find which forms were active during *this* calculation
-                const activeFormIdsThisTurn = [...(calculatorState.activeFormIds || [])]; // Clone array
+                const activeFormIdsThisTurn = [...(calculatorState.activeFormIds || [])]; // Clone array to avoid issues if state changes during loop
+                let anyFormBuffed = false; // Track if any buff was applied
 
-                activeFormIdsThisTurn.forEach(formId => {
-                    const formIndex = characterForms.findIndex(f => f.id === formId);
-                    if (formIndex > -1) {
-                        const form = characterForms[formIndex]; // Get direct reference to modify
-                        let formUpdated = false;
+                if (activeFormIdsThisTurn.length > 0) {
+                     console.log("Applying buffs for active forms:", activeFormIdsThisTurn); // Debug Log
+                     activeFormIdsThisTurn.forEach(formId => {
+                         const formIndex = characterForms.findIndex(f => f.id === formId);
+                         if (formIndex > -1) {
+                             const form = characterForms[formIndex]; // Get direct reference to modify object in the array
+                             let formUpdated = false;
 
-                        // Apply Form Multiplier Buff
-                        if (form.enableFormBuff && form.formBuffValue != 0) {
-                            const buffVal = safeParseFloat(form.formBuffValue, 0);
-                            if (form.formBuffType === 'add') {
-                                form.formMultiplier += buffVal;
-                            } else if (form.formBuffType === 'multiply') {
-                                form.formMultiplier *= buffVal;
-                            }
-                             form.formMultiplier = Math.max(0, form.formMultiplier); // Prevent negative multipliers
-                            formUpdated = true;
-                        }
+                             // Apply Form Multiplier Buff
+                             if (form.enableFormBuff && form.formBuffValue != 0) { // Ensure buff is enabled and value is non-zero
+                                 const buffVal = safeParseFloat(form.formBuffValue, 0);
+                                 const currentMult = form.formMultiplier; // Get current value before modification
+                                 if (form.formBuffType === 'add') {
+                                     form.formMultiplier += buffVal;
+                                 } else if (form.formBuffType === 'multiply') {
+                                     form.formMultiplier *= buffVal;
+                                 }
+                                  form.formMultiplier = Math.max(0, form.formMultiplier); // Prevent negative multipliers
+                                 if (form.formMultiplier !== currentMult) { // Check if value actually changed
+                                     formUpdated = true;
+                                     console.log(`Form "${form.name}" FM buffed: ${currentMult} -> ${form.formMultiplier}`); // Debug Log
+                                 }
+                             }
 
-                        // Apply Pool Max Multiplier Buff
-                        if (form.enablePoolBuff && form.poolBuffValue != 0) {
-                            const buffVal = safeParseFloat(form.poolBuffValue, 0);
-                            if (form.poolBuffType === 'add') {
-                                form.poolMaxMultiplier += buffVal;
-                            } else if (form.poolBuffType === 'multiply') {
-                                form.poolMaxMultiplier *= buffVal;
-                            }
-                             form.poolMaxMultiplier = Math.max(0, form.poolMaxMultiplier); // Prevent negative multipliers
-                            formUpdated = true;
-                        }
+                             // Apply Pool Max Multiplier Buff
+                             if (form.enablePoolBuff && form.poolBuffValue != 0) { // Ensure buff is enabled and value is non-zero
+                                 const buffVal = safeParseFloat(form.poolBuffValue, 0);
+                                 const currentMult = form.poolMaxMultiplier; // Get current value before modification
+                                 if (form.poolBuffType === 'add') {
+                                     form.poolMaxMultiplier += buffVal;
+                                 } else if (form.poolBuffType === 'multiply') {
+                                     form.poolMaxMultiplier *= buffVal;
+                                 }
+                                  form.poolMaxMultiplier = Math.max(0, form.poolMaxMultiplier); // Prevent negative multipliers
+                                 if (form.poolMaxMultiplier !== currentMult) { // Check if value actually changed
+                                     formUpdated = true;
+                                      console.log(`Form "${form.name}" PM buffed: ${currentMult} -> ${form.poolMaxMultiplier}`); // Debug Log
+                                 }
+                             }
 
-                        if (formUpdated) {
-                            console.log(`Form "${form.name}" buffed: FM=${form.formMultiplier}, PM=${form.poolMaxMultiplier}`);
-                            // No need to save state here, just modifying the in-memory array `characterForms`
-                        }
-                    }
-                });
+                             if (formUpdated) {
+                                 anyFormBuffed = true; // Mark that at least one form was updated
+                                 // We are directly modifying the object within the characterForms array
+                             }
+                         } else {
+                              console.warn(`Tried to apply buff, but couldn't find form with ID: ${formId}`);
+                         }
+                     });
 
-                // If any forms were updated, refresh UI elements that depend on characterForms data
-                 if (activeFormIdsThisTurn.length > 0 && characterForms.some(f => activeFormIdsThisTurn.includes(f.id) && (f.enableFormBuff || f.enablePoolBuff))) {
-                     console.log("Forms were buffed, refreshing relevant UI for next calculation cycle...");
-                     renderFormList(); // Update tooltips in stats panel list
-                     renderActiveFormsSection(); // Update tooltips on checkboxes if any
-                     applyActiveFormEffects(); // Re-apply combined effects based on NEWLY buffed values
-                 }
+                     // If any forms were updated by buffs, refresh UI elements that depend on characterForms data
+                      if (anyFormBuffed) {
+                          console.log("Forms were buffed, refreshing relevant UI for next calculation cycle...");
+                          renderFormList();           // Update tooltips in stats panel list
+                          renderActiveFormsSection(); // Update tooltips on checkboxes
+                          applyActiveFormEffects();   // Re-apply combined effects based on NEWLY buffed values for display consistency
+                          // Equation display will be updated just before showing results anyway
+                      }
+                }
                 // --- End Form Buff Logic ---
-
-
                 // --- 9. Display results ---
+                // Ensure final damage is non-negative for display
+                finalDamage = Math.max(0, finalDamage);
+
                 resultValueEl.textContent = formatSimpleNumber(finalDamage);
-                resultTotalEnergyUsedEl.textContent = formatStatNumber(totalEnergyUsedFromSliders);
-                const totalExtraDamage = totalExtraDamageFromEnergy + speedDamage; // Include speed damage here
+                resultTotalEnergyUsedEl.textContent = formatStatNumber(totalEnergyUsedFromSliders); // Only energy used
+                // Include speed damage in the "Extra Damage" display
+                const totalExtraDamage = totalExtraDamageFromEnergy + speedDamage;
                 resultTotalExtraDamageEl.textContent = formatStatNumber(totalExtraDamage);
-                const extraDamageLabel = resultTotalExtraDamageEl.closest('p')?.querySelector('strong'); if (extraDamageLabel) { extraDamageLabel.textContent = 'Total Extra Damage (Energy + Speed):'; }
+                const extraDamageLabel = resultTotalExtraDamageEl.closest('p')?.querySelector('strong');
+                if (extraDamageLabel) {
+                    extraDamageLabel.textContent = 'Total Extra Damage (Energy + Speed):';
+                }
 
                 displayAllFormats(finalDamage);
-                updateEquationDisplay(); // Update equation after everything, including potential buffs for display link accuracy
+                updateEquationDisplay(); // Update equation one last time AFTER potential buffs for link accuracy
                 resultDiv.classList.remove('hidden', 'bg-error-light', 'border-error', 'text-error-dark');
                 resultDiv.classList.add('bg-success-light', 'border-success', 'text-success-dark');
                 resultDiv.classList.remove('animate__animated', 'animate__fadeInUp');
                 void resultDiv.offsetWidth; // Trigger reflow for animation restart
                 resultDiv.classList.add('animate__animated', 'animate__fadeInUp');
                 resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-success-dark';
-                let successMsg = 'Calculation successful!'; if (healthDepleted) { successMsg += ' Warning: Health depleted by Kaioken strain!'; } showMessage(successMsg, healthDepleted ? 'error' : 'success');
+                let successMsg = 'Calculation successful!';
+                if (healthDepleted) { successMsg += ' Warning: Health depleted by Kaioken strain!'; }
+                showMessage(successMsg, healthDepleted ? 'error' : 'success');
 
             } catch (error) {
                 console.error("Calculation Error:", error);
-                // Display error state... (same as before)
-                resultValueEl.textContent = 'Error'; resultTotalEnergyUsedEl.textContent = 'N/A'; resultTotalExtraDamageEl.textContent = 'N/A'; resultScientificEl.textContent = 'N/A'; resultWordsEl.textContent = 'Error'; equationDisplayEl.innerHTML = '<span class="text-error-dark">Error calculating equation.</span>'; resultDiv.classList.remove('hidden', 'bg-success-light', 'border-success', 'text-success-dark'); resultDiv.classList.add('bg-error-light', 'border-error', 'text-error-dark'); resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-error-dark'; showMessage(`Calculation failed: ${error.message || 'Unknown error'}`, 'error');
+                // Display error state...
+                resultValueEl.textContent = 'Error';
+                resultTotalEnergyUsedEl.textContent = 'N/A';
+                resultTotalExtraDamageEl.textContent = 'N/A';
+                resultScientificEl.textContent = 'N/A';
+                resultWordsEl.textContent = 'Error';
+                equationDisplayEl.innerHTML = '<span class="text-error-dark">Error calculating equation.</span>';
+                resultDiv.classList.remove('hidden', 'bg-success-light', 'border-success', 'text-success-dark');
+                resultDiv.classList.add('bg-error-light', 'border-error', 'text-error-dark');
+                resultDiv.querySelector('.result-title').className = 'result-title text-lg font-semibold mb-2 text-error-dark';
+                showMessage(`Calculation failed: ${error.message || 'Unknown error'}`, 'error');
             } finally {
-                showLoading(false);
+                showLoading(false); // Ensure loading indicator is hidden
             }
-        }, 50); // Short delay for loading indicator
-    }
+        }, 50); // Short delay for loading indicator allows UI to update
+    } // <-- End of performCalculation function
     // --- Number Formatting ---
     function displayAllFormats(damage) {
+         // Ensure damage is a valid number before formatting
+         damage = safeParseFloat(damage, 0);
          try {
              resultScientificEl.textContent = damage.toExponential(2).replace(/e\+?(-?)/, ' x 10^$1');
          } catch (e) {
@@ -1640,17 +1722,21 @@ document.addEventListener('firebaseReady', async () => {
              console.error("Number to words error:", e);
          }
      }
-    function convertNumberToWords(number) { // ... This long function remains unchanged ...
-        const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen']; const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']; const scales = [ '', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quattuordecillion', 'Quindecillion', 'Sexdecillion', 'Septendecillion', 'Octodecillion', 'Novemdecillion', 'Vigintillion', 'Unvigintillion', 'Duovigintillion', 'Tresvigintillion', 'Quattuorvigintillion', 'Quinvigintillion', 'Sesvigintillion', 'Septemvigintillion', 'Octovigintillion', 'Novemvigintillion', 'Trigintillion', 'Untrigintillion', 'Duotrigintillion', 'Trestrigintillion', 'Quattuortrigintillion', 'Quintrigintillion', 'Sestrigintillion', 'Septentrigintillion', 'Octotrigintillion', 'Noventrigintillion', 'Quadragintillion', 'Unquadragintillion', 'Duoquadragintillion', 'Tresquadragintillion', 'Quattuorquadragintillion', 'Quinquadragintillion', 'Sesquadragintillion', 'Septenquadragintillion', 'Octoquadragintillion', 'Novemquadragintillion', 'Quinquagintillion', 'Unquinquagintillion', 'Duoquinquagintillion', 'Tresquinquagintillion', 'Quattuorquinquagintillion', 'Quinquinquagintillion', 'Sesquinquagintillion', 'Septenquinquagintillion', 'Octoquinquagintillion', 'Novemquinquagintillion', 'Sexagintillion', 'Unsexagintillion', 'Duosexagintillion', 'Tresexagintillion', 'Quattuorsexagintillion', 'Quinsexagintillion', 'Sesexagintillion', 'Septensexagintillion', 'Octosexagintillion', 'Novemsexagintillion', 'Septuagintillion', 'Unseptuagintillion', 'Duoseptuagintillion', 'Tresseptuagintillion', 'Quattuorseptuagintillion', 'Quinseptuagintillion', 'Seseptuagintillion', 'Septenseptuagintillion', 'Octoseptuagintillion', 'Novemseptuagintillion', 'Octogintillion', 'Unoctogintillion', 'Duooctogintillion', 'Tresoctogintillion', 'Quattuoroctogintillion', 'Quinoctogintillion', 'Sexoctogintillion', 'Septemoctogintillion', 'Octooctogintillion', 'Novemoctogintillion', 'Nonagintillion', 'Unnonagintillion', 'Duononagintillion', 'Tresnonagintillion', 'Quattuornonagintillion', 'Quinnonagintillion', 'Senonagintillion', 'Septenonagintillion', 'Octononagintillion', 'Novenonagintillion', 'Centillion' ]; if (typeof number !== 'number' || !isFinite(number)) { return 'Invalid Number'; } if (number === 0) { return 'Zero'; } const MAX_SAFE_INTEGER_FOR_WORDS = BigInt("9".repeat((scales.length) * 3)); let numForCheck; try { numForCheck = number < 0 ? BigInt(Math.abs(Math.trunc(number))) : BigInt(Math.trunc(number)); } catch (e) { console.error("Error converting number to BigInt for size check:", number, e); return number.toExponential(2) + " (Extremely large)"; } if (numForCheck > MAX_SAFE_INTEGER_FOR_WORDS) { console.warn("Number too large for full word conversion, returning scientific."); return number.toExponential(2) + " (Too large for words)"; } let isNegative = number < 0; if (isNegative) number = -number; let integerPart; let fractionalPart = 0; try { const numStr = number.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 20 }); const parts = numStr.split('.'); integerPart = BigInt(parts[0]); if (parts.length > 1) { fractionalPart = parseFloat('0.' + parts[1]); } } catch (e) { console.error("Error processing number for words:", number, e); return "Number too large or invalid format"; } let words = isNegative ? 'Negative ' : ''; function convertHundreds(num) { let word = ''; const h = Math.floor(num / 100); const r = num % 100; if (h > 0) { word += units[h] + ' Hundred'; } if (r > 0) { if (word !== '') word += ' '; if (r < 20) { word += units[r]; } else { const t = Math.floor(r / 10); const o = r % 10; word += tens[t]; if (o > 0) { word += '-' + units[o]; } } } return word; } if (integerPart === 0n) { if (fractionalPart === 0) words += 'Zero'; } else { let scaleIndex = 0; let tempWords = []; let currentInt = integerPart; while (currentInt > 0n) { if (scaleIndex >= scales.length) { console.error("Number exceeds defined scales during conversion:", number); return number.toExponential(2) + " (Too large for words)"; } const chunk = Number(currentInt % 1000n); if (chunk !== 0) { const chunkWords = convertHundreds(chunk); tempWords.push(chunkWords + (scaleIndex > 0 ? ' ' + scales[scaleIndex] : '')); } currentInt /= 1000n; scaleIndex++; } words += tempWords.reverse().filter(w => w.trim()).join(', '); } if (fractionalPart > 1e-9) { words += ' Point'; let fractionalStr = fractionalPart.toFixed(6).substring(2).replace(/0+$/, ''); if (fractionalStr.length > 0) { for (const digit of fractionalStr) { words += ' ' + (units[parseInt(digit)] || 'Zero'); } } else { words = words.replace(/ Point$/, ''); } } return words.trim();
-    }
-
+    // This long function converts a number to words (remains unchanged)
+    function convertNumberToWords(number) { const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen']; const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']; const scales = [ '', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quattuordecillion', 'Quindecillion', 'Sexdecillion', 'Septendecillion', 'Octodecillion', 'Novemdecillion', 'Vigintillion', 'Unvigintillion', 'Duovigintillion', 'Tresvigintillion', 'Quattuorvigintillion', 'Quinvigintillion', 'Sesvigintillion', 'Septemvigintillion', 'Octovigintillion', 'Novemvigintillion', 'Trigintillion', 'Untrigintillion', 'Duotrigintillion', 'Trestrigintillion', 'Quattuortrigintillion', 'Quintrigintillion', 'Sestrigintillion', 'Septentrigintillion', 'Octotrigintillion', 'Noventrigintillion', 'Quadragintillion', 'Unquadragintillion', 'Duoquadragintillion', 'Tresquadragintillion', 'Quattuorquadragintillion', 'Quinquadragintillion', 'Sesquadragintillion', 'Septenquadragintillion', 'Octoquadragintillion', 'Novemquadragintillion', 'Quinquagintillion', 'Unquinquagintillion', 'Duoquinquagintillion', 'Tresquinquagintillion', 'Quattuorquinquagintillion', 'Quinquinquagintillion', 'Sesquinquagintillion', 'Septenquinquagintillion', 'Octoquinquagintillion', 'Novemquinquagintillion', 'Sexagintillion', 'Unsexagintillion', 'Duosexagintillion', 'Tresexagintillion', 'Quattuorsexagintillion', 'Quinsexagintillion', 'Sesexagintillion', 'Septensexagintillion', 'Octosexagintillion', 'Novemsexagintillion', 'Septuagintillion', 'Unseptuagintillion', 'Duoseptuagintillion', 'Tresseptuagintillion', 'Quattuorseptuagintillion', 'Quinseptuagintillion', 'Seseptuagintillion', 'Septenseptuagintillion', 'Octoseptuagintillion', 'Novemseptuagintillion', 'Octogintillion', 'Unoctogintillion', 'Duooctogintillion', 'Tresoctogintillion', 'Quattuoroctogintillion', 'Quinoctogintillion', 'Sexoctogintillion', 'Septemoctogintillion', 'Octooctogintillion', 'Novemoctogintillion', 'Nonagintillion', 'Unnonagintillion', 'Duononagintillion', 'Tresnonagintillion', 'Quattuornonagintillion', 'Quinnonagintillion', 'Senonagintillion', 'Septenonagintillion', 'Octononagintillion', 'Novenonagintillion', 'Centillion' ]; if (typeof number !== 'number' || !isFinite(number)) { return 'Invalid Number'; } if (number === 0) { return 'Zero'; } const MAX_SAFE_INTEGER_FOR_WORDS = BigInt("9".repeat((scales.length) * 3)); let numForCheck; try { numForCheck = number < 0 ? BigInt(Math.abs(Math.trunc(number))) : BigInt(Math.trunc(number)); } catch (e) { console.error("Error converting number to BigInt for size check:", number, e); return number.toExponential(2) + " (Extremely large)"; } if (numForCheck > MAX_SAFE_INTEGER_FOR_WORDS) { console.warn("Number too large for full word conversion, returning scientific."); return number.toExponential(2) + " (Too large for words)"; } let isNegative = number < 0; if (isNegative) number = -number; let integerPart; let fractionalPart = 0; try { const numStr = number.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 20 }); const parts = numStr.split('.'); integerPart = BigInt(parts[0]); if (parts.length > 1) { fractionalPart = parseFloat('0.' + parts[1]); } } catch (e) { console.error("Error processing number for words:", number, e); return "Number too large or invalid format"; } let words = isNegative ? 'Negative ' : ''; function convertHundreds(num) { let word = ''; const h = Math.floor(num / 100); const r = num % 100; if (h > 0) { word += units[h] + ' Hundred'; } if (r > 0) { if (word !== '') word += ' '; if (r < 20) { word += units[r]; } else { const t = Math.floor(r / 10); const o = r % 10; word += tens[t]; if (o > 0) { word += '-' + units[o]; } } } return word; } if (integerPart === 0n) { if (fractionalPart === 0) words += 'Zero'; } else { let scaleIndex = 0; let tempWords = []; let currentInt = integerPart; while (currentInt > 0n) { if (scaleIndex >= scales.length) { console.error("Number exceeds defined scales during conversion:", number); return number.toExponential(2) + " (Too large for words)"; } const chunk = Number(currentInt % 1000n); if (chunk !== 0) { const chunkWords = convertHundreds(chunk); tempWords.push(chunkWords + (scaleIndex > 0 ? ' ' + scales[scaleIndex] : '')); } currentInt /= 1000n; scaleIndex++; } words += tempWords.reverse().filter(w => w.trim()).join(', '); } if (fractionalPart > 1e-9) { words += ' Point'; let fractionalStr = fractionalPart.toFixed(6).substring(2).replace(/0+$/, ''); if (fractionalStr.length > 0) { for (const digit of fractionalStr) { words += ' ' + (units[parseInt(digit)] || 'Zero'); } } else { words = words.replace(/ Point$/, ''); } } return words.trim(); }
     // --- Equation Display Function (Includes Speed Term) ---
     function updateEquationDisplay() {
          if (!equationDisplayEl) return;
          let equationHTML = '';
          const op = (operator) => `<span class="equation-operator">${operator}</span>`;
          const group = (content) => `<span class="equation-group">(</span>${content}<span class="equation-group">)</span>`;
-         const num = (value, targetId, title = '') => { const titleAttr = title ? ` title="${escapeHtml(title)}"` : ''; return `<span class="equation-number" data-target-id="${targetId}"${titleAttr}>${formatSimpleNumber(value)}</span>`; };
+         // Helper to create clickable number spans linked to input IDs
+         const num = (value, targetId, title = '') => {
+             const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+             // Ensure targetId is not null/undefined before using it
+             const targetAttr = targetId ? ` data-target-id="${targetId}"` : '';
+             return `<span class="equation-number"${targetAttr}${titleAttr}>${formatSimpleNumber(value)}</span>`;
+         };
 
          try {
              const baseDamage = safeParseFloat(baseDamageInput.value, 0);
@@ -1659,23 +1745,34 @@ document.addEventListener('firebaseReady', async () => {
              const formMultiplierVal = safeParseFloat(formMultiplierInput.value, 1);
 
              let basePart = num(baseDamage, 'base-damage', 'Base Damage');
+             // Only show base multiplier if not default 1
              if (baseMultiplier !== 1 || baseMultiplierInput.value.trim() !== '1') {
                  basePart += op('*') + num(baseMultiplier, 'base-multiplier', 'Base Multiplier');
              }
-             // Only show combined form multiplier if it's not 1
+             // Only show combined form multiplier if not default 1
              if (formMultiplierVal !== 1 || formMultiplierInput.value.trim() !== '1') {
                  basePart += op('*') + num(formMultiplierVal, 'form-multiplier', 'Combined Form Multiplier');
              }
 
+             // Group base parts if there was multiplication
              let baseCalculationHTML = (basePart.includes(op('*'))) ? group(basePart) : basePart;
 
+             // Add Compression Points multiplier if applicable
              const compressionPoints = safeParseFloat(attackCompressionPointsInput.value, 0);
              if (compressionPoints > 0) {
                  let compressionMultiplierValue = Math.max(1, (compressionPoints * 1.5) + (Math.floor(compressionPoints / 10) * 3));
-                 baseCalculationHTML += op('*') + `<span class="equation-number" data-target-id="attack-compression-points" title="${compressionPoints} Comp. Points -> x${formatSimpleNumber(compressionMultiplierValue)} Multiplier">${formatSimpleNumber(compressionMultiplierValue)}</span>`;
+                  // Ensure grouping if previous part exists and compression is added
+                 if (baseCalculationHTML && baseCalculationHTML !== '0') {
+                     baseCalculationHTML = group(baseCalculationHTML);
+                 } else if (!baseCalculationHTML || baseCalculationHTML === '0') {
+                     // If base damage part was 0 or empty, start fresh but show the 1x multiplier implicitly
+                     baseCalculationHTML = ''; // Will just show compression multiplier
+                 }
+                 baseCalculationHTML += (baseCalculationHTML ? op('*') : '') + num(compressionMultiplierValue, 'attack-compression-points', `${compressionPoints} Comp. Points -> x${formatSimpleNumber(compressionMultiplierValue)} Multiplier`);
              }
-             equationHTML = baseCalculationHTML;
+             equationHTML = baseCalculationHTML || '0'; // Start with base calculation or 0
 
+             // Add Dynamic Multiplicative Modifiers
              let multiplicativeTerms = [];
              document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach((modifierDiv) => {
                  const valueInput = modifierDiv.querySelector('.modifier-value-input');
@@ -1685,18 +1782,21 @@ document.addEventListener('firebaseReady', async () => {
                  const factorName = nameInput?.value.trim() || 'Unnamed Multiplier';
                  if (valueInput && typeOption && modifierId && typeOption.dataset.value === 'multiplicative') {
                      const multiplier = safeParseFloat(valueInput.value, 1);
-                     if (multiplier !== 1 || valueInput.value.trim() !== '1') {
+                     if (multiplier !== 1 || valueInput.value.trim() !== '1') { // Only include if not default 1
                          multiplicativeTerms.push(num(multiplier, modifierId, factorName));
                      }
                  }
              });
              if (multiplicativeTerms.length > 0) {
-                 if (multiplicativeTerms.length > 1 || equationHTML.includes(op('*')) || equationHTML.includes(op('+'))) {
-                     equationHTML = group(equationHTML);
+                 // Group previous parts if they exist and contain operations or if there's more than one mult term
+                 if (equationHTML.includes(op('*')) || equationHTML.includes(op('+')) || multiplicativeTerms.length > 1) {
+                      if (equationHTML !== '0') equationHTML = group(equationHTML); // Group if not just 0
                  }
-                 equationHTML += op('*') + group(multiplicativeTerms.join(op('*')));
+                  if (equationHTML === '0') equationHTML = ''; // Avoid showing "0 * (...)"
+                 equationHTML += (equationHTML ? op('*') : '') + (multiplicativeTerms.length > 1 ? group(multiplicativeTerms.join(op('*'))) : multiplicativeTerms[0]);
              }
 
+             // Add Energy Damage Terms
              let energyTerms = [];
              ALL_ENERGY_TYPES.forEach(type => {
                  const els = getEnergyElements(type);
@@ -1709,24 +1809,34 @@ document.addEventListener('firebaseReady', async () => {
                      const effectivePercent = Math.min(sliderPercent, limitPercent);
                      if (effectivePercent > 0) {
                          const currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent);
-                         const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1);
-                         const energyUsed = Math.min(currentEnergy * (effectivePercent / 100), currentEnergy);
-                         const energyDamage = energyUsed * damagePerPower;
-                         if (energyDamage !== 0) {
-                             const energyTitle = `${ENERGY_TYPE_DETAILS[type]?.name || type} Energy Used (${sliderPercent}%)`;
-                             const dppTitle = `${ENERGY_TYPE_DETAILS[type]?.name || type} Damage/Point`;
-                             energyTerms.push(group(num(energyUsed, `${type}-energy-slider`, energyTitle) + op('*') + num(damagePerPower, `${type}-damage-per-power`, dppTitle)));
+                         if (currentEnergy > 0) {
+                             const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1);
+                             const energyUsed = Math.min(currentEnergy * (effectivePercent / 100), currentEnergy);
+                             const energyDamage = energyUsed * damagePerPower;
+                             if (energyDamage !== 0) {
+                                 const energyTitle = `${ENERGY_TYPE_DETAILS[type]?.name || type} Energy Used (${sliderPercent}%)`;
+                                 const dppTitle = `${ENERGY_TYPE_DETAILS[type]?.name || type} Damage/Point`;
+                                 let term = num(energyUsed, `${type}-energy-slider`, energyTitle);
+                                 if (damagePerPower !== 1 || els.damagePerPowerEl.value.trim() !== '1') {
+                                      term += op('*') + num(damagePerPower, `${type}-damage-per-power`, dppTitle);
+                                      term = group(term); // Group if DPP is involved
+                                 }
+                                 energyTerms.push(term);
+                             }
                          }
                      }
                  }
              });
              if (energyTerms.length > 0) {
-                  if (equationHTML.includes(op('*')) || equationHTML.includes(op('+'))) {
-                      equationHTML = group(equationHTML);
-                  }
-                 equationHTML += op('+') + group(energyTerms.join(op('+')));
+                 // Group previous calculation before adding energy terms
+                 if (equationHTML.includes(op('*')) || equationHTML.includes(op('+'))) {
+                     if (equationHTML !== '0') equationHTML = group(equationHTML);
+                 }
+                 if (equationHTML === '0') equationHTML = ''; // Avoid 0 + (...)
+                  equationHTML += (equationHTML ? op('+') : '') + group(energyTerms.join(op('+')));
              }
 
+             // Add Dynamic Additive Modifiers
              let additiveTerms = [];
              document.querySelectorAll('#dynamic-modifiers-container .dynamic-box').forEach((modifierDiv) => {
                  const valueInput = modifierDiv.querySelector('.modifier-value-input');
@@ -1736,19 +1846,21 @@ document.addEventListener('firebaseReady', async () => {
                  const factorName = nameInput?.value.trim() || 'Unnamed Additive';
                  if (valueInput && typeOption && modifierId && typeOption.dataset.value === 'additive') {
                      const modifierValue = safeParseFloat(valueInput.value, 0);
-                     if (modifierValue !== 0 || valueInput.value.trim() !== '0') {
+                     if (modifierValue !== 0 || valueInput.value.trim() !== '0') { // Only include if not default 0
                          additiveTerms.push(num(modifierValue, modifierId, factorName));
                      }
                  }
              });
              if (additiveTerms.length > 0) {
-                  if (equationHTML.includes(op('*')) || equationHTML.includes(op('+'))) {
-                      equationHTML = group(equationHTML);
-                  }
-                 equationHTML += op('+') + group(additiveTerms.join(op('+')));
+                 // Group previous calculation before adding additive terms
+                 if (equationHTML.includes(op('*')) || equationHTML.includes(op('+'))) {
+                      if (equationHTML !== '0') equationHTML = group(equationHTML);
+                 }
+                 if (equationHTML === '0') equationHTML = ''; // Avoid 0 + (...)
+                 equationHTML += (equationHTML ? op('+') : '') + (additiveTerms.length > 1 ? group(additiveTerms.join(op('+'))) : additiveTerms[0]);
              }
 
-             // Add Speed Term (At the end as requested for calculation order)
+             // Add Speed Term (At the end)
              const speedSliderEq = document.getElementById('speed-slider');
              const baseSpeedEq = safeParseFloat(charSpeedInput?.value, 0);
              if (speedSliderEq && baseSpeedEq > 0) {
@@ -1757,25 +1869,127 @@ document.addEventListener('firebaseReady', async () => {
                       const speedUsedEq = baseSpeedEq * (sliderPercentEq / 100);
                       const speedDamageEq = speedUsedEq * 1; // 1:1 conversion
                       if (speedDamageEq !== 0) {
-                         // Group previous calculation if it contains operators
+                         // Group previous calculation before adding speed term
                          if (equationHTML.includes(op('*')) || equationHTML.includes(op('+'))) {
-                              equationHTML = group(equationHTML);
+                              if (equationHTML !== '0') equationHTML = group(equationHTML);
                          }
+                          if (equationHTML === '0') equationHTML = ''; // Avoid 0 + (...)
                          // Use speed-slider as the target ID for linking
-                         equationHTML += op('+') + num(speedDamageEq, 'speed-slider', `${formatSimpleNumber(speedUsedEq)} Speed Used`);
+                         equationHTML += (equationHTML ? op('+') : '') + num(speedDamageEq, 'speed-slider', `${formatSimpleNumber(speedUsedEq)} Speed Used`);
                       }
                  }
              }
 
-             equationDisplayEl.innerHTML = equationHTML; // Assign the final HTML
+             // Final display assignment
+              if (!equationHTML || equationHTML.trim() === '0') {
+                  equationHTML = '0'; // Display '0' if calculation results in empty string or just '0'
+              }
+             equationDisplayEl.innerHTML = equationHTML;
          } catch (error) {
              console.error("Error updating equation:", error);
              equationDisplayEl.innerHTML = '<span class="text-error-dark">Could not generate equation.</span>';
          }
         }
+       // --- Click Handler for Equation Numbers ---
+     function handleEquationClick(event) {
+         const target = event.target;
+         // Check if the clicked element is a number span with a target ID
+         if (target.classList.contains('equation-number') && target.dataset.targetId) {
+             const targetId = target.dataset.targetId;
+             const sourceElement = document.getElementById(targetId); // Find the linked input/slider/etc.
 
-    // --- Click Handler for Equation Numbers ---
-     function handleEquationClick(event) { const target = event.target; if (target.classList.contains('equation-number') && target.dataset.targetId) { const targetId = target.dataset.targetId; const sourceElement = document.getElementById(targetId); if (sourceElement) { sourceElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); let elementToPulse = sourceElement; if (sourceElement.tagName === 'SPAN' && sourceElement.classList.contains('readonly-display')) { elementToPulse = sourceElement.closest('.energy-pool') || sourceElement; } else if (sourceElement.type === 'range') { elementToPulse = sourceElement.closest('.energy-slider-section') || sourceElement; } else if (sourceElement.classList.contains('modifier-value-input')) { elementToPulse = sourceElement.closest('.dynamic-box') || sourceElement; } else if (targetId === 'speed-slider') { elementToPulse = document.getElementById('speed-slider-section') || sourceElement; } triggerAnimation(elementToPulse, 'pulse-source'); if (sourceElement.tagName === 'INPUT' && !sourceElement.readOnly && sourceElement.type !== 'range') { sourceElement.focus(); } const energyTypeMatch = targetId.match(/^([a-z]+)-(damage-per-power|energy-slider|max-multiplier)/); if (energyTypeMatch) { const energyType = energyTypeMatch[1]; if (ALL_ENERGY_TYPES.includes(energyType) && energyTypeSelect.value !== energyType) { console.log(`Switching view to ${energyType} pool triggered by equation click...`); energyTypeSelect.value = energyType; showSelectedEnergyPool(); } } } else { console.warn(`Equation link target element not found: #${targetId}`); } } }
+             if (sourceElement) {
+                 // Scroll the source element into view
+                 sourceElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                 // Determine which element to visually pulse
+                 let elementToPulse = sourceElement;
+                 if (sourceElement.tagName === 'SPAN' && sourceElement.classList.contains('readonly-display')) {
+                     // If it's a read-only display span (like current energy), pulse the parent pool
+                     elementToPulse = sourceElement.closest('.energy-pool') || sourceElement;
+                 } else if (sourceElement.type === 'range') {
+                     // If it's a slider input, pulse its parent section
+                     elementToPulse = sourceElement.closest('.energy-slider-section') || sourceElement;
+                 } else if (sourceElement.classList.contains('modifier-value-input')) {
+                      // If it's an input within a dynamic modifier box, pulse the box
+                     elementToPulse = sourceElement.closest('.dynamic-box') || sourceElement;
+                 }
+                 // Specific case for Speed slider link in equation
+                  else if (targetId === 'speed-slider') {
+                       elementToPulse = document.getElementById('speed-slider-section') || sourceElement;
+                  }
+
+                 // Trigger the pulse animation
+                 triggerAnimation(elementToPulse, 'pulse-source');
+
+                 // Focus the element if it's an editable input (not range or readonly)
+                 if (sourceElement.tagName === 'INPUT' && !sourceElement.readOnly && sourceElement.type !== 'range') {
+                     sourceElement.focus();
+                 }
+
+                 // Check if the click corresponds to an energy element that isn't currently focused
+                 const energyTypeMatch = targetId.match(/^([a-z]+)-(damage-per-power|energy-slider|max-multiplier)/);
+                 if (energyTypeMatch) {
+                     const energyType = energyTypeMatch[1];
+                     if (ALL_ENERGY_TYPES.includes(energyType) && energyTypeSelect.value !== energyType) {
+                         // If clicking an energy element from a non-focused pool, switch the view
+                         console.log(`Switching view to ${energyType} pool triggered by equation click...`);
+                         energyTypeSelect.value = energyType;
+                         showSelectedEnergyPool(); // This will show the correct pool
+                     }
+                 }
+             } else {
+                 console.warn(`Equation link target element not found: #${targetId}`);
+             }
+         }
+     }         
+    // --- Tab Switching Logic ---
+    function showCharacterStatsView() {
+        if (mainCalculatorContent) mainCalculatorContent.classList.add('hidden');
+        if (characterStatsScreen) characterStatsScreen.classList.remove('hidden');
+        if (mainTitle) mainTitle.textContent = 'Character Stats';
+        if (showCharacterStatsBtn) showCharacterStatsBtn.textContent = 'Energy Calculator';
+        if (characterStatsScreen) triggerAnimation(characterStatsScreen, 'fadeIn');
+        // Store view preference
+        calculatorState.activeView = 'stats';
+    }
+    function showCalculatorView() {
+        if (characterStatsScreen) characterStatsScreen.classList.add('hidden');
+        if (mainCalculatorContent) mainCalculatorContent.classList.remove('hidden');
+        if (mainTitle) mainTitle.textContent = 'Energy Calculator';
+        if (showCharacterStatsBtn) showCharacterStatsBtn.textContent = 'Character Stats';
+        if (mainCalculatorContent) triggerAnimation(mainCalculatorContent, 'fadeIn');
+        // Store view preference
+        calculatorState.activeView = 'calculator';
+    }
+    // --- Event Listener Helper ---
+    // This function is called when character stats like Vitality, Speed, etc. change
+    function handleStatChange() {
+        console.log("Stat change detected, updating dependent elements..."); // Debug Log
+        // Update Base AC/TR/Speed in stats panel display immediately
+        updateStatsDisplay(); // Includes speed stat display update now
+
+        // Recalculate all energy pools as base stats affect them
+        // Also ensures Pool Max Multipliers (which might depend on forms) are re-applied correctly
+        // Note: applyActiveFormEffects also calls calculateAndResetEnergy internally for relevant pools
+        applyActiveFormEffects();
+
+        // Update equation
+        updateEquationDisplay();
+
+        // Ensure Speed Slider UI is updated based on the new speed value
+        updateSpeedSliderVisibility(); // Show/hide slider based on new speed value
+        updateSpeedSliderDisplay();   // Update slider text (S: ..., D: ...)
+    }
+    // --- Ryoko Mode Logic ---
+    function handleRyokoCheckboxChange() { if (!ryokoCheckbox || !ryokoEquationContainer || !charBaseMultiplierInput || !ryokoEquationInput) return; const isChecked = ryokoCheckbox.checked; ryokoEquationContainer.classList.toggle('hidden', !isChecked); charBaseMultiplierInput.readOnly = isChecked; charBaseMultiplierInput.classList.toggle('bg-gray-100', isChecked); charBaseMultiplierInput.classList.toggle('cursor-not-allowed', isChecked); charBaseMultiplierInput.classList.toggle('opacity-70', isChecked); if (isChecked) { if (ryokoEquationInput.value.trim() === '') { ryokoEquationInput.value = DEFAULT_RYOKO_EQUATION; } evaluateRyokoEquation(); ryokoEquationInput.focus(); } else { ryokoEquationInput.classList.remove('border-red-500', 'focus:ring-red-500'); ryokoEquationInput.classList.add('border-gray-300', 'focus:ring-teal-focus'); // Revert border/focus
+           // Need to re-evaluate standard stats if Ryoko mode is turned off
+           handleStatChange();
+        }
+        // No need to call handleStatChange if Ryoko mode is turned on, as evaluateRyokoEquation calls it.
+     }
+
+    function evaluateRyokoEquation() { if (!ryokoCheckbox || !ryokoCheckbox.checked || !ryokoEquationInput || !charBaseMultiplierInput) return; const expression = ryokoEquationInput.value.trim(); let result = 1; ryokoEquationInput.classList.remove('border-red-500', 'focus:ring-red-500'); ryokoEquationInput.classList.add('border-gray-300', 'focus:ring-teal-focus'); if (expression) { try { const evaluatedResult = math.evaluate(expression); if (typeof evaluatedResult === 'number' && isFinite(evaluatedResult)) { result = evaluatedResult; } else { console.error("Ryoko equation evaluated to non-finite number:", evaluatedResult); throw new Error("Invalid result (NaN or Infinity)"); } } catch (error) { console.error("Error evaluating Ryoko equation:", error); ryokoEquationInput.classList.remove('focus:ring-teal-focus'); ryokoEquationInput.classList.add('border-red-500', 'focus:ring-red-500'); showMessage(`Invalid Ryoko equation: ${error.message}`, 'error'); result = 1; } } charBaseMultiplierInput.value = formatSimpleNumber(result); handleStatChange(); } // Calls handleStatChange after evaluation
     // --- State Management ---
     function gatherState() {
         const state = {
@@ -1798,7 +2012,7 @@ document.addEventListener('firebaseReady', async () => {
             ryokoCheckboxState: ryokoCheckbox?.checked || false,
             ryokoEquationValue: ryokoEquationInput?.value || '',
             // UI State
-            activeView: characterStatsScreen?.classList.contains('hidden') ? 'calculator' : 'stats',
+            activeView: calculatorState.activeView || 'calculator', // Get from state
             // Kaioken State
             kaiokenActive: kaiokenCheckbox.checked,
             maxHealth: maxHealthInput.value,
@@ -1809,7 +2023,7 @@ document.addEventListener('firebaseReady', async () => {
             energyPools: {},       // For pool-specific inputs like DPP, regen, current value
              // Form System State
             characterForms: characterForms,         // Save the array of form objects (includes buff values now)
-            activeFormIds: calculatorState.activeFormIds || [], // <<< Save NEW active form IDs array
+            activeFormIds: calculatorState.activeFormIds || [], // <<< Save active form IDs array
             // Other dynamic elements
             dynamicModifiers: [],
             activeAttacks: activeAttacks,
@@ -1825,7 +2039,7 @@ document.addEventListener('firebaseReady', async () => {
             const els = getEnergyElements(type);
             if (els) {
                 state.energyPools[type] = {
-                    // Note: maxMultiplier is now primarily controlled by forms, but save the input value
+                    // Note: maxMultiplier is controlled by forms, but save the input value anyway
                     maxMultiplier: els.maxMultiplierEl?.value || '1',
                     currentEnergy: els.currentEnergyEl?.textContent || '0',
                     damagePerPower: els.damagePerPowerEl?.value || '1',
@@ -1852,11 +2066,14 @@ document.addEventListener('firebaseReady', async () => {
             }
         });
 
+        console.log("State gathered:", state); // Debug Log
         return state;
-    }
-
+    }   
     function applyState(state) {
-        if (!state) return;
+        if (!state) {
+             console.warn("applyState called with null or undefined state.");
+             return; // Exit if no state provided
+        }
         console.log("Applying loaded state...");
 
         // Restore Character Stats first, as they influence other calculations
@@ -1870,10 +2087,10 @@ document.addEventListener('firebaseReady', async () => {
         if (charBaseTrInput) charBaseTrInput.value = state.charBaseTr || '5';
         if (charSpeedInput) charSpeedInput.value = state.charSpeed || '';     // <<< Restore Speed
 
-        // Restore Ryoko state & Apply potential base multiplier override
+        // Restore Ryoko state & Apply potential base multiplier override (needs to happen before energy calcs)
         if (ryokoCheckbox) ryokoCheckbox.checked = state.ryokoCheckboxState || false;
         if (ryokoEquationInput) ryokoEquationInput.value = state.ryokoEquationValue || '';
-        handleRyokoCheckboxChange(); // Apply UI changes and potentially recalculate multiplier
+        handleRyokoCheckboxChange(); // Apply UI changes and potentially recalculate multiplier, then calls handleStatChange
 
         // Restore Calculator Inputs
         baseDamageInput.value = state.baseDamage || '';
@@ -1881,10 +2098,12 @@ document.addEventListener('firebaseReady', async () => {
         energyTypeSelect.value = state.selectedEnergyType || 'ki'; // Restore focus type
 
         // Restore Form Data (including buff states within the form objects)
-        characterForms = state.characterForms || [];
-        calculatorState.activeFormIds = state.activeFormIds || []; // <<< Restore NEW active form IDs array
+        characterForms = state.characterForms || []; // Load forms array
+        // Restore the list of active form IDs
+        calculatorState.activeFormIds = Array.isArray(state.activeFormIds) ? state.activeFormIds : []; // Ensure it's an array
 
-        // Restore energy pool details (DPP, Regen %, Current Value) AFTER character stats are set
+        // Restore energy pool details (DPP, Regen %, Current Value)
+        // Note: Max Multiplier input value will be set by applyActiveFormEffects later
         if (state.energyPools) {
              ALL_ENERGY_TYPES.forEach(type => {
                  const els = getEnergyElements(type);
@@ -1894,25 +2113,10 @@ document.addEventListener('firebaseReady', async () => {
                      if(els.damagePerPowerEl) els.damagePerPowerEl.value = poolData.damagePerPower || '1';
                      if(els.regenPercentEl) els.regenPercentEl.value = poolData.regenPercent || '';
 
-                     // Max Multiplier is controlled by forms, don't restore directly, applyActiveFormEffects will set it.
-                     // if(els.maxMultiplierEl) els.maxMultiplierEl.value = poolData.maxMultiplier || '1';
-
-                     // Recalculate base/total AFTER character stats and BEFORE restoring current
-                     // applyActiveFormEffects (called later) will set the correct max multiplier BEFORE this is called by showSelectedEnergyPool
-                     const baseMaxEnergy = calculateBaseMaxEnergy(type);
-                     const poolMultiplier = safeParseFloat(poolData.maxMultiplier || '1', 1); // Use saved max multiplier for calculating total limit
-                     const charMultiplier = safeParseFloat(charBaseMultiplierInput.value, 1);
-                     const totalEnergy = baseMaxEnergy * charMultiplier * poolMultiplier; // Use this to cap current
-
-                     if(els.baseMaxEnergyEl) els.baseMaxEnergyEl.textContent = formatStatNumber(baseMaxEnergy);
-                     if(els.totalEnergyEl) els.totalEnergyEl.textContent = formatStatNumber(totalEnergy); // Display calculated total
-
-                     // Restore current energy, capped by the potentially recalculated total based on restored stats/multipliers
-                     if(els.currentEnergyEl) {
-                         const savedCurrentNum = parseFormattedNumber(poolData.currentEnergy || '0');
-                         // Cap saved current energy by the calculated total energy for consistency
-                         els.currentEnergyEl.textContent = formatStatNumber(Math.min(savedCurrentNum, totalEnergy > 0 ? totalEnergy : 0));
-                     }
+                     // --- Defer Current Energy Restoration ---
+                     // We need to calculate the Max Energy based on restored stats and active forms first.
+                     // We'll restore current energy *after* applyActiveFormEffects runs.
+                     // Store the saved value temporarily if needed, or just use the value from poolData later.
                  }
              });
         }
@@ -1922,6 +2126,9 @@ document.addEventListener('firebaseReady', async () => {
 
         // Restore Kaioken state
         kaiokenCheckbox.checked = state.kaiokenActive || false; maxHealthInput.value = state.maxHealth || '1000'; kaiokenStrainInput.value = state.kaiokenStrain || '10'; if(currentHealthEl) { const savedHealthNum = parseFormattedNumber(state.currentHealth || '0'); currentHealthEl.textContent = formatStatNumber(savedHealthNum); }
+        // Apply initial Kaioken style if needed (will be re-checked in showSelectedEnergyPool)
+        if (kaiokenCheckbox.checked && energyTypeSelect.value === 'ki') { applyKaiokenStyle(); } else { removeKaiokenStyle(); }
+
 
         // Restore overall stats tracking
         totalDamageDealt = state.totalDamageDealt || 0; totalEnergySpent = state.totalEnergySpent || 0; attackCount = state.attackCount || 0; highestDamage = state.highestDamage || 0;
@@ -1932,221 +2139,53 @@ document.addEventListener('firebaseReady', async () => {
         // --- Update UI based on restored state ---
         // Order is important here!
 
-        // 1. Render form lists (needed before applying effects)
+        // 1. Render form lists (needed before applying effects and restoring current energy)
         renderFormList();           // Update list in stats panel (uses characterForms)
         renderActiveFormsSection(); // Update checkboxes in main section (uses characterForms and activeFormIds)
 
-        // 2. Apply combined form effects (sets multipliers, AC/TR state, recalculates energy pools)
+        // 2. Apply combined form effects (sets multipliers, AC/TR state, recalculates base/total energy pools)
         applyActiveFormEffects();   // Uses activeFormIds and characterForms
 
-        // 3. Restore slider percentages AFTER pools potentially recalculated by applyActiveFormEffects
-        if (state.sliderPercentages) { ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); if (els?.energySlider) { els.energySlider.value = state.sliderPercentages[type] || '0'; updateSingleSliderDisplay(type); } updateSliderVisibility(type); }); }
-        // Restore Speed Slider percentage & Update display
-        const speedSlider = document.getElementById('speed-slider');
-        updateSpeedSliderVisibility(); // Ensure slider exists if needed
-        if (speedSlider && state.speedSliderPercentage) { // Check speedSlider exists AFTER visibility check potentially created it
-            speedSlider.value = state.speedSliderPercentage || '0';
-        }
-        updateSpeedSliderDisplay();
-
-        // 4. Update attack button states & slider gradients for focused type
-        updateAttackButtonStates(energyTypeSelect.value);
-        ALL_ENERGY_TYPES.forEach(type => { updateSliderLimitAndStyle(type); }); // Update all gradients
-
-        // 5. Update stats display and equation
-        updateStatsDisplay();     // Show final AC/TR, speed, etc.
-        updateEquationDisplay();  // Show equation based on current values
-
-        // 6. Restore active view (calculator or stats screen)
-        if (state.activeView === 'stats') { showCharacterStatsView(); }
-        else { showCalculatorView(); }
-
-        console.log("State application complete.");
-    }
-    // --- State Management ---
-    function gatherState() {
-        const state = {
-            // Basic inputs
-            baseDamage: baseDamageInput.value,
-            baseMultiplier: baseMultiplierInput.value,
-            attackCompressionPoints: attackCompressionPointsInput.value,
-            selectedEnergyType: energyTypeSelect.value, // Still useful for focus/Kaioken
-            // Character Stats
-            characterName: characterNameInput?.value || '',
-            charBaseHealth: charBaseHealthInput?.value || '',
-            charBaseMultiplier: charBaseMultiplierInput?.value || '1',
-            charVitality: charVitalityInput?.value || '',
-            charSoulPower: charSoulPowerInput?.value || '',
-            charSoulHp: charSoulHpInput?.value || '',
-            charBaseAc: charBaseAcInput?.value || '10',
-            charBaseTr: charBaseTrInput?.value || '5',
-            charSpeed: charSpeedInput?.value || '',      // <<< Speed Input Save
-            // Ryoko Mode
-            ryokoCheckboxState: ryokoCheckbox?.checked || false,
-            ryokoEquationValue: ryokoEquationInput?.value || '',
-            // UI State
-            activeView: characterStatsScreen?.classList.contains('hidden') ? 'calculator' : 'stats',
-            // Kaioken State
-            kaiokenActive: kaiokenCheckbox.checked,
-            maxHealth: maxHealthInput.value,
-            kaiokenStrain: kaiokenStrainInput.value,
-            currentHealth: currentHealthEl?.textContent || '0',
-            // Energy Pool Details & Sliders
-            sliderPercentages: {}, // For energy sliders
-            energyPools: {},       // For pool-specific inputs like DPP, regen, current value
-             // Form System State
-            characterForms: characterForms,         // Save the array of form objects (includes buff values now)
-            activeFormIds: calculatorState.activeFormIds || [], // <<< Save NEW active form IDs array
-            // Other dynamic elements
-            dynamicModifiers: [],
-            activeAttacks: activeAttacks,
-            // Overall Stats
-            totalDamageDealt: totalDamageDealt,
-            totalEnergySpent: totalEnergySpent,
-            attackCount: attackCount,
-            highestDamage: highestDamage,
-        };
-
-        // Gather Energy Pool Data
-        ALL_ENERGY_TYPES.forEach(type => {
-            const els = getEnergyElements(type);
-            if (els) {
-                state.energyPools[type] = {
-                    // Note: maxMultiplier is now primarily controlled by forms, but save the input value
-                    maxMultiplier: els.maxMultiplierEl?.value || '1',
-                    currentEnergy: els.currentEnergyEl?.textContent || '0',
-                    damagePerPower: els.damagePerPowerEl?.value || '1',
-                    regenPercent: els.regenPercentEl?.value || ''
-                 };
-                 state.sliderPercentages[type] = els.energySlider?.value || '0';
-            }
-        });
-
-        // Gather Speed Slider Percentage
-        const speedSlider = document.getElementById('speed-slider');
-        state.speedSliderPercentage = speedSlider?.value || '0'; // <<< Speed Slider Save
-
-        // Gather Dynamic Modifiers
-        dynamicModifiersContainer.querySelectorAll('.dynamic-box').forEach(box => {
-            const nameInput = box.querySelector('.modifier-name-input');
-            const valueInput = box.querySelector('.modifier-value-input');
-            const typeOption = box.querySelector('.modifier-type-option.active');
-            if (nameInput && valueInput && typeOption) {
-                state.dynamicModifiers.push({
-                    name: nameInput.value,
-                    value: valueInput.value,
-                    type: typeOption.dataset.value });
-            }
-        });
-
-        return state;
-    }
-
-    function applyState(state) {
-        if (!state) return;
-        console.log("Applying loaded state...");
-
-        // Restore Character Stats first, as they influence other calculations
-        if (characterNameInput) characterNameInput.value = state.characterName || '';
-        if (charBaseHealthInput) charBaseHealthInput.value = state.charBaseHealth || '';
-        if (charBaseMultiplierInput) charBaseMultiplierInput.value = state.charBaseMultiplier || '1';
-        if (charVitalityInput) charVitalityInput.value = state.charVitality || '';
-        if (charSoulPowerInput) charSoulPowerInput.value = state.charSoulPower || '';
-        if (charSoulHpInput) charSoulHpInput.value = state.charSoulHp || '';
-        if (charBaseAcInput) charBaseAcInput.value = state.charBaseAc || '10';
-        if (charBaseTrInput) charBaseTrInput.value = state.charBaseTr || '5';
-        if (charSpeedInput) charSpeedInput.value = state.charSpeed || '';     // <<< Restore Speed
-
-        // Restore Ryoko state & Apply potential base multiplier override
-        if (ryokoCheckbox) ryokoCheckbox.checked = state.ryokoCheckboxState || false;
-        if (ryokoEquationInput) ryokoEquationInput.value = state.ryokoEquationValue || '';
-        handleRyokoCheckboxChange(); // Apply UI changes and potentially recalculate multiplier
-
-        // Restore Calculator Inputs
-        baseDamageInput.value = state.baseDamage || '';
-        attackCompressionPointsInput.value = state.attackCompressionPoints || '0';
-        energyTypeSelect.value = state.selectedEnergyType || 'ki'; // Restore focus type
-
-        // Restore Form Data (including buff states within the form objects)
-        characterForms = state.characterForms || [];
-        calculatorState.activeFormIds = state.activeFormIds || []; // <<< Restore NEW active form IDs array
-
-        // Restore energy pool details (DPP, Regen %, Current Value) AFTER character stats are set
-        if (state.energyPools) {
+        // 3. Restore CURRENT Energy *after* total energy has been recalculated by applyActiveFormEffects
+         if (state.energyPools) {
              ALL_ENERGY_TYPES.forEach(type => {
                  const els = getEnergyElements(type);
                  const poolData = state.energyPools[type];
-                 if (els && poolData) {
-                     // Restore inputs directly modifiable by user within the pool section
-                     if(els.damagePerPowerEl) els.damagePerPowerEl.value = poolData.damagePerPower || '1';
-                     if(els.regenPercentEl) els.regenPercentEl.value = poolData.regenPercent || '';
-
-                     // Max Multiplier is controlled by forms, don't restore directly, applyActiveFormEffects will set it.
-                     // if(els.maxMultiplierEl) els.maxMultiplierEl.value = poolData.maxMultiplier || '1';
-
-                     // Recalculate base/total AFTER character stats and BEFORE restoring current
-                     // applyActiveFormEffects (called later) will set the correct max multiplier BEFORE this is called by showSelectedEnergyPool
-                     const baseMaxEnergy = calculateBaseMaxEnergy(type);
-                     const poolMultiplier = safeParseFloat(poolData.maxMultiplier || '1', 1); // Use saved max multiplier for calculating total limit
-                     const charMultiplier = safeParseFloat(charBaseMultiplierInput.value, 1);
-                     const totalEnergy = baseMaxEnergy * charMultiplier * poolMultiplier; // Use this to cap current
-
-                     if(els.baseMaxEnergyEl) els.baseMaxEnergyEl.textContent = formatStatNumber(baseMaxEnergy);
-                     if(els.totalEnergyEl) els.totalEnergyEl.textContent = formatStatNumber(totalEnergy); // Display calculated total
-
-                     // Restore current energy, capped by the potentially recalculated total based on restored stats/multipliers
-                     if(els.currentEnergyEl) {
-                         const savedCurrentNum = parseFormattedNumber(poolData.currentEnergy || '0');
-                         // Cap saved current energy by the calculated total energy for consistency
-                         els.currentEnergyEl.textContent = formatStatNumber(Math.min(savedCurrentNum, totalEnergy > 0 ? totalEnergy : 0));
-                     }
+                 if (els && els.currentEnergyEl && poolData) {
+                     const savedCurrentNum = parseFormattedNumber(poolData.currentEnergy || '0');
+                     const currentTotal = parseFormattedNumber(els.totalEnergyEl.textContent || '0');
+                     // Cap saved current energy by the calculated total energy for consistency
+                     els.currentEnergyEl.textContent = formatStatNumber(Math.max(0, Math.min(savedCurrentNum, currentTotal)));
                  }
              });
         }
 
-        // Restore dynamic modifiers
-        dynamicModifiersContainer.innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>'; dynamicModifierCount = 0; if (state.dynamicModifiers && Array.isArray(state.dynamicModifiers)) { state.dynamicModifiers.forEach(modData => addDynamicModifier(modData)); }
 
-        // Restore Kaioken state
-        kaiokenCheckbox.checked = state.kaiokenActive || false; maxHealthInput.value = state.maxHealth || '1000'; kaiokenStrainInput.value = state.kaiokenStrain || '10'; if(currentHealthEl) { const savedHealthNum = parseFormattedNumber(state.currentHealth || '0'); currentHealthEl.textContent = formatStatNumber(savedHealthNum); }
-
-        // Restore overall stats tracking
-        totalDamageDealt = state.totalDamageDealt || 0; totalEnergySpent = state.totalEnergySpent || 0; attackCount = state.attackCount || 0; highestDamage = state.highestDamage || 0;
-
-        // Restore attack states (which energy types had super/ultimate active)
-        activeAttacks = state.activeAttacks || {};
-
-        // --- Update UI based on restored state ---
-        // Order is important here!
-
-        // 1. Render form lists (needed before applying effects)
-        renderFormList();           // Update list in stats panel (uses characterForms)
-        renderActiveFormsSection(); // Update checkboxes in main section (uses characterForms and activeFormIds)
-
-        // 2. Apply combined form effects (sets multipliers, AC/TR state, recalculates energy pools)
-        applyActiveFormEffects();   // Uses activeFormIds and characterForms
-
-        // 3. Restore slider percentages AFTER pools potentially recalculated by applyActiveFormEffects
+        // 4. Restore slider percentages AFTER pools potentially recalculated by applyActiveFormEffects AND current energy restored
         if (state.sliderPercentages) { ALL_ENERGY_TYPES.forEach(type => { const els = getEnergyElements(type); if (els?.energySlider) { els.energySlider.value = state.sliderPercentages[type] || '0'; updateSingleSliderDisplay(type); } updateSliderVisibility(type); }); }
         // Restore Speed Slider percentage & Update display
+        updateSpeedSliderVisibility(); // Ensure slider exists if speed > 0
         const speedSlider = document.getElementById('speed-slider');
-        updateSpeedSliderVisibility(); // Ensure slider exists if needed
         if (speedSlider && state.speedSliderPercentage) { // Check speedSlider exists AFTER visibility check potentially created it
             speedSlider.value = state.speedSliderPercentage || '0';
         }
-        updateSpeedSliderDisplay();
+        updateSpeedSliderDisplay(); // Update display text
 
-        // 4. Update attack button states & slider gradients for focused type
+        // 5. Update attack button states & slider gradients for focused type
         updateAttackButtonStates(energyTypeSelect.value);
         ALL_ENERGY_TYPES.forEach(type => { updateSliderLimitAndStyle(type); }); // Update all gradients
 
-        // 5. Update stats display and equation
-        updateStatsDisplay();     // Show final AC/TR, speed, etc.
-        updateEquationDisplay();  // Show equation based on current values
+        // 6. Update stats display and equation (final check based on all restored state)
+        updateStatsDisplay();
+        updateEquationDisplay();
 
-        // 6. Restore active view (calculator or stats screen)
-        if (state.activeView === 'stats') { showCharacterStatsView(); }
+        // 7. Restore active view (calculator or stats screen)
+        calculatorState.activeView = state.activeView || 'calculator'; // Make sure it's set in state object
+        if (calculatorState.activeView === 'stats') { showCharacterStatsView(); }
         else { showCalculatorView(); }
+
+        // 8. Ensure the initially selected energy pool is displayed correctly
+        showSelectedEnergyPool(); // Call this last to ensure visual consistency for the focused pool
 
         console.log("State application complete.");
     }
@@ -2162,7 +2201,14 @@ document.addEventListener('firebaseReady', async () => {
             showMessage(`Signed in as ${user.displayName || user.email}`, 'success');
         } catch (error) {
             console.error("Google Sign-in error:", error);
-            showMessage(`Google Sign-in failed: ${error.message}`, 'error');
+            // Provide more user-friendly messages for common errors
+            if (error.code === 'auth/popup-closed-by-user') {
+                 showMessage('Sign-in cancelled.', 'info');
+            } else if (error.code === 'auth/network-request-failed') {
+                 showMessage('Network error during sign-in. Please check connection.', 'error');
+            } else {
+                showMessage(`Google Sign-in failed: ${error.message}`, 'error');
+            }
         }
     }
     async function handleSignOut() {
@@ -2176,12 +2222,12 @@ document.addEventListener('firebaseReady', async () => {
             showMessage(`Sign-out failed: ${error.message}`, 'error');
         }
     }
-// --- Helper functions for initialization ---
+ // --- Helper functions for initialization ---
     function initializeDefaultState() {
         console.log("Initializing default state...");
         // Reset core calculator state variables
         characterForms = []; // Clear saved forms
-        calculatorState = { activeFormIds: [], appliedAcBonus: 0, appliedTrueResistanceBonus: 0 }; // Reset form state
+        calculatorState = { activeFormIds: [], appliedAcBonus: 0, appliedTrueResistanceBonus: 0, activeView: 'calculator' }; // Reset form state & view
         totalDamageDealt = 0; totalEnergySpent = 0; attackCount = 0; highestDamage = 0;
         activeAttacks = {}; // Clear attack reservations
 
@@ -2250,8 +2296,9 @@ document.addEventListener('firebaseReady', async () => {
              showCalculatorView();
          }
          // Potentially re-render form sections just in case applyState order wasn't perfect
-         renderFormList();
-         renderActiveFormsSection();
+         // These are also called within applyState -> showSelectedEnergyPool -> applyActiveFormEffects though
+         // renderFormList();
+         // renderActiveFormsSection();
     }
     // --- Event Listeners Setup ---
     // NOTE: This function should be called ONLY ONCE after initial HTML generation and DOM references are set.
@@ -2259,18 +2306,46 @@ document.addEventListener('firebaseReady', async () => {
         console.log("Setting up event listeners...");
 
         // --- Static element listeners ---
-        if (energyTypeSelect) energyTypeSelect.addEventListener('change', () => { showSelectedEnergyPool(); /* applyActiveFormEffects called within showSelected... */ updateEquationDisplay(); });
-        if (calculateBtn) calculateBtn.addEventListener('click', () => { triggerAnimation(calculateBtn, 'pulse'); performCalculation(); });
-        if (addDynamicBoxBtn) addDynamicBoxBtn.addEventListener('click', () => { triggerAnimation(addDynamicBoxBtn, 'pulse'); addDynamicModifier(); updateEquationDisplay(); });
+        if (energyTypeSelect) {
+             energyTypeSelect.addEventListener('change', () => {
+                 console.log('DROPDOWN CHANGED to:', energyTypeSelect.value); // Log for debugging
+                 showSelectedEnergyPool();
+                 // updateEquationDisplay(); // Called within showSelectedEnergyPool -> applyActiveFormEffects now
+             });
+        }
+        if (calculateBtn) {
+             calculateBtn.addEventListener('click', () => {
+                 console.log('CALCULATE BUTTON CLICKED'); // Log for debugging
+                 triggerAnimation(calculateBtn, 'pulse');
+                 performCalculation();
+             });
+        }
+        if (addDynamicBoxBtn) {
+            addDynamicBoxBtn.addEventListener('click', () => {
+                triggerAnimation(addDynamicBoxBtn, 'pulse');
+                addDynamicModifier();
+                updateEquationDisplay();
+            });
+        }
+        // Base Damage / Compression / Base Multiplier Inputs -> Update Equation on change
         [baseDamageInput, attackCompressionPointsInput, baseMultiplierInput].forEach(input => {
             if (input) {
                 input.addEventListener('input', updateEquationDisplay);
-                input.addEventListener('change', updateEquationDisplay); // Add change listener too for robustness
+                input.addEventListener('change', updateEquationDisplay);
             }
         });
 
         // --- Character Stat inputs listener (includes Speed) ---
-        const characterStatInputs = [charBaseHealthInput, charVitalityInput, charSoulPowerInput, charSoulHpInput, charBaseAcInput, charBaseTrInput, charSpeedInput]; // Added charSpeedInput
+        // These trigger recalculations of energy pools and other stats
+        const characterStatInputs = [
+             charBaseHealthInput,
+             charVitalityInput,
+             charSoulPowerInput,
+             charSoulHpInput,
+             charBaseAcInput,
+             charBaseTrInput,
+             charSpeedInput // <<< Added charSpeedInput here
+        ];
         characterStatInputs.forEach(input => {
              if (input) {
                  input.addEventListener('input', handleStatChange);
@@ -2278,28 +2353,45 @@ document.addEventListener('firebaseReady', async () => {
             }
         });
 
-        // Specific handling for Character Base Multiplier and Ryoko Mode
-        if (charBaseMultiplierInput) { charBaseMultiplierInput.addEventListener('input', () => { if (!charBaseMultiplierInput.readOnly) { handleStatChange(); } }); }
+        // Specific handling for Character Base Multiplier (affected by Ryoko mode)
+        if (charBaseMultiplierInput) {
+             charBaseMultiplierInput.addEventListener('input', () => {
+                 // Only trigger full stat change if NOT in Ryoko mode (handled separately)
+                 if (!charBaseMultiplierInput.readOnly) {
+                     handleStatChange();
+                 } else {
+                     // If readonly (Ryoko mode), maybe just update equation?
+                     updateEquationDisplay();
+                 }
+             });
+             charBaseMultiplierInput.addEventListener('change', () => {
+                 if (!charBaseMultiplierInput.readOnly) { handleStatChange();} else { updateEquationDisplay();}
+            });
+        }
         if (ryokoCheckbox) { ryokoCheckbox.addEventListener('change', handleRyokoCheckboxChange); }
         if (ryokoEquationInput) { ryokoEquationInput.addEventListener('input', evaluateRyokoEquation); ryokoEquationInput.addEventListener('change', evaluateRyokoEquation); }
 
-        // --- Dynamic Modifier Box Listeners ---
-        // Attached directly when boxes are created by addListenersToModifierBox
-
-        // --- Energy Pool Input Listeners (using delegation) ---
+        /// --- Energy Pool Input Listeners (using delegation on the container) ---
         if (energyPoolsContainer) {
              energyPoolsContainer.addEventListener('input', (event) => {
-                 if (event.target.classList.contains('max-multiplier')) {
-                     const type = event.target.id.split('-')[0];
-                     // Only recalculate this specific pool, applyActiveForms handles setting initial value
+                 const target = event.target;
+                 if (target.classList.contains('max-multiplier')) {
+                     const type = target.id.split('-')[0];
+                     // Recalculate this pool's energy based on user override of max multiplier
+                     // Note: This might get overridden again if active forms change later
                      calculateAndResetEnergy(type);
-                     updateStatsDisplay(); updateEquationDisplay();
-                 } else if (event.target.classList.contains('damage-per-power')) {
-                     const type = event.target.id.split('-')[0];
-                     updateSingleSliderDisplay(type); updateEquationDisplay();
+                     updateStatsDisplay();
+                     updateEquationDisplay();
+                 } else if (target.classList.contains('damage-per-power')) {
+                     const type = target.id.split('-')[0];
+                     updateSingleSliderDisplay(type); // Update slider text immediately
+                     updateEquationDisplay(); // Update equation immediately
+                 } else if (target.classList.contains('regen-percent')) {
+                     // No action needed on mere input, only on button click
                  }
-                 // Removed listener for form-select as it's gone
+                 // No listener needed for form-select as it was removed
              });
+             // Listener for Regen button clicks
              energyPoolsContainer.addEventListener('click', (event) => {
                  if (event.target.classList.contains('regen-btn')) {
                      triggerAnimation(event.target, 'pulse');
@@ -2309,32 +2401,34 @@ document.addEventListener('firebaseReady', async () => {
              // Removed change listener for form-select
         }
 
-        // --- Slider Input Listener (Energy + Speed, using delegation) ---
+        // --- Slider Input Listener (Energy + Speed, using delegation on the grid) ---
         if (slidersGrid) {
             slidersGrid.addEventListener('input', (event) => {
                 const slider = event.target;
-                if (slider.classList.contains('energy-slider')) { // Check general class first
+                // Check if the event target is actually one of our sliders
+                if (slider.type === 'range' && slider.classList.contains('energy-slider')) {
                     const currentType = slider.dataset.type; // 'ki', 'nen', ..., 'speed'
+
                     if (currentType === 'speed') {
-                        // Handle Speed Slider
-                         updateSpeedSliderDisplay();
-                         updateEquationDisplay();
+                        // Handle Speed Slider input
+                         updateSpeedSliderDisplay(); // Update display (S: ..., D: ...)
+                         updateEquationDisplay(); // Update main equation
                     } else if (ALL_ENERGY_TYPES.includes(currentType)) {
-                         // Handle Energy Sliders
+                         // Handle Energy Sliders input
                         const activeAttack = activeAttacks[currentType] || null;
                         let limitPercent = 100;
                         if (activeAttack === 'super') limitPercent = 95;
                         else if (activeAttack === 'ultimate') limitPercent = 90;
+                        // Enforce limit if user tries to drag beyond reserved amount
                         if (parseInt(slider.value) > limitPercent) {
                             slider.value = limitPercent;
                         }
-                        updateSingleSliderDisplay(currentType);
-                        updateEquationDisplay();
+                        updateSingleSliderDisplay(currentType); // Update display (E: ..., D: ...)
+                        updateEquationDisplay(); // Update main equation
                     }
                 }
             });
         }
-
         // --- Auth buttons ---
         const googleSignInBtn = document.getElementById('google-signin-btn');
         const signOutBtn = document.getElementById('sign-out-btn');
@@ -2342,12 +2436,12 @@ document.addEventListener('firebaseReady', async () => {
         if (signOutBtn) { signOutBtn.removeEventListener('click', handleSignOut); signOutBtn.addEventListener('click', handleSignOut); }
 
         // --- Save/Load/Clear buttons ---
-        if (saveBtn) saveBtn.addEventListener('click', () => { triggerAnimation(saveBtn, 'pulse'); saveState(); });
-        if (loadBtn) loadBtn.addEventListener('click', () => { triggerAnimation(loadBtn, 'pulse'); loadState().then(loaded => { if(loaded) { showMessage('State loaded successfully.', 'success'); } else { showMessage('No saved state found or failed to load.', 'info');} }); });
-        if (clearBtn) clearBtn.addEventListener('click', () => { triggerAnimation(clearBtn, 'pulse'); clearState(); });
+        if (saveBtn) saveBtn.addEventListener('click', () => { console.log('SAVE BUTTON CLICKED'); triggerAnimation(saveBtn, 'pulse'); saveState(); });
+        if (loadBtn) loadBtn.addEventListener('click', () => { console.log('LOAD BUTTON CLICKED'); triggerAnimation(loadBtn, 'pulse'); loadState().then(loaded => { if(loaded) { showMessage('State loaded successfully.', 'success'); } else { showMessage('No saved state found or failed to load.', 'info');} }); });
+        if (clearBtn) clearBtn.addEventListener('click', () => { console.log('CLEAR BUTTON CLICKED'); triggerAnimation(clearBtn, 'pulse'); clearState(); });
 
         // --- Kaioken section listeners ---
-        if (kaiokenCheckbox) { kaiokenCheckbox.addEventListener('change', () => { const isChecked = kaiokenCheckbox.checked; kaiokenDetails.classList.toggle('hidden', !isChecked); if (isChecked) { applyKaiokenStyle(); updateCurrentHealthDisplay(); } else { removeKaiokenStyle(); } updateEquationDisplay(); }); }
+        if (kaiokenCheckbox) { kaiokenCheckbox.addEventListener('change', () => { const isChecked = kaiokenCheckbox.checked; kaiokenDetails.classList.toggle('hidden', !isChecked); if (isChecked) { applyKaiokenStyle(); updateCurrentHealthDisplay(); } else { removeKaiokenStyle(); } updateEquationDisplay(); }); } // Equation might change if Kaioken affects multipliers indirectly? Re-evaluating is safe.
         if (maxHealthInput) { maxHealthInput.addEventListener('input', () => { updateCurrentHealthDisplay(); updateEquationDisplay(); }); maxHealthInput.addEventListener('change', () => { updateCurrentHealthDisplay(); updateEquationDisplay(); }); }
         if (kaiokenStrainInput) { kaiokenStrainInput.addEventListener('input', updateEquationDisplay); kaiokenStrainInput.addEventListener('change', updateEquationDisplay);}
         if (regenHealthBtn) { regenHealthBtn.addEventListener('click', () => { triggerAnimation(regenHealthBtn, 'pulse'); regenerateHealth(); }); }
@@ -2363,22 +2457,24 @@ document.addEventListener('firebaseReady', async () => {
         if (ultimateAttackBtn) ultimateAttackBtn.addEventListener('click', handleAttackButtonClick);
 
         // --- Tab Switching Button Listener ---
-        if (showCharacterStatsBtn) { showCharacterStatsBtn.addEventListener('click', () => { triggerAnimation(showCharacterStatsBtn, 'pulse'); if (characterStatsScreen && characterStatsScreen.classList.contains('hidden')) { showCharacterStatsView(); } else { showCalculatorView(); } }); }
-
+        if (showCharacterStatsBtn) { showCharacterStatsBtn.addEventListener('click', () => { console.log('SHOW CHAR STATS BUTTON CLICKED'); triggerAnimation(showCharacterStatsBtn, 'pulse'); if (characterStatsScreen && characterStatsScreen.classList.contains('hidden')) { showCharacterStatsView(); } else { showCalculatorView(); } }); }
         // --- Form Creator Listeners ---
         if (formAffectsResistancesCheckbox) {
             formAffectsResistancesCheckbox.addEventListener('change', () => {
+                 // Toggle visibility of AC/TR bonus inputs
                  formResistanceBonusInputsDiv.classList.toggle('hidden', !formAffectsResistancesCheckbox.checked);
+                 // Reset values if checkbox is unchecked
                  if (!formAffectsResistancesCheckbox.checked) {
                      if(formAcBonusInput) formAcBonusInput.value = 0;
                      if(formTrueResistanceBonusInput) formTrueResistanceBonusInput.value = 0;
                  }
             });
         }
-        // Add listeners for new buff inputs (optional, as they are read on 'Add Form' click)
+        // Add listeners for new buff inputs (optional, can just read on button click)
         // Example: formEnableFormBuffCheckbox.addEventListener('change', someFunction);
         // Example: formFormBuffValueInput.addEventListener('input', someFunction);
 
+        // Listener for the main "Add This Form" button
         if (addFormButton) {
             addFormButton.addEventListener('click', () => {
                 triggerAnimation(addFormButton, 'pulse');
@@ -2387,7 +2483,10 @@ document.addEventListener('firebaseReady', async () => {
                 const affectsResistances = formAffectsResistancesCheckbox.checked;
 
                 if (!formName) { showMessage("Please enter a Form Name.", 'error'); return; }
-                if (characterForms.some(form => form.name === formName)) { showMessage(`A form named "${formName}" already exists.`, 'error'); return; }
+                // Check for duplicate form names
+                if (characterForms.some(form => form.name.toLowerCase() === formName.toLowerCase())) {
+                     showMessage(`A form named "${formName}" already exists. Please use a unique name.`, 'error'); return;
+                }
 
                 // Read buff values when adding the form
                 const enableFormBuff = formEnableFormBuffCheckbox.checked;
@@ -2397,30 +2496,31 @@ document.addEventListener('firebaseReady', async () => {
                 const poolBuffValue = safeParseFloat(formPoolBuffValueInput.value, 0);
                 const poolBuffType = formPoolBuffTypeSelect.value; // 'add' or 'multiply'
 
+                // Create the new form object, including buff properties
                 const newForm = {
-                    id: `form_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+                    id: `form_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`, // Unique ID
                     name: formName,
                     formMultiplier: safeParseFloat(formFormMultiplierInput.value, 1),
                     poolMaxMultiplier: safeParseFloat(formPoolMaxMultiplierInput.value, 1),
-                    energyType: energyType,
+                    energyType: energyType, // Can be 'None'
                     affectsResistances: affectsResistances,
                     acBonus: affectsResistances ? (safeParseFloat(formAcBonusInput.value, 0)) : 0,
                     trueResistanceBonus: affectsResistances ? (safeParseFloat(formTrueResistanceBonusInput.value, 0)) : 0,
-                    // Add buff properties
-                    enableFormBuff: enableFormBuff,
-                    formBuffValue: formBuffValue,
-                    formBuffType: formBuffType,
-                    enablePoolBuff: enablePoolBuff,
-                    poolBuffValue: poolBuffValue,
-                    poolBuffType: poolBuffType
+                    // Add buff properties with defaults if needed
+                    enableFormBuff: enableFormBuff || false,
+                    formBuffValue: formBuffValue || 0,
+                    formBuffType: formBuffType || 'add',
+                    enablePoolBuff: enablePoolBuff || false,
+                    poolBuffValue: poolBuffValue || 0,
+                    poolBuffType: poolBuffType || 'add'
                 };
 
-                characterForms.push(newForm);
+                characterForms.push(newForm); // Add to our main forms array
                 console.log("Form Added:", newForm);
                 showMessage(`Form "${newForm.name}" added!`, 'success');
 
                 renderFormList();           // Update the list in the stats panel
-                renderActiveFormsSection(); // Update the list of checkboxes
+                renderActiveFormsSection(); // Update the list of checkboxes in main section
 
                 // Reset Form Creator fields including buff inputs
                 formNameInput.value = '';
@@ -2437,95 +2537,125 @@ document.addEventListener('firebaseReady', async () => {
                 formEnablePoolBuffCheckbox.checked = false;
                 formPoolBuffValueInput.value = 0;
                 formPoolBuffTypeSelect.value = 'add';
+
+                // Note: State is not auto-saved here. User uses Save button.
             });
         }
 
-        // --- Form List Delete listener (Stats Panel) ---
+        // --- Form List Delete listener (Stats Panel - using delegation) ---
         if (formListContainer) {
-            formListContainer.addEventListener('click', handleDeleteFormClick);
+            formListContainer.addEventListener('click', handleDeleteFormClick); // Uses the function defined elsewhere
         }
 
         // --- Active Forms Checkbox Listener ---
-        // Added directly to checkboxes in renderActiveFormsSection, no delegation needed here
+        // Attached directly to checkboxes in renderActiveFormsSection, no delegation needed here
+
+        console.log("Event listeners setup complete.");
+    } // <-- End of setupEventListeners function
+                          // --- Form Creator Listeners ---
+        if (formAffectsResistancesCheckbox) {
+            formAffectsResistancesCheckbox.addEventListener('change', () => {
+                 // Toggle visibility of AC/TR bonus inputs
+                 formResistanceBonusInputsDiv.classList.toggle('hidden', !formAffectsResistancesCheckbox.checked);
+                 // Reset values if checkbox is unchecked
+                 if (!formAffectsResistancesCheckbox.checked) {
+                     if(formAcBonusInput) formAcBonusInput.value = 0;
+                     if(formTrueResistanceBonusInput) formTrueResistanceBonusInput.value = 0;
+                 }
+            });
+        }
+        // Add listeners for new buff inputs (optional, can just read on button click)
+        // Example: formEnableFormBuffCheckbox.addEventListener('change', someFunction);
+        // Example: formFormBuffValueInput.addEventListener('input', someFunction);
+
+        // Listener for the main "Add This Form" button
+        if (addFormButton) {
+            addFormButton.addEventListener('click', () => {
+                triggerAnimation(addFormButton, 'pulse');
+                const formName = formNameInput.value.trim();
+                const energyType = formEnergyTypeSelect.value;
+                const affectsResistances = formAffectsResistancesCheckbox.checked;
+
+                if (!formName) { showMessage("Please enter a Form Name.", 'error'); return; }
+                // Check for duplicate form names
+                if (characterForms.some(form => form.name.toLowerCase() === formName.toLowerCase())) {
+                     showMessage(`A form named "${formName}" already exists. Please use a unique name.`, 'error'); return;
+                }
+
+                // Read buff values when adding the form
+                const enableFormBuff = formEnableFormBuffCheckbox.checked;
+                const formBuffValue = safeParseFloat(formFormBuffValueInput.value, 0);
+                const formBuffType = formFormBuffTypeSelect.value; // 'add' or 'multiply'
+                const enablePoolBuff = formEnablePoolBuffCheckbox.checked;
+                const poolBuffValue = safeParseFloat(formPoolBuffValueInput.value, 0);
+                const poolBuffType = formPoolBuffTypeSelect.value; // 'add' or 'multiply'
+
+                // Create the new form object, including buff properties
+                const newForm = {
+                    id: `form_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`, // Unique ID
+                    name: formName,
+                    formMultiplier: safeParseFloat(formFormMultiplierInput.value, 1),
+                    poolMaxMultiplier: safeParseFloat(formPoolMaxMultiplierInput.value, 1),
+                    energyType: energyType, // Can be 'None'
+                    affectsResistances: affectsResistances,
+                    acBonus: affectsResistances ? (safeParseFloat(formAcBonusInput.value, 0)) : 0,
+                    trueResistanceBonus: affectsResistances ? (safeParseFloat(formTrueResistanceBonusInput.value, 0)) : 0,
+                    // Add buff properties with defaults if needed
+                    enableFormBuff: enableFormBuff || false,
+                    formBuffValue: formBuffValue || 0,
+                    formBuffType: formBuffType || 'add',
+                    enablePoolBuff: enablePoolBuff || false,
+                    poolBuffValue: poolBuffValue || 0,
+                    poolBuffType: poolBuffType || 'add'
+                };
+
+                characterForms.push(newForm); // Add to our main forms array
+                console.log("Form Added:", newForm);
+                showMessage(`Form "${newForm.name}" added!`, 'success');
+
+                renderFormList();           // Update the list in the stats panel
+                renderActiveFormsSection(); // Update the list of checkboxes in main section
+
+                // Reset Form Creator fields including buff inputs
+                formNameInput.value = '';
+                formEnergyTypeSelect.value = 'None';
+                formFormMultiplierInput.value = 1;
+                formPoolMaxMultiplierInput.value = 1;
+                formAffectsResistancesCheckbox.checked = false;
+                formResistanceBonusInputsDiv.classList.add('hidden');
+                formAcBonusInput.value = 0;
+                formTrueResistanceBonusInput.value = 0;
+                formEnableFormBuffCheckbox.checked = false;
+                formFormBuffValueInput.value = 0;
+                formFormBuffTypeSelect.value = 'add';
+                formEnablePoolBuffCheckbox.checked = false;
+                formPoolBuffValueInput.value = 0;
+                formPoolBuffTypeSelect.value = 'add';
+
+                // Note: State is not auto-saved here. User uses Save button.
+            });
+        }
+
+        // --- Form List Delete listener (Stats Panel - using delegation) ---
+        if (formListContainer) {
+            formListContainer.addEventListener('click', handleDeleteFormClick); // Uses the function defined elsewhere
+        }
+
+        // --- Active Forms Checkbox Listener ---
+        // Attached directly to checkboxes in renderActiveFormsSection, no delegation needed here
 
         console.log("Event listeners setup complete.");
     }
-    // --- Initialization Sequence ---
+                          // --- Initialization Sequence ---
     console.log(`Initializing Energy Calculator v12.0 (Multi-Form, Buffs, Speed)...`);
 
-    // --- Generate Elements from Templates ---
-    function generateEnergySections() {
-        if (!energyPoolTemplate || !energySliderTemplate || !energyPoolsContainer || !slidersGrid) {
-            console.error("Required templates or containers not found! Cannot generate energy sections.");
-            return;
-        }
-        energyPoolsContainer.innerHTML = '';
-        slidersGrid.innerHTML = ''; // Clear sliders grid too
+    // 1. Generate base DOM structure for energy sections (pools/sliders)
+    generateEnergySections();
+    // Note: Speed slider DOM is generated only *if needed* by updateSpeedSliderVisibility,
+    // which is called later during initialization or state application.
 
-        ALL_ENERGY_TYPES.forEach(type => {
-            const details = ENERGY_TYPE_DETAILS[type];
-            if (!details) return;
-
-            // --- Generate Energy Pool Section ---
-            const poolClone = energyPoolTemplate.content.cloneNode(true);
-            const poolDiv = poolClone.querySelector('.energy-pool');
-            if (poolDiv) {
-                poolDiv.id = `${type}-pool`;
-                poolDiv.style.display = 'none'; // Start hidden
-                poolDiv.classList.add(details.border, details.gradientTo);
-
-                const titleEl = poolDiv.querySelector('.pool-title');
-                if (titleEl) titleEl.textContent = `${details.name} Energy Pool`;
-
-                // Setup inputs/spans with unique IDs and labels
-                const setupElement = (selectorSuffix, isInput = true, focusClass = '') => {
-                    const el = poolDiv.querySelector(`.${selectorSuffix}`);
-                    const labelEl = poolDiv.querySelector(`.${selectorSuffix}-label`);
-                    if (el) {
-                        el.id = `${type}-${selectorSuffix}`;
-                        if(labelEl) {
-                            if(isInput) { labelEl.htmlFor = el.id; } else { labelEl.removeAttribute('for'); }
-                        }
-                        if (isInput && focusClass) el.classList.add(focusClass);
-                    }
-                };
-                setupElement('base-max-energy', false);
-                setupElement('max-multiplier', true, details.focusRing); // Pool Max Multiplier
-                setupElement('total-energy', false);
-                setupElement('current-energy', false);
-                setupElement('damage-per-power', true, details.focusRing);
-                setupElement('regen-percent', true, details.focusRing);
-                // NOTE: Form select elements removed from template and this setup
-
-                const regenBtn = poolDiv.querySelector('.regen-btn');
-                if (regenBtn) { regenBtn.dataset.type = type; }
-
-                energyPoolsContainer.appendChild(poolClone);
-            } else {
-                console.error(`Could not find .energy-pool in template clone for ${type}`);
-            }
-
-            // --- Generate Slider Section ---
-            const sliderClone = energySliderTemplate.content.cloneNode(true);
-            const sliderSection = sliderClone.querySelector('.energy-slider-section');
-            if (sliderSection) {
-                sliderSection.id = `${type}-slider-section`;
-                sliderSection.dataset.type = type; // Link to energy type
-                const sliderLabel = sliderSection.querySelector('.slider-label');
-                if (sliderLabel) { sliderLabel.htmlFor = `${type}-energy-slider`; sliderLabel.textContent = `${details.name} Energy Used (%):`; }
-                const energySlider = sliderSection.querySelector('.energy-slider');
-                if (energySlider) { energySlider.id = `${type}-energy-slider`; energySlider.dataset.type = type; } // Link slider too
-                const valueDisplay = sliderSection.querySelector('.energy-slider-value-display');
-                if (valueDisplay) { valueDisplay.id = `${type}-slider-value-display`; }
-                slidersGrid.appendChild(sliderClone);
-            } else {
-                console.error(`Could not find .energy-slider-section in template clone for ${type}`);
-            }
-        });
-        console.log("Energy sections generated from templates.");
-        // Speed slider is generated separately by generateSpeedSlider() when needed
-    }
-    setupEventListeners();    // 2. Attach listeners to elements ONCE (includes listeners for dynamic elements via delegation or direct attachment)
+    // 2. Attach all static and dynamic event listeners
+    setupEventListeners();
 
 
     // --- Authentication State Change Listener ---
