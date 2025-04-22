@@ -683,6 +683,8 @@
 <script>
 document.addEventListener('firebaseReady', async () => {
     // --- DOM Element References ---
+    // ... (keep ALL your other getElementById calls here) ...
+    const statSpeedEl = document.getElementById('stat-speed');
     const energyTypeSelect = document.getElementById('energy-type');
     const energyPoolsContainer = document.getElementById('energy-pools-container');
     const slidersGrid = document.getElementById('sliders-grid');
