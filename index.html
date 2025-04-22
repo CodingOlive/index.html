@@ -2459,7 +2459,7 @@ document.addEventListener('firebaseReady', async () => {
         // --- Tab Switching Button Listener ---
         if (showCharacterStatsBtn) { showCharacterStatsBtn.addEventListener('click', () => { console.log('SHOW CHAR STATS BUTTON CLICKED'); triggerAnimation(showCharacterStatsBtn, 'pulse'); if (characterStatsScreen && characterStatsScreen.classList.contains('hidden')) { showCharacterStatsView(); } else { showCalculatorView(); } }); }
        
-            });
+            };
         }
         // Add listeners for new buff inputs (optional, can just read on button click)
         // Example: formEnableFormBuffCheckbox.addEventListener('change', someFunction);
