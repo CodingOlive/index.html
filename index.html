@@ -1137,7 +1137,7 @@ document.addEventListener('firebaseReady', async () => {
         const baseSpeed = safeParseFloat(charSpeedInput?.value, 0);
 
         if (!slider || !valueDisplay || !charSpeedInput) {
-            // Don't spam console if slider just hasn't been generated yet
+            // Don't spam console  just hasn't been generated yet
             // console.warn("Speed slider elements not found for display update.");
             return; // Exit if elements aren't ready
         }
@@ -1435,9 +1435,12 @@ document.addEventListener('firebaseReady', async () => {
     // Updates the text display below an energy slider (e.g., E: 100, D: 100.00)
     // This is also used by the speed slider display update function.
     function updateSingleSliderDisplay(type) {
+         console.log(`--- Running updateSingleSliderDisplay for: ${type} ---`);
          const els = getEnergyElements(type);
+         console.log(`Elements found for ${type}:`, els);
          if (!els?.energySlider || !els?.sliderValueDisplay || !els?.currentEnergyEl || !els?.damagePerPowerEl) {
              // Don't update if elements are missing (e.g., during init)
+             console.warn(`Required elements missing for ${type}, exiting update.`);
              return;
          }
          const percentSpan = els.sliderValueDisplay.querySelector('.slider-percent-value');
@@ -1457,9 +1460,11 @@ document.addEventListener('firebaseReady', async () => {
          const potentialEnergyUsed = currentEnergy * (effectivePercent / 100);
          const actualEnergyUsed = Math.min(potentialEnergyUsed, currentEnergy); // Cannot use more than current
          const extraDamage = actualEnergyUsed * damagePerPower;
-
+         console.log(`Calculated for <span class="math-inline">\{type\}\: actualUsedE\=</span>{actualEnergyUsed}, extraD=${extraDamage}`);
+        
          percentSpan.textContent = `${sliderPercent}%`; // Display the actual slider %
          detailsSpan.textContent = `(E: ${formatStatNumber(actualEnergyUsed)}, D: ${formatStatNumber(extraDamage)})`;
+         console.log(`--- Finished updateSingleSliderDisplay for: ${type} ---`);
      }
     // Main calculation function
     function performCalculation() {
@@ -2478,6 +2483,7 @@ document.addEventListener('firebaseReady', async () => {
         // --- Slider Input Listener (Energy + Speed, using delegation on the grid) ---
           console.log("Checking slidersGrid element:", slidersGrid);
         if (slidersGrid) {
+            console.log("Attaching listener to slidersGrid SUCCESSFUL."); 
             slidersGrid.addEventListener('input', (event) => {
                 const slider = event.target;
                 // Check if the event target is actually one of our sliders
