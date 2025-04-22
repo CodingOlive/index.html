@@ -2459,8 +2459,8 @@ document.addEventListener('firebaseReady', async () => {
         // --- Tab Switching Button Listener ---
         if (showCharacterStatsBtn) { showCharacterStatsBtn.addEventListener('click', () => { console.log('SHOW CHAR STATS BUTTON CLICKED'); triggerAnimation(showCharacterStatsBtn, 'pulse'); if (characterStatsScreen && characterStatsScreen.classList.contains('hidden')) { showCharacterStatsView(); } else { showCalculatorView(); } }); }
        
-            };
-        }
+            
+        
         // Add listeners for new buff inputs (optional, can just read on button click)
         // Example: formEnableFormBuffCheckbox.addEventListener('change', someFunction);
         // Example: formFormBuffValueInput.addEventListener('input', someFunction);
@@ -2636,10 +2636,8 @@ document.addEventListener('firebaseReady', async () => {
         // Attached directly to checkboxes in renderActiveFormsSection, no delegation needed here
 
         console.log("Event listeners setup complete.");
-    }
-                          // --- Initialization Sequence ---
-    console.log(`Initializing Energy Calculator v12.0 (Multi-Form, Buffs, Speed)...`);
-
+    ;
+ 
     // 1. Generate base DOM structure for energy sections (pools/sliders)
     generateEnergySections();
     // Note: Speed slider DOM is generated only *if needed* by updateSpeedSliderVisibility,
