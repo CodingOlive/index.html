@@ -1435,36 +1435,32 @@ document.addEventListener('firebaseReady', async () => {
     // Updates the text display below an energy slider (e.g., E: 100, D: 100.00)
     // This is also used by the speed slider display update function.
     function updateSingleSliderDisplay(type) {
-        function updateSingleSliderDisplay(type) {
-    console.log(`--- Running updateSingleSliderDisplay for: ${type}`); // <<< ADD THIS LOG
-    const els = getEnergyElements(type);
-    if (!els?.energySlider || !els?.sliderValueDisplay || !els?.currentEnergyEl || !els?.damagePerPowerEl) {
-         console.error(`Missing elements for updateSingleSliderDisplay(${type})`); // <<< ADD LOG
-         return;
-    }
-    const percentSpan = els.sliderValueDisplay.querySelector('.slider-percent-value');
-    const detailsSpan = els.sliderValueDisplay.querySelector('.slider-details-value');
-    if (!percentSpan || !detailsSpan) { console.error(`Slider display spans not found for ${type}`); return; }
+         const els = getEnergyElements(type);
+         if (!els?.energySlider || !els?.sliderValueDisplay || !els?.currentEnergyEl || !els?.damagePerPowerEl) {
+             // Don't update if elements are missing (e.g., during init)
+             return;
+         }
+         const percentSpan = els.sliderValueDisplay.querySelector('.slider-percent-value');
+         const detailsSpan = els.sliderValueDisplay.querySelector('.slider-details-value');
+         if (!percentSpan || !detailsSpan) {
+             console.error("Slider display spans not found for", type);
+             return;
+         }
+         const sliderPercent = parseInt(els.energySlider.value);
+         const currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent);
+         const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1);
+         const activeAttack = activeAttacks[type] || null;
+         let limitPercent = 100;
+         if (activeAttack === 'super') limitPercent = 95;
+         else if (activeAttack === 'ultimate') limitPercent = 90;
+         const effectivePercent = Math.min(sliderPercent, limitPercent); // Use limited % for calculation
+         const potentialEnergyUsed = currentEnergy * (effectivePercent / 100);
+         const actualEnergyUsed = Math.min(potentialEnergyUsed, currentEnergy); // Cannot use more than current
+         const extraDamage = actualEnergyUsed * damagePerPower;
 
-    const sliderPercent = parseInt(els.energySlider.value);
-    const currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent);
-    const damagePerPower = safeParseFloat(els.damagePerPowerEl.value, 1);
-    console.log(`   Values read for ${type} -> %: ${sliderPercent}, CurrentE: ${currentEnergy}, DPP: ${damagePerPower}`); // <<< ADD THIS LOG
-
-    const activeAttack = activeAttacks[type] || null;
-    let limitPercent = 100;
-    if (activeAttack === 'super') limitPercent = 95;
-    else if (activeAttack === 'ultimate') limitPercent = 90;
-    const effectivePercent = Math.min(sliderPercent, limitPercent);
-    const potentialEnergyUsed = currentEnergy * (effectivePercent / 100);
-    const actualEnergyUsed = Math.min(potentialEnergyUsed, currentEnergy);
-    const extraDamage = actualEnergyUsed * damagePerPower;
-     console.log(`   Calculated for ${type} -> UsedE: ${actualEnergyUsed}, ExtraD: ${extraDamage}`); // <<< ADD THIS LOG
-
-    percentSpan.textContent = `${sliderPercent}%`;
-    detailsSpan.textContent = `(E: ${formatStatNumber(actualEnergyUsed)}, D: ${formatStatNumber(extraDamage)})`;
-     console.log(`   Updated text for ${type} to: ${detailsSpan.textContent}`); // <<< ADD THIS LOG
-}
+         percentSpan.textContent = `${sliderPercent}%`; // Display the actual slider %
+         detailsSpan.textContent = `(E: ${formatStatNumber(actualEnergyUsed)}, D: ${formatStatNumber(extraDamage)})`;
+     }
     // Main calculation function
     function performCalculation() {
         showLoading(true);
@@ -2407,31 +2403,32 @@ document.addEventListener('firebaseReady', async () => {
 
         // --- Slider Input Listener (Energy + Speed, using delegation on the grid) ---
         if (slidersGrid) {
-        slidersGrid.addEventListener('input', (event) => {
-            const slider = event.target;
-            if (slider.type === 'range' && slider.classList.contains('energy-slider')) {
-                const currentType = slider.dataset.type;
-                console.log(`Slider input event for type: ${currentType}, value: ${slider.value}`); // <<< ADD THIS LOG
+            slidersGrid.addEventListener('input', (event) => {
+                const slider = event.target;
+                // Check if the event target is actually one of our sliders
+                if (slider.type === 'range' && slider.classList.contains('energy-slider')) {
+                    const currentType = slider.dataset.type; // 'ki', 'nen', ..., 'speed'
 
-                if (currentType === 'speed') {
-                     updateSpeedSliderDisplay();
-                     updateEquationDisplay();
-                } else if (ALL_ENERGY_TYPES.includes(currentType)) {
-                    // Handle Energy Sliders input
-                    const activeAttack = activeAttacks[currentType] || null;
-                    let limitPercent = 100;
-                    if (activeAttack === 'super') limitPercent = 95;
-                    else if (activeAttack === 'ultimate') limitPercent = 90;
-                    if (parseInt(slider.value) > limitPercent) {
-                        slider.value = limitPercent;
+                    if (currentType === 'speed') {
+                        // Handle Speed Slider input
+                         updateSpeedSliderDisplay(); // Update display (S: ..., D: ...)
+                         updateEquationDisplay(); // Update main equation
+                    } else if (ALL_ENERGY_TYPES.includes(currentType)) {
+                         // Handle Energy Sliders input
+                        const activeAttack = activeAttacks[currentType] || null;
+                        let limitPercent = 100;
+                        if (activeAttack === 'super') limitPercent = 95;
+                        else if (activeAttack === 'ultimate') limitPercent = 90;
+                        // Enforce limit if user tries to drag beyond reserved amount
+                        if (parseInt(slider.value) > limitPercent) {
+                            slider.value = limitPercent;
+                        }
+                        updateSingleSliderDisplay(currentType); // Update display (E: ..., D: ...)
+                        updateEquationDisplay(); // Update main equation
                     }
-                    console.log(` -> Calling updateSingleSliderDisplay(${currentType})`); // <<< ADD THIS LOG
-                    updateSingleSliderDisplay(currentType);
-                    updateEquationDisplay();
                 }
-            }
-        });
-    }
+            });
+        }
         // --- Auth buttons ---
         const googleSignInBtn = document.getElementById('google-signin-btn');
         const signOutBtn = document.getElementById('sign-out-btn');
