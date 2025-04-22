@@ -1991,6 +1991,80 @@ document.addEventListener('firebaseReady', async () => {
 
     function evaluateRyokoEquation() { if (!ryokoCheckbox || !ryokoCheckbox.checked || !ryokoEquationInput || !charBaseMultiplierInput) return; const expression = ryokoEquationInput.value.trim(); let result = 1; ryokoEquationInput.classList.remove('border-red-500', 'focus:ring-red-500'); ryokoEquationInput.classList.add('border-gray-300', 'focus:ring-teal-focus'); if (expression) { try { const evaluatedResult = math.evaluate(expression); if (typeof evaluatedResult === 'number' && isFinite(evaluatedResult)) { result = evaluatedResult; } else { console.error("Ryoko equation evaluated to non-finite number:", evaluatedResult); throw new Error("Invalid result (NaN or Infinity)"); } } catch (error) { console.error("Error evaluating Ryoko equation:", error); ryokoEquationInput.classList.remove('focus:ring-teal-focus'); ryokoEquationInput.classList.add('border-red-500', 'focus:ring-red-500'); showMessage(`Invalid Ryoko equation: ${error.message}`, 'error'); result = 1; } } charBaseMultiplierInput.value = formatSimpleNumber(result); handleStatChange(); } // Calls handleStatChange after evaluation
     // --- State Management ---
+    // *** Firebase State Functions (MODIFIED FOR AUTH) ***
+    async function saveState() {
+         if (!currentUser) { // Check if user is signed in
+             showMessage('You must be signed in to save state.', 'error');
+             return;
+         }
+         try {
+             const state = gatherState(); // Assumes gatherState is defined elsewhere
+             // Construct path using the user's unique ID
+             const userSavePath = `${FIREBASE_SAVE_PATH_BASE}/${currentUser.uid}`;
+             const dbRef = window.firebaseDbRef(window.firebaseDb, userSavePath);
+             await window.firebaseDbSet(dbRef, state);
+             showMessage('State saved successfully to Firebase!', 'success');
+         } catch (error) {
+             console.error("Firebase save error:", error);
+             showMessage(`Failed to save state to Firebase. ${error.message}`, 'error');
+         }
+    }
+
+    async function loadState() { // <<< THIS FUNCTION WAS MISSING
+         if (!currentUser) { // Check if user is signed in
+             console.warn("Attempted to load state before user was signed in.");
+             return false; // Can't load without a user
+         }
+         // Construct path using the user's unique ID
+         const userSavePath = `${FIREBASE_SAVE_PATH_BASE}/${currentUser.uid}`;
+         console.log(`Attempting to load state from: ${userSavePath}`); // Debug Log
+         try {
+             const dbRef = window.firebaseDbRef(window.firebaseDb, userSavePath);
+             const snapshot = await window.firebaseDbGet(dbRef);
+             if (snapshot.exists()) {
+                 const state = snapshot.val();
+                 if (state) {
+                     console.log("State found in Firebase, attempting to apply..."); // Debug Log
+                     applyState(state); // Apply the loaded state to the UI
+                     return true; // Indicate success
+                 } else {
+                     console.warn("Firebase data node exists but is null or empty.");
+                     return false; // Indicate no valid state found
+                 }
+             } else {
+                 console.log("No saved state found at Firebase path:", userSavePath);
+                 return false; // Indicate no state found
+             }
+         } catch (error) {
+             console.error("Error loading state from Firebase:", error);
+             showMessage(`Failed to load state from Firebase. ${error.message}`, 'error');
+             return false; // Indicate failure
+         }
+    } // <<< END OF loadState FUNCTION
+
+    async function clearState() {
+         if (!currentUser) { // Check if user is signed in
+             showMessage('You must be signed in to clear state.', 'error');
+             return;
+         }
+         if (confirm('Are you sure you want to clear your saved state FROM FIREBASE? This cannot be undone.')) {
+             // Construct path using the user's unique ID
+             const userSavePath = `${FIREBASE_SAVE_PATH_BASE}/${currentUser.uid}`;
+             try {
+                 const dbRef = window.firebaseDbRef(window.firebaseDb, userSavePath);
+                 await window.firebaseDbRemove(dbRef);
+                 showMessage('Saved state cleared from Firebase. Reloading.', 'success');
+                 setTimeout(() => window.location.reload(), 1000); // Reload to get default state cleanly
+             } catch (error) {
+                  console.error("Firebase clear error:", error);
+                  showMessage(`Failed to clear state from Firebase. ${error.message}`, 'error');
+             }
+         }
+    }
+    // *** Authentication Handlers ***
+    async function handleGoogleSignIn() { /* ... unchanged ... */ const provider = new window.firebaseGoogleAuthProvider(); try { console.log("Attempting Google Sign-in..."); const result = await window.firebaseSignInWithPopup(window.firebaseAuth, provider); const user = result.user; console.log("Google Sign-in successful for:", user.displayName); showMessage(`Signed in as ${user.displayName || user.email}`, 'success'); } catch (error) { console.error("Google Sign-in error:", error); if (error.code === 'auth/popup-closed-by-user') { showMessage('Sign-in cancelled.', 'info'); } else if (error.code === 'auth/network-request-failed') { showMessage('Network error during sign-in. Please check connection.', 'error'); } else { showMessage(`Google Sign-in failed: ${error.message}`, 'error'); } } }
+    async function handleSignOut() { /* ... unchanged ... */ try { await window.firebaseSignOut(window.firebaseAuth); console.log("Sign-out successful."); showMessage('Signed out successfully.', 'info'); } catch (error) { console.error("Sign-out error:", error); showMessage(`Sign-out failed: ${error.message}`, 'error'); } }
+    
     function gatherState() {
         const state = {
             // Basic inputs
