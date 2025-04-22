@@ -2476,6 +2476,7 @@ document.addEventListener('firebaseReady', async () => {
         }
 
         // --- Slider Input Listener (Energy + Speed, using delegation on the grid) ---
+          console.log("Checking slidersGrid element:", slidersGrid);
         if (slidersGrid) {
             slidersGrid.addEventListener('input', (event) => {
                 const slider = event.target;
@@ -2488,7 +2489,7 @@ document.addEventListener('firebaseReady', async () => {
                          updateSpeedSliderDisplay(); // Update display (S: ..., D: ...)
                          updateEquationDisplay(); // Update main equation
                     } else if (ALL_ENERGY_TYPES.includes(currentType)) {
-                         // Handle Energy Sliders input
+                         console.error("slidersGrid element not found!");
                         const activeAttack = activeAttacks[currentType] || null;
                         let limitPercent = 100;
                         if (activeAttack === 'super') limitPercent = 95;
