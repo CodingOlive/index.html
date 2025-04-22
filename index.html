@@ -2712,12 +2712,9 @@ function generateEnergySections() {
     // Note: Speed slider DOM is generated only *if needed* by updateSpeedSliderVisibility,
     // which is called later during initialization or state application.
 
-    // 2. Attach all static and dynamic event listeners
+    // 2. Attach all static and dynamic event listener
     setupEventListeners();
     
-    // 3. Initialize any additional UI components or state
-    initializeAdditionalUIComponents(); // New function to handle additional UI setup
-
 
     // --- Authentication State Change Listener ---
     // 4. Set up the Authentication Listener - This drives the rest of the initial state loading or default setup
