@@ -2459,7 +2459,78 @@ document.addEventListener('firebaseReady', async () => {
         // --- Tab Switching Button Listener ---
         if (showCharacterStatsBtn) { showCharacterStatsBtn.addEventListener('click', () => { console.log('SHOW CHAR STATS BUTTON CLICKED'); triggerAnimation(showCharacterStatsBtn, 'pulse'); if (characterStatsScreen && characterStatsScreen.classList.contains('hidden')) { showCharacterStatsView(); } else { showCalculatorView(); } }); }
        
-            
+            // --- Generate Elements from Templates ---
+    function generateEnergySections() {
+        if (!energyPoolTemplate || !energySliderTemplate || !energyPoolsContainer || !slidersGrid) {
+            console.error("Required templates or containers not found! Cannot generate energy sections.");
+            return;
+        }
+        energyPoolsContainer.innerHTML = '';
+        slidersGrid.innerHTML = ''; // Clear sliders grid too
+
+        ALL_ENERGY_TYPES.forEach(type => {
+            const details = ENERGY_TYPE_DETAILS[type];
+            if (!details) return;
+
+            // --- Generate Energy Pool Section ---
+            const poolClone = energyPoolTemplate.content.cloneNode(true);
+            const poolDiv = poolClone.querySelector('.energy-pool');
+            if (poolDiv) {
+                poolDiv.id = `${type}-pool`;
+                poolDiv.style.display = 'none'; // Start hidden
+                poolDiv.classList.add(details.border, details.gradientTo);
+
+                const titleEl = poolDiv.querySelector('.pool-title');
+                if (titleEl) titleEl.textContent = `${details.name} Energy Pool`;
+
+                // Setup inputs/spans with unique IDs and labels
+                const setupElement = (selectorSuffix, isInput = true, focusClass = '') => {
+                    const el = poolDiv.querySelector(`.${selectorSuffix}`);
+                    const labelEl = poolDiv.querySelector(`.${selectorSuffix}-label`);
+                    if (el) {
+                        el.id = `${type}-${selectorSuffix}`;
+                        if(labelEl) {
+                            if(isInput) { labelEl.htmlFor = el.id; } else { labelEl.removeAttribute('for'); }
+                        }
+                        if (isInput && focusClass) el.classList.add(focusClass);
+                    }
+                };
+                setupElement('base-max-energy', false);
+                setupElement('max-multiplier', true, details.focusRing); // Pool Max Multiplier
+                setupElement('total-energy', false);
+                setupElement('current-energy', false);
+                setupElement('damage-per-power', true, details.focusRing);
+                setupElement('regen-percent', true, details.focusRing);
+                // NOTE: Form select elements removed from template and this setup
+
+                const regenBtn = poolDiv.querySelector('.regen-btn');
+                if (regenBtn) { regenBtn.dataset.type = type; }
+
+                energyPoolsContainer.appendChild(poolClone);
+            } else {
+                console.error(`Could not find .energy-pool in template clone for ${type}`);
+            }
+
+            // --- Generate Slider Section ---
+            const sliderClone = energySliderTemplate.content.cloneNode(true);
+            const sliderSection = sliderClone.querySelector('.energy-slider-section');
+            if (sliderSection) {
+                sliderSection.id = `${type}-slider-section`;
+                sliderSection.dataset.type = type; // Link to energy type
+                const sliderLabel = sliderSection.querySelector('.slider-label');
+                if (sliderLabel) { sliderLabel.htmlFor = `${type}-energy-slider`; sliderLabel.textContent = `${details.name} Energy Used (%):`; }
+                const energySlider = sliderSection.querySelector('.energy-slider');
+                if (energySlider) { energySlider.id = `${type}-energy-slider`; energySlider.dataset.type = type; } // Link slider too
+                const valueDisplay = sliderSection.querySelector('.energy-slider-value-display');
+                if (valueDisplay) { valueDisplay.id = `${type}-slider-value-display`; }
+                slidersGrid.appendChild(sliderClone);
+            } else {
+                console.error(`Could not find .energy-slider-section in template clone for ${type}`);
+            }
+        });
+        console.log("Energy sections generated from templates.");
+        // Speed slider is generated separately by generateSpeedSlider() when needed
+    }
         
         // Add listeners for new buff inputs (optional, can just read on button click)
         // Example: formEnableFormBuffCheckbox.addEventListener('change', someFunction);
@@ -2636,78 +2707,6 @@ document.addEventListener('firebaseReady', async () => {
         // Attached directly to checkboxes in renderActiveFormsSection, no delegation needed here
 
         console.log("Event listeners setup complete.");
-        // --- Generate Elements from Templates ---
-    function generateEnergySections() {
-        if (!energyPoolTemplate || !energySliderTemplate || !energyPoolsContainer || !slidersGrid) {
-            console.error("Required templates or containers not found! Cannot generate energy sections.");
-            return;
-        }
-        energyPoolsContainer.innerHTML = '';
-        slidersGrid.innerHTML = ''; // Clear sliders grid too
-
-        ALL_ENERGY_TYPES.forEach(type => {
-            const details = ENERGY_TYPE_DETAILS[type];
-            if (!details) return;
-
-            // --- Generate Energy Pool Section ---
-            const poolClone = energyPoolTemplate.content.cloneNode(true);
-            const poolDiv = poolClone.querySelector('.energy-pool');
-            if (poolDiv) {
-                poolDiv.id = `${type}-pool`;
-                poolDiv.style.display = 'none'; // Start hidden
-                poolDiv.classList.add(details.border, details.gradientTo);
-
-                const titleEl = poolDiv.querySelector('.pool-title');
-                if (titleEl) titleEl.textContent = `${details.name} Energy Pool`;
-
-                // Setup inputs/spans with unique IDs and labels
-                const setupElement = (selectorSuffix, isInput = true, focusClass = '') => {
-                    const el = poolDiv.querySelector(`.${selectorSuffix}`);
-                    const labelEl = poolDiv.querySelector(`.${selectorSuffix}-label`);
-                    if (el) {
-                        el.id = `${type}-${selectorSuffix}`;
-                        if(labelEl) {
-                            if(isInput) { labelEl.htmlFor = el.id; } else { labelEl.removeAttribute('for'); }
-                        }
-                        if (isInput && focusClass) el.classList.add(focusClass);
-                    }
-                };
-                setupElement('base-max-energy', false);
-                setupElement('max-multiplier', true, details.focusRing); // Pool Max Multiplier
-                setupElement('total-energy', false);
-                setupElement('current-energy', false);
-                setupElement('damage-per-power', true, details.focusRing);
-                setupElement('regen-percent', true, details.focusRing);
-                // NOTE: Form select elements removed from template and this setup
-
-                const regenBtn = poolDiv.querySelector('.regen-btn');
-                if (regenBtn) { regenBtn.dataset.type = type; }
-
-                energyPoolsContainer.appendChild(poolClone);
-            } else {
-                console.error(`Could not find .energy-pool in template clone for ${type}`);
-            }
-
-            // --- Generate Slider Section ---
-            const sliderClone = energySliderTemplate.content.cloneNode(true);
-            const sliderSection = sliderClone.querySelector('.energy-slider-section');
-            if (sliderSection) {
-                sliderSection.id = `${type}-slider-section`;
-                sliderSection.dataset.type = type; // Link to energy type
-                const sliderLabel = sliderSection.querySelector('.slider-label');
-                if (sliderLabel) { sliderLabel.htmlFor = `${type}-energy-slider`; sliderLabel.textContent = `${details.name} Energy Used (%):`; }
-                const energySlider = sliderSection.querySelector('.energy-slider');
-                if (energySlider) { energySlider.id = `${type}-energy-slider`; energySlider.dataset.type = type; } // Link slider too
-                const valueDisplay = sliderSection.querySelector('.energy-slider-value-display');
-                if (valueDisplay) { valueDisplay.id = `${type}-slider-value-display`; }
-                slidersGrid.appendChild(sliderClone);
-            } else {
-                console.error(`Could not find .energy-slider-section in template clone for ${type}`);
-            }
-        });
-        console.log("Energy sections generated from templates.");
-        // Speed slider is generated separately by generateSpeedSlider() when needed
-    }
     ;
  
     // 1. Generate base DOM structure for energy sections (pools/sliders)
@@ -2717,6 +2716,9 @@ document.addEventListener('firebaseReady', async () => {
 
     // 2. Attach all static and dynamic event listeners
     setupEventListeners();
+    
+    // 3. Initialize any additional UI components or state
+    initializeAdditionalUIComponents(); // New function to handle additional UI setup
 
 
     // --- Authentication State Change Listener ---
