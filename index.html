@@ -2458,16 +2458,7 @@ document.addEventListener('firebaseReady', async () => {
 
         // --- Tab Switching Button Listener ---
         if (showCharacterStatsBtn) { showCharacterStatsBtn.addEventListener('click', () => { console.log('SHOW CHAR STATS BUTTON CLICKED'); triggerAnimation(showCharacterStatsBtn, 'pulse'); if (characterStatsScreen && characterStatsScreen.classList.contains('hidden')) { showCharacterStatsView(); } else { showCalculatorView(); } }); }
-        // --- Form Creator Listeners ---
-        if (formAffectsResistancesCheckbox) {
-            formAffectsResistancesCheckbox.addEventListener('change', () => {
-                 // Toggle visibility of AC/TR bonus inputs
-                 formResistanceBonusInputsDiv.classList.toggle('hidden', !formAffectsResistancesCheckbox.checked);
-                 // Reset values if checkbox is unchecked
-                 if (!formAffectsResistancesCheckbox.checked) {
-                     if(formAcBonusInput) formAcBonusInput.value = 0;
-                     if(formTrueResistanceBonusInput) formTrueResistanceBonusInput.value = 0;
-                 }
+       
             });
         }
         // Add listeners for new buff inputs (optional, can just read on button click)
