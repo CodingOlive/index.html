@@ -2496,7 +2496,6 @@ document.addEventListener('firebaseReady', async () => {
                          updateSpeedSliderDisplay(); // Update display (S: ..., D: ...)
                          updateEquationDisplay(); // Update main equation
                     } else if (ALL_ENERGY_TYPES.includes(currentType)) {
-                         console.error("slidersGrid element not found!");
                         const activeAttack = activeAttacks[currentType] || null;
                         let limitPercent = 100;
                         if (activeAttack === 'super') limitPercent = 95;
