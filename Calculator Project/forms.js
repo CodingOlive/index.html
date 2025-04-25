@@ -465,7 +465,7 @@ export function applyActiveFormEffects() {
     activeIds.forEach(formId => {
         const form = characterForms.find(f => f.id === formId);
         if (form) {
-            combinedFormMultiplier *= form.formMultiplier;
+            combinedFormMultiplier += form.formMultiplier;
             if (form.affectsResistances) {
                 combinedAcBonus += form.acBonus;
                 combinedTrBonus += form.trueResistanceBonus;
