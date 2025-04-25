@@ -1,14 +1,16 @@
-// energy-pools.js - Logic specific to energy pool calculations and actions.
+// energy-pools.js - Logic specific to energy pool calculations and actions, using merged types.
 
 // --- Import Dependencies ---
 import {
     // Character Stat Inputs needed for base calculations
     charBaseHealthInput, charVitalityInput, charSoulPowerInput,
-    charSoulHpInput, charBaseMultiplierInput // Base multiplier affects total energy
+    charSoulHpInput, charBaseMultiplierInput
 } from './dom-elements.js';
 
-import { ALL_ENERGY_TYPES } from './config.js'; // Needed for validation and looping
+// Import State (READ access needed)
+import { mergedEnergyTypes } from './state.js'; // Use the merged list
 
+// Import Utilities & Formatters
 import { safeParseFloat } from './utils.js';
 import { formatStatNumber, parseFormattedNumber } from './formatters.js';
 
@@ -16,335 +18,194 @@ import { formatStatNumber, parseFormattedNumber } from './formatters.js';
 import { showMessage } from './ui-feedback.js';
 import { triggerAnimation } from './utils.js';
 import {
-    updateSliderVisibility, // To show/hide slider based on total energy
-    updateStatsDisplay    // To update stats panel after regeneration
+    updateSliderVisibility, updateStatsDisplay
 } from './ui-updater.js';
-// Import the function that updates the slider's text display (E:..., D:...)
-import { updateSingleSliderDisplay } from './calculation.js'; // Assumes it's defined in calculation.js
+import { updateSingleSliderDisplay } from './calculation.js';
 
 
 // --- Energy Pool Functions ---
 
 /**
  * Gets references to all DOM elements associated with a specific energy type's pool and slider.
- * Uses getElementById internally to find sub-elements based on naming convention.
- * @param {string} type - The energy type (e.g., 'ki', 'nen').
- * @returns {object|null} An object containing element references, or null if the main pool div isn't found or type is invalid.
+ * Uses the type ID (standard key or custom Firebase ID).
+ * @param {string} typeId - The energy type ID.
+ * @returns {object|null} An object containing element references, or null if the main pool div isn't found.
  */
-export function getEnergyElements(type) {
-    // Uses imported ALL_ENERGY_TYPES for validation
-    if (!ALL_ENERGY_TYPES.includes(type)) {
-        return null;
-    }
-    const poolDiv = document.getElementById(`${type}-pool`);
+export function getEnergyElements(typeId) {
+    // Validation might now rely on checking if typeId exists in mergedEnergyTypes if needed
+    // Example: if (!mergedEnergyTypes.some(et => et.id === typeId)) return null;
+
+    const poolDiv = document.getElementById(`${typeId}-pool`);
     if (!poolDiv) {
+        // console.warn(`Pool div not found for type ID: ${typeId}`); // Reduce noise
         return null;
     }
-    // Uses getElementById/querySelector directly, no further imports needed inside here
+    // Find sub-elements within the poolDiv or associated slider section
     return {
         poolDiv: poolDiv,
-        baseMaxEnergyEl: poolDiv.querySelector(`#${type}-base-max-energy`),
-        maxMultiplierEl: poolDiv.querySelector(`#${type}-max-multiplier`),
-        totalEnergyEl: poolDiv.querySelector(`#${type}-total-energy`),
-        currentEnergyEl: poolDiv.querySelector(`#${type}-current-energy`),
-        damagePerPowerEl: poolDiv.querySelector(`#${type}-damage-per-power`),
-        regenPercentEl: poolDiv.querySelector(`#${type}-regen-percent`),
-        regenBtn: poolDiv.querySelector(`button[data-type="${type}"]`),
-        sliderSection: document.getElementById(`${type}-slider-section`),
-        energySlider: document.getElementById(`${type}-energy-slider`),
-        sliderValueDisplay: document.getElementById(`${type}-slider-value-display`),
+        baseMaxEnergyEl: poolDiv.querySelector(`#${typeId}-base-max-energy`),
+        maxMultiplierEl: poolDiv.querySelector(`#${typeId}-max-multiplier`),
+        totalEnergyEl: poolDiv.querySelector(`#${typeId}-total-energy`),
+        currentEnergyEl: poolDiv.querySelector(`#${typeId}-current-energy`),
+        damagePerPowerEl: poolDiv.querySelector(`#${typeId}-damage-per-power`),
+        regenPercentEl: poolDiv.querySelector(`#${typeId}-regen-percent`),
+        regenBtn: poolDiv.querySelector(`button[data-type="${typeId}"]`), // Find button by data attribute
+        sliderSection: document.getElementById(`${typeId}-slider-section`),
+        energySlider: document.getElementById(`${typeId}-energy-slider`),
+        sliderValueDisplay: document.getElementById(`${typeId}-slider-value-display`),
     };
 }
 
 /**
- * Calculates the base maximum energy for a given type based on character stats.
- * Does not include multipliers.
- * @param {string} type - The energy type.
+ * Calculates the base maximum energy for a given type based on character stats
+ * and the type's definition (standard switch or custom formula).
+ * @param {string} typeId - The ID of the energy type (standard or custom).
  * @returns {number} The calculated base maximum energy.
  */
-export function calculateBaseMaxEnergy(type) {
-    // Uses imported DOM elements and safeParseFloat util
-    const baseHp = safeParseFloat(charBaseHealthInput?.value, 0);
-    const vitality = safeParseFloat(charVitalityInput?.value, 0);
-    const soulPower = safeParseFloat(charSoulPowerInput?.value, 0);
-    const soulHp = safeParseFloat(charSoulHpInput?.value, 0);
+export function calculateBaseMaxEnergy(typeId) {
+    // Find the energy type definition in the merged list
+    const energyType = mergedEnergyTypes.find(et => et.id === typeId);
+
+    if (!energyType) {
+        console.warn(`Energy type definition not found for ID: ${typeId}`);
+        return 0;
+    }
+
+    // Read required character stats using imported elements and util
+    const stats = {
+        baseHp: safeParseFloat(charBaseHealthInput?.value, 0),
+        vitality: safeParseFloat(charVitalityInput?.value, 0),
+        soulPower: safeParseFloat(charSoulPowerInput?.value, 0),
+        soulHp: safeParseFloat(charSoulHpInput?.value, 0)
+        // Ensure variable names here EXACTLY match those expected in formula strings
+    };
 
     let baseMax = 0;
-    // ... (switch statement remains the same) ...
-     switch (type) {
-        case 'nen': baseMax = vitality * soulHp; break;
-        case 'chakra': baseMax = vitality * (0.5 * soulHp + 0.5 * soulPower); break;
-        case 'reiatsu': baseMax = soulHp * vitality * soulPower; break;
-        case 'cursed': baseMax = soulPower * soulHp; break;
-        case 'ki': baseMax = vitality * (soulPower + soulHp); break; // Ki
-        case 'haki': baseMax = vitality * (soulPower + soulHp); break; // Haki (same as Ki)
-        case 'alchemy': baseMax = soulPower * baseHp; break;
-        case 'nature': baseMax = vitality * (soulHp + baseHp + soulPower); break;
-        case 'magic': baseMax = soulPower * (soulHp + baseHp + vitality); break;
-        case 'force': baseMax = soulHp + vitality; break;
-        case 'origin': baseMax = vitality * soulPower * soulHp; break; // Origin (same as Reiatsu?)
-        case 'fundamental': baseMax = vitality * (soulPower + soulHp); break; // Fundamental (same as Ki/Haki)
-        case 'other': baseMax = vitality + soulPower + soulHp; break;
-        default:
-            console.warn(`Unknown energy type for base max calculation: ${type}`);
-            baseMax = 0;
+
+    if (energyType.isStandard) {
+        // --- Standard Type Calculation (using switch statement) ---
+        console.log(`Calculating standard base max for: ${typeId}`);
+        switch (typeId) {
+            // Ensure cases match the exact IDs used in config.js/ALL_ENERGY_TYPES
+            case 'nen': baseMax = stats.vitality * stats.soulHp; break;
+            case 'chakra': baseMax = stats.vitality * (0.5 * stats.soulHp + 0.5 * stats.soulPower); break;
+            case 'reiatsu': baseMax = stats.soulHp * stats.vitality * stats.soulPower; break;
+            case 'cursed': baseMax = stats.soulPower * stats.soulHp; break;
+            case 'ki': baseMax = stats.vitality * (stats.soulPower + stats.soulHp); break;
+            case 'haki': baseMax = stats.vitality * (stats.soulPower + stats.soulHp); break;
+            case 'alchemy': baseMax = stats.soulPower * stats.baseHp; break;
+            case 'nature': baseMax = stats.vitality * (stats.soulHp + stats.baseHp + stats.soulPower); break;
+            case 'magic': baseMax = stats.soulPower * (stats.soulHp + stats.baseHp + stats.vitality); break;
+            case 'force': baseMax = stats.soulHp + stats.vitality; break;
+            case 'origin': baseMax = stats.vitality * stats.soulPower * stats.soulHp; break;
+            case 'fundamental': baseMax = stats.vitality * (stats.soulPower + stats.soulHp); break;
+            case 'other': baseMax = stats.vitality + stats.soulPower + stats.soulHp; break;
+            default:
+                console.warn(`Unknown standard energy type ID in switch: ${typeId}`);
+                baseMax = 0;
+        }
+    } else if (energyType.formula) {
+        // --- Custom Type Calculation (using MathJS evaluation) ---
+        const formulaString = energyType.formula;
+        console.log(`Calculating custom base max for: ${energyType.name} using formula: ${formulaString}`);
+        try {
+            // Ensure MathJS is loaded (it's included via CDN in index.html)
+            if (typeof math === 'undefined' || !math?.evaluate) {
+                throw new Error("MathJS library (math.evaluate) not available.");
+            }
+            // Compile and evaluate the formula string with the current stats as the scope
+            const compiledFormula = math.compile(formulaString);
+            baseMax = compiledFormula.evaluate(stats); // Pass stats object
+
+            // Ensure the result is a valid number
+            if (typeof baseMax !== 'number' || !isFinite(baseMax)) {
+                console.error(`Custom formula for "${energyType.name}" [${formulaString}] evaluated to non-finite value:`, baseMax);
+                showMessage(`Error in formula for ${energyType.name}: Invalid result. Check console.`, 'error'); // Use imported function
+                baseMax = 0;
+            } else {
+                 console.log(`Custom formula result for ${energyType.name}: ${baseMax}`);
+            }
+        } catch (error) {
+            console.error(`Error evaluating custom formula "${formulaString}" for "${energyType.name}":`, error);
+            // Provide more specific error feedback if possible
+            let errorMsg = error.message || 'Unknown error during evaluation.';
+            if (error.message?.includes('Undefined symbol')) {
+                errorMsg = `Formula contains an unknown stat name (e.g., ${error.message.split(' ').pop()}). Check formula and available stats.`;
+            }
+            showMessage(`Formula Error (${energyType.name}): ${errorMsg}`, 'error'); // Use imported function
+            baseMax = 0; // Default to 0 on error
+        }
+    } else {
+        // Custom type exists but has no formula? Default to 0.
+        console.warn(`Custom energy type "${energyType.name}" (ID: ${typeId}) has no formula defined.`);
+        baseMax = 0;
     }
+
+    // Ensure base max is not negative
     return Math.max(0, baseMax);
 }
 
 /**
- * Calculates total energy for a pool (Base * Char Base Mult * Pool Max Mult)
- * and updates the pool's display elements (Base Max, Total, Current).
- * Adjusts Current energy to not exceed the new Total.
- * @param {string} type - The energy type.
+ * Calculates total energy for a pool and updates its display elements.
+ * Uses the updated calculateBaseMaxEnergy function.
+ * @param {string} typeId - The energy type ID (standard or custom).
  * @returns {number} The calculated total energy for the pool.
  */
-export function calculateAndResetEnergy(type) {
-    const els = getEnergyElements(type); // Uses function defined above
+export function calculateAndResetEnergy(typeId) {
+    // Uses imported helper and elements
+    const els = getEnergyElements(typeId);
     if (!els?.baseMaxEnergyEl || !els?.maxMultiplierEl || !els?.totalEnergyEl || !els?.currentEnergyEl) {
+        // console.warn(`Elements missing for energy calc/reset: ${typeId}`);
         return 0;
     }
 
-    // Uses function defined above
-    const baseMaxEnergy = calculateBaseMaxEnergy(type);
-    els.baseMaxEnergyEl.textContent = formatStatNumber(baseMaxEnergy); // Uses imported formatter
+    // 1. Calculate and display Base Max Energy (uses the updated function above)
+    const baseMaxEnergy = calculateBaseMaxEnergy(typeId);
+    els.baseMaxEnergyEl.textContent = formatStatNumber(baseMaxEnergy); // Use imported formatter
 
-    // Uses imported element and util
+    // 2. Get multipliers (uses imported element and util)
     const characterBaseMultiplier = safeParseFloat(charBaseMultiplierInput?.value, 1);
-    const poolMaxMultiplier = safeParseFloat(els.maxMultiplierEl.value, 1); // Uses element from els
+    const poolMaxMultiplier = safeParseFloat(els.maxMultiplierEl.value, 1);
 
+    // 3. Calculate and display Total Energy
     const totalEnergy = baseMaxEnergy * characterBaseMultiplier * poolMaxMultiplier;
-    els.totalEnergyEl.textContent = formatStatNumber(totalEnergy); // Uses imported formatter
+    els.totalEnergyEl.textContent = formatStatNumber(totalEnergy); // Use imported formatter
 
-    // Uses imported formatters/parsers
+    // 4. Adjust and display Current Energy (uses imported formatters/parsers)
     const currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent);
     const newTotal = totalEnergy;
     els.currentEnergyEl.textContent = formatStatNumber(Math.max(0, Math.min(currentEnergy, newTotal)));
 
-    // Uses imported UI functions
-    updateSliderVisibility(type);
-    updateSingleSliderDisplay(type);
+    // 5. Update associated UI elements (uses imported functions)
+    updateSliderVisibility(typeId);
+    updateSingleSliderDisplay(typeId);
 
     return totalEnergy;
 }
 
 /**
  * Regenerates energy for a specific pool based on its regen rate.
- * @param {string} type - The energy type to regenerate.
+ * (No changes needed here, it works with the calculated Total Energy)
+ * @param {string} typeId - The energy type ID (standard or custom).
  */
-export function regenerateEnergy(type) {
-    const els = getEnergyElements(type); // Uses function defined above
+export function regenerateEnergy(typeId) {
+    // Uses imported helper, formatters, utils, UI functions
+    const els = getEnergyElements(typeId);
     if (!els?.totalEnergyEl || !els?.currentEnergyEl || !els?.regenPercentEl) {
-        console.error(`Elements missing for energy regeneration: ${type}`);
+        console.error(`Elements missing for energy regeneration: ${typeId}`);
         return;
     }
-
-    // Uses imported formatters/parsers/utils
     const totalEnergy = parseFormattedNumber(els.totalEnergyEl.textContent);
     let currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent);
     const regenPercent = safeParseFloat(els.regenPercentEl.value, 0);
-
-    if (totalEnergy <= 0) {
-        showMessage(`Total Energy for ${type} must be positive to regenerate.`, 'error'); // Uses imported UI function
-        return;
-    }
-    if (regenPercent <= 0) {
-        showMessage('Regen Rate must be positive.', 'error'); // Uses imported UI function
-        return;
-    }
-
+    if (totalEnergy <= 0) { showMessage(`Total Energy for ${typeId} must be positive...`, 'error'); return; }
+    if (regenPercent <= 0) { showMessage('Regen Rate must be positive.', 'error'); return; }
     const regenAmount = totalEnergy * (regenPercent / 100);
     let newEnergy = Math.min(currentEnergy + regenAmount, totalEnergy);
-
-    els.currentEnergyEl.textContent = formatStatNumber(newEnergy); // Uses imported formatter
-
-    // Uses imported UI/Util functions
-    showMessage(`${formatStatNumber(regenAmount)} ${type} regenerated. Current: ${formatStatNumber(newEnergy)}`, 'success');
+    els.currentEnergyEl.textContent = formatStatNumber(newEnergy);
+    showMessage(`${formatStatNumber(regenAmount)} ${typeId} regenerated. Current: ${formatStatNumber(newEnergy)}`, 'success');
     triggerAnimation(els.currentEnergyEl, 'flash-green');
-
-    // Uses imported UI/Calculation functions
-    updateSingleSliderDisplay(type);
+    updateSingleSliderDisplay(typeId);
     updateStatsDisplay();
 }
 
-// ... (Keep exports if using named exports list at bottom, otherwise ensure functions have 'export' keyword)
-// Exporting inline as done above is fine.
-import {
-    // Character Stat Inputs needed for base calculations
-    charBaseHealthInput, charVitalityInput, charSoulPowerInput,
-    charSoulHpInput, charBaseMultiplierInput // Base multiplier affects total energy
-    // May need energyTypeSelect if used directly here, but often passed as argument
-} from './dom-elements.js';
-
-import { ALL_ENERGY_TYPES } from './config.js'; // Needed for validation in getEnergyElements
-
-import { safeParseFloat } from './utils.js';
-import { formatStatNumber, parseFormattedNumber } from './formatters.js';
-
-// UI/Feedback Functions (Import later)
-import { showMessage } from './ui-feedback.js';
-import { triggerAnimation } from './utils.js'; // Or ui-updater.js
-import {
-    updateSliderVisibility, updateStatsDisplay // From ui-updater.js
-    // updateSingleSliderDisplay // From calculation.js or ui-updater.js
-} from './ui-updater.js';
-
-
-// --- Energy Pool Functions ---
-
-/**
- * Gets references to all DOM elements associated with a specific energy type's pool and slider.
- * Uses getElementById internally to find sub-elements based on naming convention.
- * @param {string} type - The energy type (e.g., 'ki', 'nen').
- * @returns {object|null} An object containing element references, or null if the main pool div isn't found or type is invalid.
- */
-export function getEnergyElements(type) {
-    if (!ALL_ENERGY_TYPES.includes(type)) {
-        // console.warn("Invalid energy type requested:", type); // Keep console noise low
-        return null;
-    }
-    const poolDiv = document.getElementById(`${type}-pool`);
-    if (!poolDiv) {
-        // console.warn(`Pool div not found for type: ${type}`); // Keep console noise low
-        return null; // Cannot proceed if the main container isn't there
-    }
-
-    // Find sub-elements within the poolDiv or associated slider section
-    // Note: Assumes consistent naming convention (e.g., {type}-base-max-energy)
-    return {
-        poolDiv: poolDiv,
-        baseMaxEnergyEl: poolDiv.querySelector(`#${type}-base-max-energy`), // Use querySelector for robustness within the poolDiv
-        maxMultiplierEl: poolDiv.querySelector(`#${type}-max-multiplier`),   // Input for Pool Max Multiplier
-        totalEnergyEl: poolDiv.querySelector(`#${type}-total-energy`),
-        currentEnergyEl: poolDiv.querySelector(`#${type}-current-energy`),
-        damagePerPowerEl: poolDiv.querySelector(`#${type}-damage-per-power`),
-        regenPercentEl: poolDiv.querySelector(`#${type}-regen-percent`),
-        regenBtn: poolDiv.querySelector(`button[data-type="${type}"]`), // Find button by data attribute if needed
-        // Associated slider elements (may be in a different container)
-        sliderSection: document.getElementById(`${type}-slider-section`),
-        energySlider: document.getElementById(`${type}-energy-slider`),
-        sliderValueDisplay: document.getElementById(`${type}-slider-value-display`),
-    };
-}
-
-/**
- * Calculates the base maximum energy for a given type based on character stats.
- * Does not include multipliers.
- * @param {string} type - The energy type.
- * @returns {number} The calculated base maximum energy.
- */
-export function calculateBaseMaxEnergy(type) {
-    // Read required character stats (ensure elements are imported)
-    const baseHp = safeParseFloat(charBaseHealthInput?.value, 0);
-    const vitality = safeParseFloat(charVitalityInput?.value, 0);
-    const soulPower = safeParseFloat(charSoulPowerInput?.value, 0);
-    const soulHp = safeParseFloat(charSoulHpInput?.value, 0);
-
-    let baseMax = 0;
-    switch (type) {
-        case 'nen': baseMax = vitality * soulHp; break;
-        case 'chakra': baseMax = vitality * (0.5 * soulHp + 0.5 * soulPower); break;
-        case 'reiatsu': baseMax = soulHp * vitality * soulPower; break;
-        case 'cursed': baseMax = soulPower * soulHp; break;
-        case 'ki': baseMax = vitality * (soulPower + soulHp); break; // Ki
-        case 'haki': baseMax = vitality * (soulPower + soulHp); break; // Haki (same as Ki)
-        case 'alchemy': baseMax = soulPower * baseHp; break;
-        case 'nature': baseMax = vitality * (soulHp + baseHp + soulPower); break;
-        case 'magic': baseMax = soulPower * (soulHp + baseHp + vitality); break;
-        case 'force': baseMax = soulHp + vitality; break;
-        case 'origin': baseMax = vitality * soulPower * soulHp; break; // Origin (same as Reiatsu?)
-        case 'fundamental': baseMax = vitality * (soulPower + soulHp); break; // Fundamental (same as Ki/Haki)
-        case 'other': baseMax = vitality + soulPower + soulHp; break;
-        default:
-            console.warn(`Unknown energy type for base max calculation: ${type}`);
-            baseMax = 0;
-    }
-    // Ensure base max is not negative
-    return Math.max(0, baseMax);
-}
-
-/**
- * Calculates total energy for a pool (Base * Char Base Mult * Pool Max Mult)
- * and updates the pool's display elements (Base Max, Total, Current).
- * Adjusts Current energy to not exceed the new Total.
- * @param {string} type - The energy type.
- * @returns {number} The calculated total energy for the pool.
- */
-export function calculateAndResetEnergy(type) {
-    const els = getEnergyElements(type);
-    if (!els?.baseMaxEnergyEl || !els?.maxMultiplierEl || !els?.totalEnergyEl || !els?.currentEnergyEl) {
-        // console.warn(`Elements missing for energy calc/reset: ${type}`); // Reduce noise
-        return 0; // Return 0 if elements not ready
-    }
-
-    // 1. Calculate and display Base Max Energy
-    const baseMaxEnergy = calculateBaseMaxEnergy(type);
-    els.baseMaxEnergyEl.textContent = formatStatNumber(baseMaxEnergy);
-
-    // 2. Get multipliers
-    // Character Base Multiplier (could be overridden by Ryoko mode)
-    const characterBaseMultiplier = safeParseFloat(charBaseMultiplierInput?.value, 1);
-    // Pool Max Multiplier (this value is set by form effects or user input)
-    const poolMaxMultiplier = safeParseFloat(els.maxMultiplierEl.value, 1);
-
-    // 3. Calculate and display Total Energy
-    const totalEnergy = baseMaxEnergy * characterBaseMultiplier * poolMaxMultiplier;
-    els.totalEnergyEl.textContent = formatStatNumber(totalEnergy);
-
-    // 4. Adjust and display Current Energy
-    // Cap current energy at the new total, or set to 0 if total is 0.
-    const currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent);
-    const newTotal = totalEnergy; // Use the calculated total
-    // Set current to the minimum of its previous value and the new total, ensuring it's not negative.
-    els.currentEnergyEl.textContent = formatStatNumber(Math.max(0, Math.min(currentEnergy, newTotal)));
-    // If you always want to reset current to max when recalculating:
-    // els.currentEnergyEl.textContent = formatStatNumber(newTotal);
-
-    // 5. Update associated UI elements
-    // TODO: Import these UI functions later
-    updateSliderVisibility(type); // Show/hide slider based on new total
-    // updateSingleSliderDisplay(type); // Update slider text based on potentially changed current energy
-
-    return totalEnergy; // Return the calculated total
-}
-
-/**
- * Regenerates energy for a specific pool based on its regen rate.
- * @param {string} type - The energy type to regenerate.
- */
-export function regenerateEnergy(type) {
-    const els = getEnergyElements(type);
-    if (!els?.totalEnergyEl || !els?.currentEnergyEl || !els?.regenPercentEl) {
-        console.error(`Elements missing for energy regeneration: ${type}`);
-        return;
-    }
-
-    const totalEnergy = parseFormattedNumber(els.totalEnergyEl.textContent);
-    let currentEnergy = parseFormattedNumber(els.currentEnergyEl.textContent);
-    const regenPercent = safeParseFloat(els.regenPercentEl.value, 0);
-
-    if (totalEnergy <= 0) {
-        // TODO: Import showMessage
-        showMessage(`Total Energy for ${type} must be positive to regenerate.`, 'error');
-        return;
-    }
-    if (regenPercent <= 0) {
-        // TODO: Import showMessage
-        showMessage('Regen Rate must be positive.', 'error');
-        return;
-    }
-
-    const regenAmount = totalEnergy * (regenPercent / 100);
-    let newEnergy = Math.min(currentEnergy + regenAmount, totalEnergy); // Cap at total
-
-    els.currentEnergyEl.textContent = formatStatNumber(newEnergy);
-
-    // TODO: Import showMessage and triggerAnimation
-    showMessage(`${formatStatNumber(regenAmount)} ${type} regenerated. Current: ${formatStatNumber(newEnergy)}`, 'success');
-    triggerAnimation(els.currentEnergyEl, 'flash-green'); // Flash the updated value
-
-    // Update other UI that depends on current energy
-    // TODO: Import these functions later
-    // updateSingleSliderDisplay(type); // Update slider text (E: ..., D: ...)
-    updateStatsDisplay(); // Update the general stats panel display
-}

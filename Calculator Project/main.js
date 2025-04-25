@@ -2,19 +2,19 @@
 
 // --- Import Modules ---
 // Import Firebase initialization first to ensure it runs and instances are available.
-// We might not use the exported values directly here, but importing ensures initialization.
 import { app, database, auth } from './firebase-init.js';
 
-// Import DOM generation / UI update functions needed at startup
-import { generateEnergySections } from './dom-generators.js';
-// Import function to check/show/hide speed slider (assumes it also handles initial generation if needed)
-import { updateSpeedSliderVisibility } from './ui-updater.js';
+// Import UI update functions needed at startup
+import { updateSpeedSliderVisibility } from './ui-updater.js'; // Check speed slider visibility initially
 
 // Import event listener setup function
 import { setupAllEventListeners } from './event-listeners.js';
 
 // Import authentication listener setup function
 import { setupAuthListener } from './auth.js';
+
+// Import admin panel listener setup function
+import { setupAdminPanelListeners } from './admin.js';
 
 
 // --- Application Initialization Sequence ---
@@ -40,23 +40,25 @@ if (!app || !database || !auth) {
         body.prepend(errorDiv); // Add message at the very top
     }
     // Depending on severity, you might stop here or allow partial functionality
-    // For now, we'll let it continue but the error is logged / shown.
+} else {
+    // 2. Update speed slider visibility initially (doesn't depend on merged types)
+    // Uses imported function
+    updateSpeedSliderVisibility();
+
+    // 3. Set up all main event listeners
+    // Uses imported function
+    setupAllEventListeners();
+
+    // 4. Set up admin panel listeners (only attaches if elements exist)
+    // Uses imported function
+    setupAdminPanelListeners();
+
+    // 5. Set up the Firebase Authentication listener
+    // This handles login, state loading, energy merging, and THEN final UI generation/updates
+    // Uses imported function
+    setupAuthListener();
+
+    console.log("Energy Calculator Initialization sequence complete.");
 }
-
-// 2. Generate initial dynamic UI elements
-// Uses imported functions
-generateEnergySections(); // Create energy pools and energy sliders
-updateSpeedSliderVisibility(); // Check if speed slider needs to be generated/shown initially
-
-// 3. Set up all static and dynamic event listeners
-// Uses imported function
-setupAllEventListeners();
-
-// 4. Set up the Firebase Authentication listener
-// This listener handles the rest of the flow (loading state or initializing defaults)
-// Uses imported function
-setupAuthListener();
-
-console.log("Energy Calculator Initialization sequence complete.");
 
 // --- End of main.js ---

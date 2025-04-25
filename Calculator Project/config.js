@@ -51,3 +51,14 @@ export {
     ENERGY_TYPE_DETAILS,
     SPEED_DETAILS
 };
+export const ADMIN_PATH = '/admins';
+
+export const CUSTOM_TYPES_PATH = '/customEnergyTypes'; // Path to store custom energy definitions
+
+// ... keep other constants ...
+
+// Make sure it's included in the export block if using one at the bottom
+export {
+    // ... other existing constants ...
+    CUSTOM_TYPES_PATH // Add this line
+};

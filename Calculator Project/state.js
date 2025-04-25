@@ -1,44 +1,30 @@
 // state.js - Manages the application's state variables and save/load logic.
 
 // --- Import Dependencies ---
-// Import DOM Elements (Many needed for gather/apply)
 import {
-    // Inputs/Selects read by gatherState & written by applyState
     baseDamageInput, baseMultiplierInput, attackCompressionPointsInput,
     energyTypeSelect, characterNameInput, charBaseHealthInput,
     charBaseMultiplierInput, charVitalityInput, charSoulPowerInput,
     charSoulHpInput, charBaseAcInput, charBaseTrInput, charSpeedInput,
     ryokoCheckbox, ryokoEquationInput, kaiokenCheckbox, maxHealthInput,
-    kaiokenStrainInput,
-    // Spans written/read by applyState/gatherState
-    currentHealthEl,
-    // Containers read by gatherState / cleared by applyState
-    dynamicModifiersContainer,
-    // Elements potentially accessed indirectly via helpers
-    formMultiplierInput // Read-only, set by applyActiveFormEffects
-    // Specific energy pool/slider elements accessed via getEnergyElements
+    kaiokenStrainInput, currentHealthEl, dynamicModifiersContainer,
+    formMultiplierInput
 } from './dom-elements.js';
-
-// Import Config
-import { ALL_ENERGY_TYPES } from './config.js';
-
-// Import Utilities & Formatters
-import { safeParseFloat, parseFormattedNumber, formatStatNumber, formatSimpleNumber } from './formatters.js'; // Or split utils/formatters
-
-// Import Functions from other modules called by applyState
+import { ALL_ENERGY_TYPES, ENERGY_TYPE_DETAILS } from './config.js';
+import { safeParseFloat, parseFormattedNumber, formatStatNumber, formatSimpleNumber } from './formatters.js';
 import { addDynamicModifier, renderFormList, renderActiveFormsSection } from './dom-generators.js';
-import { applyActiveFormEffects, handleRyokoCheckboxChange } from './forms.js'; // handleRyoko is called by applyState indirectly via character-stats? No, directly.
-import { getEnergyElements } from './energy-pools.js'; // Helper to get pool/slider elements
+import { applyActiveFormEffects, handleRyokoCheckboxChange } from './forms.js';
+import { getEnergyElements } from './energy-pools.js';
 import { updateSingleSliderDisplay } from './calculation.js';
 import { updateSpeedSliderDisplay } from './speed-slider.js';
 import {
     updateSliderVisibility, updateSpeedSliderVisibility,
-    applyKaiokenStyle, removeKaiokenStyle, // For Kaioken state restore
-    showCharacterStatsView, showCalculatorView, // For view restore
-    updateStatsDisplay, // Called at end of applyState
-    updateCurrentHealthDisplay // Called within applyState for Kaioken
+    applyKaiokenStyle, removeKaiokenStyle,
+    showCharacterStatsView, showCalculatorView,
+    updateStatsDisplay, updateCurrentHealthDisplay
 } from './ui-updater.js';
-import { updateEquationDisplay } from './equation.js'; // Called at end of applyState
+import { updateEquationDisplay } from './equation.js';
+import { loadCustomEnergyTypes } from './database.js';
 
 
 // --- State Variables ---
@@ -56,12 +42,13 @@ export let calculatorState = {
     activeView: 'calculator'
 };
 export let activeAttacks = {};
+export let mergedEnergyTypes = [];
+export let isAdmin = false; // <-- NEW: Flag for admin status
 
 
 // --- Core State Functions ---
 
 export function initializeCoreState() {
-    // ... (content remains the same) ...
     console.log("Initializing core state variables...");
     currentUser = null;
     totalDamageDealt = 0;
@@ -77,8 +64,9 @@ export function initializeCoreState() {
         activeView: 'calculator'
     };
     activeAttacks = {};
+    mergedEnergyTypes = [];
+    isAdmin = false; // <-- Reset admin flag on logout/init
 }
-
 
 /**
  * Gathers the current state of the application from DOM elements and state variables.
@@ -92,7 +80,7 @@ export function gatherState() {
     }
 
     const state = {
-        // Read state from imported elements and variables
+        // ... (all other state properties remain the same) ...
         baseDamage: baseDamageInput.value,
         baseMultiplier: baseMultiplierInput?.value || '1',
         attackCompressionPoints: attackCompressionPointsInput?.value || '0',
@@ -108,29 +96,30 @@ export function gatherState() {
         charSpeed: charSpeedInput?.value || '',
         ryokoCheckboxState: ryokoCheckbox?.checked || false,
         ryokoEquationValue: ryokoEquationInput?.value || '',
-        activeView: calculatorState.activeView, // Read from state object
+        activeView: calculatorState.activeView,
         kaiokenActive: kaiokenCheckbox?.checked || false,
         maxHealth: maxHealthInput?.value || '1000',
         kaiokenStrain: kaiokenStrainInput?.value || '10',
-        currentHealth: currentHealthEl?.textContent || '0', // Read display
+        currentHealth: currentHealthEl?.textContent || '0',
         sliderPercentages: {},
         energyPools: {},
-        characterForms: characterForms, // Read from state variable
-        activeFormIds: calculatorState.activeFormIds, // Read from state object
+        characterForms: characterForms,
+        activeFormIds: calculatorState.activeFormIds,
         dynamicModifiers: [],
-        activeAttacks: activeAttacks, // Read from state variable
-        totalDamageDealt: totalDamageDealt, // Read from state variable
-        totalEnergySpent: totalEnergySpent, // Read from state variable
-        attackCount: attackCount, // Read from state variable
-        highestDamage: highestDamage, // Read from state variable
+        activeAttacks: activeAttacks,
+        totalDamageDealt: totalDamageDealt,
+        totalEnergySpent: totalEnergySpent,
+        attackCount: attackCount,
+        highestDamage: highestDamage,
+        // NOTE: We don't typically need to SAVE the isAdmin status,
+        // it's determined on login based on the database.
     };
 
-    // Gather Energy Pool Data using imported helper
+    // Gather Energy Pool Data
     ALL_ENERGY_TYPES.forEach(type => {
-       const els = getEnergyElements(type); // Use imported helper
+       const els = getEnergyElements(type);
        if (els) {
            state.energyPools[type] = {
-               // Read directly from elements obtained via getEnergyElements
                maxMultiplier: els.maxMultiplierEl?.value || '1',
                currentEnergy: els.currentEnergyEl?.textContent || '0',
                damagePerPower: els.damagePerPowerEl?.value || '1',
@@ -141,10 +130,10 @@ export function gatherState() {
     });
 
     // Gather Speed Slider Percentage
-    const speedSlider = document.getElementById('speed-slider'); // Still need direct lookup if not exported
+    const speedSlider = document.getElementById('speed-slider');
     state.speedSliderPercentage = speedSlider?.value || '0';
 
-    // Gather Dynamic Modifiers using imported container element
+    // Gather Dynamic Modifiers
     dynamicModifiersContainer?.querySelectorAll('.dynamic-box').forEach(box => {
         const nameInput = box.querySelector('.modifier-name-input');
         const valueInput = box.querySelector('.modifier-value-input');
@@ -168,11 +157,13 @@ export function gatherState() {
  * @param {object} state - The state object to apply.
  */
 export function applyState(state) {
+    // ... (Function content remains the same as before) ...
+    // It restores state variables and DOM elements based on the loaded 'state' object.
+    // It does NOT need to handle the 'isAdmin' flag, as that's set during login check.
     if (!state) { /* ... warning ... */ return; }
     console.log("Applying loaded state...");
 
     // --- 1. Restore Core State Variables ---
-    // Modify imported 'let' variables
     characterForms = state.characterForms || [];
     calculatorState.activeFormIds = Array.isArray(state.activeFormIds) ? state.activeFormIds : [];
     calculatorState.activeView = state.activeView || 'calculator';
@@ -181,73 +172,58 @@ export function applyState(state) {
     totalEnergySpent = state.totalEnergySpent || 0;
     attackCount = state.attackCount || 0;
     highestDamage = state.highestDamage || 0;
-    // dynamicModifierCount is reset when adding modifiers
 
     // --- 2. Restore DOM Element Values ---
-    // Uses imported elements
     if (baseDamageInput) baseDamageInput.value = state.baseDamage || '';
     if (attackCompressionPointsInput) attackCompressionPointsInput.value = state.attackCompressionPoints || '0';
     if (energyTypeSelect) energyTypeSelect.value = state.selectedEnergyType || 'ki';
-    // Character Stats
     if (characterNameInput) characterNameInput.value = state.characterName || '';
     if (charBaseHealthInput) charBaseHealthInput.value = state.charBaseHealth || '';
-    // NOTE: charBaseMultiplierInput is set by Ryoko handler or applyActiveFormEffects indirectly
+    if (charBaseMultiplierInput) charBaseMultiplierInput.value = state.charBaseMultiplier || '1';
     if (charVitalityInput) charVitalityInput.value = state.charVitality || '';
     if (charSoulPowerInput) charSoulPowerInput.value = state.charSoulPower || '';
     if (charSoulHpInput) charSoulHpInput.value = state.charSoulHp || '';
     if (charBaseAcInput) charBaseAcInput.value = state.charBaseAc || '10';
     if (charBaseTrInput) charBaseTrInput.value = state.charBaseTr || '5';
     if (charSpeedInput) charSpeedInput.value = state.charSpeed || '';
-    // Kaioken
     if (kaiokenCheckbox) kaiokenCheckbox.checked = state.kaiokenActive || false;
     if (maxHealthInput) maxHealthInput.value = state.maxHealth || '1000';
     if (kaiokenStrainInput) kaiokenStrainInput.value = state.kaiokenStrain || '10';
-    if (currentHealthEl) { // Restore current health value
-        const savedHealthNum = parseFormattedNumber(state.currentHealth || '0'); // Use formatter
-        currentHealthEl.textContent = formatStatNumber(savedHealthNum); // Use formatter
+    if (currentHealthEl) {
+        const savedHealthNum = parseFormattedNumber(state.currentHealth || '0');
+        currentHealthEl.textContent = formatStatNumber(savedHealthNum);
     }
-    // Ryoko
     if (ryokoCheckbox) ryokoCheckbox.checked = state.ryokoCheckboxState || false;
     if (ryokoEquationInput) ryokoEquationInput.value = state.ryokoEquationValue || '';
-    // Call Ryoko handler to apply readonly/visibility and potentially evaluate
-    // handleRyokoCheckboxChange(); // TODO: Import from character-stats.js (if not already done)
-
+    handleRyokoCheckboxChange();
 
     // --- 3. Restore Dynamic Modifiers ---
-    // Uses imported container and generator function
     if (dynamicModifiersContainer) {
-        dynamicModifiersContainer.innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>'; // Clear existing
-        dynamicModifierCount = 0; // Reset counter before adding loaded ones
+        dynamicModifiersContainer.innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>';
+        dynamicModifierCount = 0;
         if (state.dynamicModifiers && Array.isArray(state.dynamicModifiers)) {
-            state.dynamicModifiers.forEach(modData => addDynamicModifier(modData)); // Uses imported function
+            state.dynamicModifiers.forEach(modData => addDynamicModifier(modData));
         }
     }
 
     // --- 4. Restore Energy Pool Inputs (DPP, Regen %) ---
-    // Uses imported config and helper
     if (state.energyPools) {
         ALL_ENERGY_TYPES.forEach(type => {
-            const els = getEnergyElements(type); // Use imported helper
+            const els = getEnergyElements(type);
             const poolData = state.energyPools[type];
             if (els && poolData) {
                 if(els.damagePerPowerEl) els.damagePerPowerEl.value = poolData.damagePerPower || '1';
                 if(els.regenPercentEl) els.regenPercentEl.value = poolData.regenPercent || '';
-                // Current energy is restored later after totals are calculated
             }
         });
     }
 
-    // --- 5. Update UI based on restored state (Order Matters!) ---
+    // --- 5. Update UI based on restored state ---
+    renderFormList();
+    renderActiveFormsSection();
+    applyActiveFormEffects();
 
-    // 5a. Render form lists based on restored characterForms
-    renderFormList(); // Uses imported generator
-    renderActiveFormsSection(); // Uses imported generator
-
-    // 5b. Apply combined form effects (reads restored activeFormIds, sets multipliers, recalculates pools)
-    applyActiveFormEffects(); // Uses imported function
-
-    // 5c. Restore CURRENT Energy *after* totals have been recalculated by applyActiveFormEffects
-    // Uses imported config, helper, formatters
+    // 5c. Restore CURRENT Energy *after* totals calculated
     if (state.energyPools) {
         ALL_ENERGY_TYPES.forEach(type => {
             const els = getEnergyElements(type);
@@ -261,51 +237,66 @@ export function applyState(state) {
     }
 
     // 5d. Restore slider percentages & update displays
-    // Uses imported config, helpers, UI/Calc functions
     if (state.sliderPercentages) {
         ALL_ENERGY_TYPES.forEach(type => {
             const els = getEnergyElements(type);
             if (els?.energySlider) {
                 els.energySlider.value = state.sliderPercentages[type] || '0';
-                 updateSingleSliderDisplay(type); // Use imported function
+                 updateSingleSliderDisplay(type);
             }
-            updateSliderVisibility(type); // Use imported function
+            updateSliderVisibility(type);
         });
     }
-    // Restore Speed Slider percentage & Update display
-    updateSpeedSliderVisibility(); // Ensure slider exists/visible if needed // Uses imported function
-    const speedSlider = document.getElementById('speed-slider'); // Direct lookup ok
+    updateSpeedSliderVisibility();
+    const speedSlider = document.getElementById('speed-slider');
     if (speedSlider && state.speedSliderPercentage) {
         speedSlider.value = state.speedSliderPercentage || '0';
     }
-    updateSpeedSliderDisplay(); // Use imported function
+    updateSpeedSliderDisplay();
 
-    // 5e. Update attack button states & slider gradients for focused type
-    // Uses imported UI functions and element
-    // updateAttackButtonStates(energyTypeSelect.value); // This should be imported and called
-    // ALL_ENERGY_TYPES.forEach(type => { updateSliderLimitAndStyle(type); }); // This should be imported and called
-
-
-    // 5f. Update Kaioken UI (styles, health display - redundant if applyActive handles it?)
-    // Uses imported UI functions and elements
+    // 5f. Update Kaioken UI
     if (kaiokenCheckbox?.checked && energyTypeSelect?.value === 'ki') {
         applyKaiokenStyle();
-        updateCurrentHealthDisplay(); // Ensure health display reflects loaded state correctly
+        updateCurrentHealthDisplay();
     } else {
         removeKaiokenStyle();
     }
 
-    // 5g. Update final displays: stats panel and equation
-    updateStatsDisplay(); // Use imported function
-    updateEquationDisplay(); // Use imported function
+    // 5g. Update final displays
+    updateStatsDisplay();
+    updateEquationDisplay();
 
     // 5h. Restore active view
-    // Uses imported UI functions
     if (calculatorState.activeView === 'stats') {
         showCharacterStatsView();
     } else {
         showCalculatorView();
     }
-
     console.log("State application complete.");
+}
+
+
+/**
+ * Loads custom energy types from the database, merges them with standard types,
+ * and stores the result in the `mergedEnergyTypes` state variable.
+ */
+export async function initializeAndMergeEnergyTypes() {
+    // ... (Function content remains the same) ...
+    console.log("Initializing and merging energy types...");
+    let standardTypes = [];
+    let customTypes = [];
+    try {
+        standardTypes = ALL_ENERGY_TYPES.map(typeId => {
+            const details = ENERGY_TYPE_DETAILS[typeId] || {};
+            const color = details.color || 'gray-500';
+            return { id: typeId, name: details.name || typeId.charAt(0).toUpperCase() + typeId.slice(1), colorName: details.color || null, hexColor: null, formula: null, isStandard: true, details: details };
+        });
+    } catch (error) { console.error("Error processing standard energy types:", error); }
+    try {
+        const loadedCustom = await loadCustomEnergyTypes();
+        customTypes = loadedCustom.map(ct => ({ ...ct, isStandard: false, details: null }));
+    } catch (error) { console.error("Failed to load or process custom energy types:", error); }
+    mergedEnergyTypes = [...standardTypes, ...customTypes]; // Modifies exported variable
+    console.log(`Merged energy types initialized. Total: ${mergedEnergyTypes.length} (Standard: ${standardTypes.length}, Custom: ${customTypes.length})`);
+    return true;
 }

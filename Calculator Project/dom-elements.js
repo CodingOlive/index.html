@@ -3,6 +3,7 @@ export const speedSlider = document.getElementById('speed-slider');
 export const speedSliderValueDisplay = document.getElementById('speed-slider-value-display');
 // --- DOM Element References ---
 
+
 // Main Containers / Screens
 export const mainCalculatorContent = document.getElementById('main-calculator-content');
 export const characterStatsScreen = document.getElementById('character-stats-screen');
@@ -121,8 +122,16 @@ export const formPoolBuffTypeSelect = document.getElementById('formPoolBuffType'
 export const energyPoolTemplate = document.getElementById('energy-pool-template');
 export const energySliderTemplate = document.getElementById('energy-slider-template');
 
-// Note: If 'sliders-grid' is the actual ID of the grid container inside 'all-sliders-container',
-// you might want to add that specific reference too if directly needed:
-// export const slidersGridDirect = document.getElementById('sliders-grid');
-// However, the provided code often uses the 'all-sliders-container' reference to find elements within it.
-// Let's stick to the IDs used in the original code for now.
+
+// Admin Panel Elements
+export const adminPanelToggleBtn = document.getElementById('admin-panel-toggle-btn');
+export const adminPanelSection = document.getElementById('adminPanelSection');
+export const adminEditEnergyTypeId = document.getElementById('adminEditEnergyTypeId');
+export const adminEnergyName = document.getElementById('adminEnergyName');
+export const adminEnergyColor = document.getElementById('adminEnergyColor');
+export const adminEnergyFormula = document.getElementById('adminEnergyFormula');
+export const adminSaveEnergyTypeBtn = document.getElementById('adminSaveEnergyTypeBtn');
+export const adminClearEnergyFormBtn = document.getElementById('adminClearEnergyFormBtn');
+export const adminFormMessage = document.getElementById('adminFormMessage');
+export const adminCustomEnergyList = document.getElementById('adminCustomEnergyList');
+export const adminColorPreview = document.getElementById('adminColorPreview');
