@@ -3,27 +3,23 @@
 // --- Import Dependencies ---
 // Import DOM Elements
 import {
-    // Import the element for the display area itself
-    equationDisplayEl,
-    // Import elements whose values are read for the equation
-    baseDamageInput, baseMultiplierInput, formMultiplierInput,
+    equationDisplayEl, baseDamageInput, baseMultiplierInput, formMultiplierInput,
     attackCompressionPointsInput, dynamicModifiersContainer, energyTypeSelect,
     charSpeedInput
-    // speedSlider and energy sliders/inputs accessed by ID below for now
 } from './dom-elements.js';
 
 // Import State
-import { activeAttacks } from './state.js'; // Need attack state for slider limits in equation
+import { activeAttacks } from './state.js';
 
 // Import Config
-import { ALL_ENERGY_TYPES, ENERGY_TYPE_DETAILS } from './config.js'; // Need energy details
+import { ALL_ENERGY_TYPES, ENERGY_TYPE_DETAILS } from './config.js';
 
 // Import Formatters & Utilities
-import { formatSimpleNumber, parseFormattedNumber, safeParseFloat } from './formatters.js';
-import { escapeHtml, triggerAnimation } from './utils.js';
+import { formatSimpleNumber, parseFormattedNumber } from './formatters.js'; // Import formatters
+import { safeParseFloat, escapeHtml, triggerAnimation } from './utils.js'; // Import utils (including safeParseFloat)
 
 // Import UI functions
-import { displayEnergyPool } from './ui-updater.js'; // For switching views on click
+import { displayEnergyPool } from './ui-updater.js';
 
 
 // --- Equation Functions ---
@@ -43,9 +39,9 @@ export function updateEquationDisplay() {
     const op = (operator) => `<span class="equation-operator">${operator}</span>`;
     const group = (content) => `<span class="equation-group">(</span>${content}<span class="equation-group">)</span>`;
     const num = (value, targetId, title = '') => {
-        const cleanValue = safeParseFloat(value, 0);
-        const displayValue = formatSimpleNumber(cleanValue);
-        const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+        const cleanValue = safeParseFloat(value, 0); // Use imported safeParseFloat from utils.js
+        const displayValue = formatSimpleNumber(cleanValue); // Use imported formatSimpleNumber from formatters.js
+        const titleAttr = title ? ` title="${escapeHtml(title)}"` : ''; // Use imported escapeHtml from utils.js
         const targetAttr = targetId ? ` data-target-id="${targetId}"` : '';
         return `<span class="equation-number"${targetAttr}${titleAttr}>${displayValue}</span>`;
     };
@@ -54,7 +50,7 @@ export function updateEquationDisplay() {
     let equationHTML = '';
 
     try {
-        // --- Build Equation String using imported elements/state/utils ---
+        // --- Build Equation String using imported elements/state/utils/formatters ---
         // 1. Base Damage, Base Multiplier, Form Multiplier
         const baseDamage = safeParseFloat(baseDamageInput?.value, 0);
         const baseMultiplier = safeParseFloat(baseMultiplierInput?.value, 1);
@@ -99,31 +95,26 @@ export function updateEquationDisplay() {
 
         // 4. Energy Damage Terms
         let energyTerms = [];
-        ALL_ENERGY_TYPES.forEach(type => {
+        ALL_ENERGY_TYPES.forEach(type => { // Use imported config
             const energySlider = document.getElementById(`${type}-energy-slider`);
             const currentEnergyEl = document.getElementById(`${type}-current-energy`);
             const damagePerPowerEl = document.getElementById(`${type}-damage-per-power`);
-
             if (energySlider && currentEnergyEl && damagePerPowerEl) {
                 const sliderPercent = safeParseFloat(energySlider.value, 0);
-                const attackState = activeAttacks[type] || null;
+                const attackState = activeAttacks[type] || null; // Use imported state
                 let limitPercent = 100;
-                if (attackState === 'super') limitPercent = 95;
-                else if (attackState === 'ultimate') limitPercent = 90;
+                if (attackState === 'super') limitPercent = 95; else if (attackState === 'ultimate') limitPercent = 90;
                 const effectivePercent = Math.min(sliderPercent, limitPercent);
-
                 if (effectivePercent > 0) {
-                    const currentEnergy = parseFormattedNumber(currentEnergyEl.textContent);
+                    const currentEnergy = parseFormattedNumber(currentEnergyEl.textContent); // Use imported formatter
                     if (currentEnergy > 0) {
                         const damagePerPower = safeParseFloat(damagePerPowerEl.value, 1);
                         const energyUsed = Math.max(0, Math.min(currentEnergy * (effectivePercent / 100), currentEnergy));
                         const energyDamage = energyUsed * damagePerPower;
-
                         if (energyDamage !== 0 || energyUsed !== 0) {
-                            const energyTitle = `${ENERGY_TYPE_DETAILS[type]?.name || type} Used (${sliderPercent}%) = ${formatSimpleNumber(energyUsed)}`;
+                            const energyTitle = `${ENERGY_TYPE_DETAILS[type]?.name || type} Used (${sliderPercent}%) = ${formatSimpleNumber(energyUsed)}`; // Use imported config + formatter
                             const dppTitle = `${ENERGY_TYPE_DETAILS[type]?.name || type} Damage/Point`;
                             let term = num(energyUsed, `${type}-energy-slider`, energyTitle);
-
                             if (damagePerPower !== 1 || damagePerPowerEl.value.trim() !== '1') {
                                 term += op('&times;') + num(damagePerPower, `${type}-damage-per-power`, dppTitle);
                                 term = group(term);
@@ -164,7 +155,7 @@ export function updateEquationDisplay() {
 
         // 6. Speed Term
         const speedSliderEq = document.getElementById('speed-slider');
-        const baseSpeedEq = safeParseFloat(charSpeedInput?.value, 0);
+        const baseSpeedEq = safeParseFloat(charSpeedInput?.value, 0); // Use imported element + util
         if (speedSliderEq && baseSpeedEq > 0) {
              const sliderPercentEq = safeParseFloat(speedSliderEq.value, 0);
              if (sliderPercentEq > 0) {
@@ -204,32 +195,26 @@ export function handleEquationClick(event) {
             sourceElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
             let elementToPulse = sourceElement;
             // Determine element to pulse based on type
-            if (sourceElement.tagName === 'SPAN' && sourceElement.classList.contains('readonly-display')) {
-                elementToPulse = sourceElement.closest('.energy-pool') || sourceElement;
-            } else if (sourceElement.type === 'range') {
-                elementToPulse = sourceElement.closest('.energy-slider-section') || sourceElement;
-            } else if (sourceElement.classList.contains('modifier-value-input')) {
-                 elementToPulse = sourceElement.closest('.dynamic-box') || sourceElement;
-            } else if (targetId === 'speed-slider') {
-                 elementToPulse = document.getElementById('speed-slider-section') || sourceElement;
-            } else if (targetId === 'form-multiplier') {
-                elementToPulse = document.getElementById('active-forms-section') || sourceElement;
-            }
+            if (sourceElement.tagName === 'SPAN' && sourceElement.classList.contains('readonly-display')) { elementToPulse = sourceElement.closest('.energy-pool') || sourceElement; }
+            else if (sourceElement.type === 'range') { elementToPulse = sourceElement.closest('.energy-slider-section') || sourceElement; }
+            else if (sourceElement.classList.contains('modifier-value-input')) { elementToPulse = sourceElement.closest('.dynamic-box') || sourceElement; }
+            else if (targetId === 'speed-slider') { elementToPulse = document.getElementById('speed-slider-section') || sourceElement; }
+            else if (targetId === 'form-multiplier') { elementToPulse = document.getElementById('active-forms-section') || sourceElement; }
+
             triggerAnimation(elementToPulse, 'pulse-source'); // Use imported util
             if (sourceElement.tagName === 'INPUT' && !sourceElement.readOnly && sourceElement.type !== 'range') { sourceElement.focus(); }
+
             // Energy pool switching logic
-            const energyTypeMatch = targetId.match(/^([a-z]+)-(damage-per-power|energy-slider|max-multiplier)/);
+            const energyTypeMatch = targetId.match(/^([a-z]+)-(damage-per-power|energy-slider|max-multiplier)/); // Use standard energy type keys for matching
             if (energyTypeMatch) {
                 const energyType = energyTypeMatch[1];
+                // Check against standard types for switching logic for now
                 if (ALL_ENERGY_TYPES.includes(energyType) && energyTypeSelect?.value !== energyType) { // Use imported config and element
                     if(energyTypeSelect) energyTypeSelect.value = energyType;
                     displayEnergyPool(energyType); // Use imported UI function
-                    // Might need to update attack buttons/slider style too after switch
                 }
             }
         } else { console.warn(`Equation link target element not found: #${targetId}`); }
     }
 }
-
-// NOTE: There should be NO other declaration of 'equationDisplayEl' in this file.
 
