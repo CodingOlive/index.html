@@ -10,17 +10,17 @@ import {
 import { auth } from './firebase-init.js';
 
 // DOM Elements for Auth UI & potentially Admin UI toggle
-import { googleSignInBtn, signOutBtn, userInfoSpan, adminPanelToggleBtn, energyTypeSelect } from './dom-elements.js'; // Added energyTypeSelect
+import { googleSignInBtn, signOutBtn, userInfoSpan, adminPanelToggleBtn, energyTypeSelect } from './dom-elements.js';
 
 // State variables and functions
 import {
     // Import state variables directly using 'export let' names
-    currentUser,
-    isAdmin,
+    currentUser, // Import directly
+    isAdmin,     // Import directly
     // Import functions
     initializeCoreState,
     initializeAndMergeEnergyTypes,
-    mergedEnergyTypes // Needed for populating dropdown on logout
+    mergedEnergyTypes
 } from './state.js';
 
 // Database function for loading state and checking admin status
@@ -28,13 +28,13 @@ import { loadStateAndApply, checkAdminStatus } from './database.js';
 
 // UI feedback and initialization functions
 import { showMessage } from './ui-feedback.js';
-import { initializeDefaultUI, updateStatsDisplay, displayEnergyPool, updateAttackButtonStates, updateSliderLimitAndStyle, updateSpeedSliderVisibility } from './ui-updater.js'; // Added more UI updaters
+import { initializeDefaultUI, updateStatsDisplay, displayEnergyPool, updateAttackButtonStates, updateSliderLimitAndStyle, updateSpeedSliderVisibility } from './ui-updater.js';
 
 // Import generator/updater functions needed *after* merge
 import { generateEnergySections, populateEnergyTypeDropdown, renderFormList, renderActiveFormsSection } from './dom-generators.js';
 import { updateEquationDisplay } from './equation.js';
-import { ALL_ENERGY_TYPES, ENERGY_TYPE_DETAILS } from './config.js'; // Needed for logout dropdown reset
-import { updateAdminUI } from './admin.js'; // Import admin UI updater
+import { ALL_ENERGY_TYPES, ENERGY_TYPE_DETAILS } from './config.js';
+import { updateAdminUI } from './admin.js';
 
 
 // --- Authentication Functions ---
@@ -61,8 +61,8 @@ export function setupAuthListener() {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             // --- User is signed in ---
-            // Modify the imported 'let' variables directly
-            currentUser = user;
+            // Modify the imported 'let' variables directly using their original names
+            currentUser = user; // Assign directly to imported 'currentUser'
             console.log("Auth Listener: User signed in:", user.displayName, user.uid);
             // Update Auth UI
             if (userInfoSpan) userInfoSpan.textContent = `Signed in as: ${user.displayName || user.email || 'User'}`;
@@ -70,7 +70,7 @@ export function setupAuthListener() {
             if (signOutBtn) signOutBtn.classList.remove('hidden');
 
             // Check Admin Status & Update State
-            isAdmin = await checkAdminStatus(user.uid); // Modify imported 'let'
+            isAdmin = await checkAdminStatus(user.uid); // Assign directly to imported 'isAdmin'
             console.log("Admin status checked:", isAdmin);
             updateAdminUI(); // Update button visibility based on new status
 
@@ -92,13 +92,13 @@ export function setupAuthListener() {
             await initializeAndMergeEnergyTypes();
 
             // Initialize/Update UI AFTER merge
-            generateEnergySections(); // Regenerate pools/sliders using merged list
-            populateEnergyTypeDropdown(); // Populate dropdown using merged list
+            generateEnergySections();
+            populateEnergyTypeDropdown();
             updateSpeedSliderVisibility();
             renderFormList();
             renderActiveFormsSection();
 
-            // Final UI updates based on loaded/default state + merged types
+            // Final UI updates
              const finalSelectedType = energyTypeSelect?.value;
              if (finalSelectedType) {
                  displayEnergyPool(finalSelectedType);
@@ -146,4 +146,3 @@ export function setupAuthListener() {
         console.log("Auth state change processed, including admin check and UI update.");
     });
 }
-
