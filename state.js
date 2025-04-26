@@ -53,7 +53,7 @@ export let calculatorState = {
 };
 export let activeAttacks = {};
 export let mergedEnergyTypes = [];
-export let isAdmin = false; // Ensure this is 'let'
+export let isAdmin = false; // <-- MUST BE 'let'
 
 
 // --- Core State Functions ---
@@ -67,7 +67,12 @@ export function initializeCoreState() {
     highestDamage = 0;
     dynamicModifierCount = 0;
     characterForms = [];
-    calculatorState = { /* reset object */ };
+    calculatorState = {
+        activeFormIds: [],
+        appliedAcBonus: 0,
+        appliedTrueResistanceBonus: 0,
+        activeView: 'calculator'
+    };
     activeAttacks = {};
     mergedEnergyTypes = [];
     isAdmin = false; // Modifying the exported 'let'
@@ -77,12 +82,14 @@ export function initializeCoreState() {
  * Gathers the current state of the application from DOM elements and state variables.
  */
 export function gatherState() {
-    // ... (Function content remains the same - reads state/DOM) ...
-     if (!baseDamageInput || !energyTypeSelect) { return null; }
-     const state = { /* ... gather all properties ... */ };
-     // ... (gather pools, speed, modifiers) ...
-     console.log("State gathered:", state);
-     return state;
+    if (!baseDamageInput || !energyTypeSelect /* add checks */) {
+        console.error("Cannot gather state: Critical DOM elements not found.");
+        return null;
+    }
+    const state = { /* ... gather all properties ... */ };
+    // ... (gather pools, speed, modifiers logic remains the same) ...
+    console.log("State gathered:", state);
+    return state;
 }
 
 
@@ -90,7 +97,6 @@ export function gatherState() {
  * Applies a loaded state object to the application's state variables and UI.
  */
 export function applyState(state) {
-    // ... (Function content remains the same - modifies state/DOM) ...
      if (!state) { return; }
      console.log("Applying loaded state...");
      // --- Restore Core State Variables ---
@@ -104,7 +110,7 @@ export function applyState(state) {
      highestDamage = state.highestDamage || 0;
      // --- Restore DOM Element Values ---
      // ... restore inputs/checkboxes/etc ...
-     handleRyokoCheckboxChange(); // Call handler after setting checkbox state
+     handleRyokoCheckboxChange();
      // --- Restore Dynamic Modifiers ---
      // ... clear container, loop state.dynamicModifiers, call addDynamicModifier ...
      // --- Restore Energy Pool Inputs ---
@@ -135,11 +141,11 @@ export function applyState(state) {
  * and stores the result in the `mergedEnergyTypes` state variable.
  */
 export async function initializeAndMergeEnergyTypes() {
-    // ... (Function content remains the same) ...
+     // ... (Function content remains the same) ...
      console.log("Initializing and merging energy types...");
      let standardTypes = []; let customTypes = [];
-     try { standardTypes = ALL_ENERGY_TYPES.map(typeId => { /* ... */ }); } catch (error) { /* ... */ }
-     try { const loadedCustom = await loadCustomEnergyTypes(); customTypes = loadedCustom.map(ct => ({ ...ct, isStandard: false, details: null })); } catch (error) { /* ... */ }
+     try { standardTypes = ALL_ENERGY_TYPES.map(typeId => { /* ... format standard type object ... */ }); } catch (error) { console.error("Error processing standard energy types:", error); }
+     try { const loadedCustom = await loadCustomEnergyTypes(); customTypes = loadedCustom.map(ct => ({ ...ct, isStandard: false, details: null })); } catch (error) { console.error("Failed to load or process custom energy types:", error); }
      mergedEnergyTypes = [...standardTypes, ...customTypes]; // Modifies exported variable
      console.log(`Merged energy types initialized. Total: ${mergedEnergyTypes.length} (Standard: ${standardTypes.length}, Custom: ${customTypes.length})`);
      return true;
