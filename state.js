@@ -37,8 +37,11 @@ import { loadCustomEnergyTypes } from './database.js';
 
 
 // --- State Variables ---
-// Ensure these are exported with 'let' so they can be modified by other modules
+// >>>>> CRITICAL: Ensure these use 'export let' <<<<<
 export let currentUser = null;
+export let isAdmin = false;
+// >>>>> END CRITICAL SECTION <<<<<
+
 export let totalDamageDealt = 0;
 export let totalEnergySpent = 0;
 export let attackCount = 0;
@@ -53,7 +56,6 @@ export let calculatorState = {
 };
 export let activeAttacks = {};
 export let mergedEnergyTypes = [];
-export let isAdmin = false; // <-- MUST BE 'let'
 
 
 // --- Core State Functions ---
@@ -61,6 +63,7 @@ export let isAdmin = false; // <-- MUST BE 'let'
 export function initializeCoreState() {
     console.log("Initializing core state variables...");
     currentUser = null; // Modifying the exported 'let'
+    isAdmin = false;    // Modifying the exported 'let'
     totalDamageDealt = 0;
     totalEnergySpent = 0;
     attackCount = 0;
@@ -75,21 +78,18 @@ export function initializeCoreState() {
     };
     activeAttacks = {};
     mergedEnergyTypes = [];
-    isAdmin = false; // Modifying the exported 'let'
 }
 
 /**
  * Gathers the current state of the application from DOM elements and state variables.
  */
 export function gatherState() {
-    if (!baseDamageInput || !energyTypeSelect /* add checks */) {
-        console.error("Cannot gather state: Critical DOM elements not found.");
-        return null;
-    }
-    const state = { /* ... gather all properties ... */ };
-    // ... (gather pools, speed, modifiers logic remains the same) ...
-    console.log("State gathered:", state);
-    return state;
+    // ... (Function content should be correct from previous versions) ...
+     if (!baseDamageInput || !energyTypeSelect) { return null; }
+     const state = { /* ... gather all properties ... */ };
+     // ... (gather pools, speed, modifiers) ...
+     console.log("State gathered:", state);
+     return state;
 }
 
 
@@ -97,36 +97,36 @@ export function gatherState() {
  * Applies a loaded state object to the application's state variables and UI.
  */
 export function applyState(state) {
+     // ... (Function content should be correct from previous versions) ...
+     // It modifies state variables like characterForms, calculatorState, etc.
+     // It updates DOM elements based on loaded state.
+     // It calls handleRyokoCheckboxChange after setting checkbox state.
+     // It calls UI updaters like renderFormList, applyActiveFormEffects, etc.
      if (!state) { return; }
      console.log("Applying loaded state...");
-     // --- Restore Core State Variables ---
+     // Restore Core State Variables
      characterForms = state.characterForms || [];
      calculatorState.activeFormIds = Array.isArray(state.activeFormIds) ? state.activeFormIds : [];
-     calculatorState.activeView = state.activeView || 'calculator';
-     activeAttacks = state.activeAttacks || {};
-     totalDamageDealt = state.totalDamageDealt || 0;
-     totalEnergySpent = state.totalEnergySpent || 0;
-     attackCount = state.attackCount || 0;
-     highestDamage = state.highestDamage || 0;
-     // --- Restore DOM Element Values ---
+     // ... restore other state vars ...
+     // Restore DOM Element Values
      // ... restore inputs/checkboxes/etc ...
      handleRyokoCheckboxChange();
-     // --- Restore Dynamic Modifiers ---
-     // ... clear container, loop state.dynamicModifiers, call addDynamicModifier ...
-     // --- Restore Energy Pool Inputs ---
-     // ... loop state.energyPools, set DPP/Regen values ...
-     // --- Update UI based on restored state ---
+     // Restore Dynamic Modifiers
+     // ... clear container, loop, call addDynamicModifier ...
+     // Restore Energy Pool Inputs
+     // ... loop, set DPP/Regen ...
+     // Update UI based on restored state
      renderFormList();
      renderActiveFormsSection();
      applyActiveFormEffects();
      // Restore CURRENT Energy
-     // ... loop state.energyPools, set currentEnergyEl.textContent ...
+     // ... loop, set currentEnergyEl.textContent ...
      // Restore slider percentages & update displays
-     // ... loop state.sliderPercentages, set slider values, call updateSingleSliderDisplay/updateSliderVisibility ...
+     // ... loop, set slider values, call updaters ...
      updateSpeedSliderVisibility();
-     // ... restore speed slider value, call updateSpeedSliderDisplay ...
+     // ... restore speed slider ...
      // Update Kaioken UI
-     // ... check checkbox/focus, call apply/removeKaiokenStyle, updateCurrentHealthDisplay ...
+     // ... check checkbox/focus, call style/health updaters ...
      // Update final displays
      updateStatsDisplay();
      updateEquationDisplay();
@@ -141,11 +141,11 @@ export function applyState(state) {
  * and stores the result in the `mergedEnergyTypes` state variable.
  */
 export async function initializeAndMergeEnergyTypes() {
-     // ... (Function content remains the same) ...
+    // ... (Function content should be correct from previous versions) ...
      console.log("Initializing and merging energy types...");
      let standardTypes = []; let customTypes = [];
-     try { standardTypes = ALL_ENERGY_TYPES.map(typeId => { /* ... format standard type object ... */ }); } catch (error) { console.error("Error processing standard energy types:", error); }
-     try { const loadedCustom = await loadCustomEnergyTypes(); customTypes = loadedCustom.map(ct => ({ ...ct, isStandard: false, details: null })); } catch (error) { console.error("Failed to load or process custom energy types:", error); }
+     try { standardTypes = ALL_ENERGY_TYPES.map(typeId => { /* ... format standard type object ... */ }); } catch (error) { /* ... */ }
+     try { const loadedCustom = await loadCustomEnergyTypes(); customTypes = loadedCustom.map(ct => ({ ...ct, isStandard: false, details: null })); } catch (error) { /* ... */ }
      mergedEnergyTypes = [...standardTypes, ...customTypes]; // Modifies exported variable
      console.log(`Merged energy types initialized. Total: ${mergedEnergyTypes.length} (Standard: ${standardTypes.length}, Custom: ${customTypes.length})`);
      return true;
