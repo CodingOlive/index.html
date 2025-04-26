@@ -15,7 +15,7 @@ export const saveBtn = document.getElementById('save-state-btn');
 export const loadBtn = document.getElementById('load-state-btn');
 export const clearBtn = document.getElementById('clear-state-btn');
 export const showCharacterStatsBtn = document.getElementById('show-character-stats-btn');
-export const adminPanelToggleBtn = document.getElementById('admin-panel-toggle-btn'); // Added Admin Toggle
+export const adminPanelToggleBtn = document.getElementById('admin-panel-toggle-btn');
 
 // Message Area
 export const messageArea = document.getElementById('message-area');
@@ -37,8 +37,8 @@ export const energyTypeSelect = document.getElementById('energy-type');
 
 // Containers for Dynamic Elements
 export const energyPoolsContainer = document.getElementById('energy-pools-container');
-export const slidersGrid = document.getElementById('sliders-grid'); // The grid itself
-export const allSlidersContainer = document.getElementById('all-sliders-container'); // The parent container with title
+export const slidersGrid = document.getElementById('sliders-grid');
+export const allSlidersContainer = document.getElementById('all-sliders-container');
 
 // Attack Buttons
 export const attacksSection = document.getElementById('attacks-section');
@@ -71,7 +71,7 @@ export const statFormTrBonusEl = document.getElementById('stat-form-tr-bonus');
 export const statTotalAcEl = document.getElementById('stat-total-ac');
 export const statTotalTrEl = document.getElementById('stat-total-tr');
 export const statSpeedEl = document.getElementById('stat-speed');
-export const formListContainer = document.getElementById('formListContainer'); // Saved forms list in stats panel
+export const formListContainer = document.getElementById('formListContainer');
 
 // Kaioken Section (within Stats Panel)
 export const kaiokenSection = document.getElementById('kaioken-section');
@@ -109,7 +109,6 @@ export const formResistanceBonusInputsDiv = document.getElementById('formResista
 export const formAcBonusInput = document.getElementById('formAcBonusInput');
 export const formTrueResistanceBonusInput = document.getElementById('formTrueResistanceBonusInput');
 export const addFormButton = document.getElementById('addFormButton');
-// Form Buff Inputs (within Form Creator)
 export const formEnableFormBuffCheckbox = document.getElementById('formEnableFormBuff');
 export const formFormBuffValueInput = document.getElementById('formFormBuffValue');
 export const formFormBuffTypeSelect = document.getElementById('formFormBuffType');
@@ -133,7 +132,7 @@ export const adminColorPreview = document.getElementById('adminColorPreview');
 export const energyPoolTemplate = document.getElementById('energy-pool-template');
 export const energySliderTemplate = document.getElementById('energy-slider-template');
 
-// Specific Slider Elements (if needed directly, often accessed via ID)
-// export const speedSlider = document.getElementById('speed-slider');
-// export const speedSliderValueDisplay = document.getElementById('speed-slider-value-display');
+// Specific Slider Elements (Uncommented)
+export const speedSlider = document.getElementById('speed-slider');
+export const speedSliderValueDisplay = document.getElementById('speed-slider-value-display');
 
