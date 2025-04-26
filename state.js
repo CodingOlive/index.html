@@ -1,6 +1,7 @@
 // state.js - Manages the application's state variables and save/load logic.
 
 // --- Import Dependencies ---
+// Import DOM Elements
 import {
     baseDamageInput, baseMultiplierInput, attackCompressionPointsInput,
     energyTypeSelect, characterNameInput, charBaseHealthInput,
@@ -10,10 +11,17 @@ import {
     kaiokenStrainInput, currentHealthEl, dynamicModifiersContainer,
     formMultiplierInput
 } from './dom-elements.js';
+
+// Import Config
 import { ALL_ENERGY_TYPES, ENERGY_TYPE_DETAILS } from './config.js';
+
+// Import Utilities & Formatters
 import { safeParseFloat, parseFormattedNumber, formatStatNumber, formatSimpleNumber } from './formatters.js';
+
+// Import Functions from other modules called by applyState
 import { addDynamicModifier, renderFormList, renderActiveFormsSection } from './dom-generators.js';
-import { applyActiveFormEffects, handleRyokoCheckboxChange } from './forms.js';
+import { applyActiveFormEffects } from './forms.js'; // Import only form-related handlers
+import { handleRyokoCheckboxChange } from './character-stats.js'; // <-- Import Ryoko handler from correct file
 import { getEnergyElements } from './energy-pools.js';
 import { updateSingleSliderDisplay } from './calculation.js';
 import { updateSpeedSliderDisplay } from './speed-slider.js';
@@ -43,7 +51,7 @@ export let calculatorState = {
 };
 export let activeAttacks = {};
 export let mergedEnergyTypes = [];
-export let isAdmin = false; // <-- NEW: Flag for admin status
+export let isAdmin = false;
 
 
 // --- Core State Functions ---
@@ -65,7 +73,7 @@ export function initializeCoreState() {
     };
     activeAttacks = {};
     mergedEnergyTypes = [];
-    isAdmin = false; // <-- Reset admin flag on logout/init
+    isAdmin = false;
 }
 
 /**
@@ -74,15 +82,16 @@ export function initializeCoreState() {
  */
 export function gatherState() {
     // Check if essential elements are loaded before proceeding
-    if (!baseDamageInput || !energyTypeSelect /* add checks for other critical elements */) {
+    if (!baseDamageInput || !energyTypeSelect /* add checks */) {
         console.error("Cannot gather state: Critical DOM elements not found.");
         return null;
     }
 
     const state = {
-        // ... (all other state properties remain the same) ...
+        // Read state from imported elements and variables
         baseDamage: baseDamageInput.value,
         baseMultiplier: baseMultiplierInput?.value || '1',
+        // ... (rest of properties remain the same) ...
         attackCompressionPoints: attackCompressionPointsInput?.value || '0',
         selectedEnergyType: energyTypeSelect.value,
         characterName: characterNameInput?.value || '',
@@ -111,21 +120,23 @@ export function gatherState() {
         totalEnergySpent: totalEnergySpent,
         attackCount: attackCount,
         highestDamage: highestDamage,
-        // NOTE: We don't typically need to SAVE the isAdmin status,
-        // it's determined on login based on the database.
     };
 
     // Gather Energy Pool Data
-    ALL_ENERGY_TYPES.forEach(type => {
-       const els = getEnergyElements(type);
+    // Use mergedEnergyTypes if available, otherwise fallback or use standard?
+    // For now, assuming gatherState is called when standard types are primary focus
+    // This might need adjustment depending on when state is gathered vs merged list availability
+    const typesToGather = mergedEnergyTypes.length > 0 ? mergedEnergyTypes.map(et => et.id) : ALL_ENERGY_TYPES;
+    typesToGather.forEach(typeId => {
+       const els = getEnergyElements(typeId);
        if (els) {
-           state.energyPools[type] = {
+           state.energyPools[typeId] = {
                maxMultiplier: els.maxMultiplierEl?.value || '1',
                currentEnergy: els.currentEnergyEl?.textContent || '0',
                damagePerPower: els.damagePerPowerEl?.value || '1',
                regenPercent: els.regenPercentEl?.value || ''
            };
-           state.sliderPercentages[type] = els.energySlider?.value || '0';
+           state.sliderPercentages[typeId] = els.energySlider?.value || '0';
        }
     });
 
@@ -139,11 +150,7 @@ export function gatherState() {
         const valueInput = box.querySelector('.modifier-value-input');
         const typeOption = box.querySelector('.modifier-type-option.active');
         if (nameInput && valueInput && typeOption) {
-            state.dynamicModifiers.push({
-                name: nameInput.value,
-                value: valueInput.value,
-                type: typeOption.dataset.value
-            });
+            state.dynamicModifiers.push({ name: nameInput.value, value: valueInput.value, type: typeOption.dataset.value });
         }
     });
 
@@ -157,9 +164,6 @@ export function gatherState() {
  * @param {object} state - The state object to apply.
  */
 export function applyState(state) {
-    // ... (Function content remains the same as before) ...
-    // It restores state variables and DOM elements based on the loaded 'state' object.
-    // It does NOT need to handle the 'isAdmin' flag, as that's set during login check.
     if (!state) { /* ... warning ... */ return; }
     console.log("Applying loaded state...");
 
@@ -175,6 +179,7 @@ export function applyState(state) {
 
     // --- 2. Restore DOM Element Values ---
     if (baseDamageInput) baseDamageInput.value = state.baseDamage || '';
+    // ... (restore all other inputs/selects/checkboxes) ...
     if (attackCompressionPointsInput) attackCompressionPointsInput.value = state.attackCompressionPoints || '0';
     if (energyTypeSelect) energyTypeSelect.value = state.selectedEnergyType || 'ki';
     if (characterNameInput) characterNameInput.value = state.characterName || '';
@@ -195,7 +200,7 @@ export function applyState(state) {
     }
     if (ryokoCheckbox) ryokoCheckbox.checked = state.ryokoCheckboxState || false;
     if (ryokoEquationInput) ryokoEquationInput.value = state.ryokoEquationValue || '';
-    handleRyokoCheckboxChange();
+    handleRyokoCheckboxChange(); // Use imported handler from character-stats.js
 
     // --- 3. Restore Dynamic Modifiers ---
     if (dynamicModifiersContainer) {
@@ -207,27 +212,33 @@ export function applyState(state) {
     }
 
     // --- 4. Restore Energy Pool Inputs (DPP, Regen %) ---
-    if (state.energyPools) {
-        ALL_ENERGY_TYPES.forEach(type => {
-            const els = getEnergyElements(type);
-            const poolData = state.energyPools[type];
-            if (els && poolData) {
-                if(els.damagePerPowerEl) els.damagePerPowerEl.value = poolData.damagePerPower || '1';
-                if(els.regenPercentEl) els.regenPercentEl.value = poolData.regenPercent || '';
-            }
-        });
-    }
+    // Use the keys from the saved state's energyPools object
+    const savedPoolTypes = state.energyPools ? Object.keys(state.energyPools) : [];
+    savedPoolTypes.forEach(typeId => {
+        const els = getEnergyElements(typeId);
+        const poolData = state.energyPools[typeId];
+        if (els && poolData) {
+            if(els.damagePerPowerEl) els.damagePerPowerEl.value = poolData.damagePerPower || '1';
+            if(els.regenPercentEl) els.regenPercentEl.value = poolData.regenPercent || '';
+        }
+    });
 
     // --- 5. Update UI based on restored state ---
+    // Note: mergedEnergyTypes should be loaded *before* applyState is called
+    // UI generation/population should happen *after* applyState in auth.js
+
+    // 5a. Render form lists based on restored characterForms state
     renderFormList();
     renderActiveFormsSection();
+
+    // 5b. Apply combined form effects (reads restored activeFormIds)
     applyActiveFormEffects();
 
     // 5c. Restore CURRENT Energy *after* totals calculated
     if (state.energyPools) {
-        ALL_ENERGY_TYPES.forEach(type => {
-            const els = getEnergyElements(type);
-            const poolData = state.energyPools[type];
+        savedPoolTypes.forEach(typeId => { // Iterate over saved types again
+            const els = getEnergyElements(typeId);
+            const poolData = state.energyPools[typeId];
             if (els?.currentEnergyEl && poolData) {
                 const savedCurrentNum = parseFormattedNumber(poolData.currentEnergy || '0');
                 const currentTotal = parseFormattedNumber(els.totalEnergyEl?.textContent || '0');
@@ -238,13 +249,13 @@ export function applyState(state) {
 
     // 5d. Restore slider percentages & update displays
     if (state.sliderPercentages) {
-        ALL_ENERGY_TYPES.forEach(type => {
-            const els = getEnergyElements(type);
+         savedPoolTypes.forEach(typeId => { // Iterate over saved types
+            const els = getEnergyElements(typeId);
             if (els?.energySlider) {
-                els.energySlider.value = state.sliderPercentages[type] || '0';
-                 updateSingleSliderDisplay(type);
+                els.energySlider.value = state.sliderPercentages[typeId] || '0';
+                 updateSingleSliderDisplay(typeId);
             }
-            updateSliderVisibility(type);
+            updateSliderVisibility(typeId); // Ensure visibility is correct
         });
     }
     updateSpeedSliderVisibility();
