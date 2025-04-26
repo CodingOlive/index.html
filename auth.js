@@ -14,13 +14,16 @@ import { googleSignInBtn, signOutBtn, userInfoSpan, adminPanelToggleBtn, energyT
 
 // State variables and functions
 import {
-    // Import state variables directly using 'export let' names
-    currentUser, // Import directly
-    isAdmin,     // Import directly
-    // Import functions
+    // Import state variables for reading if needed elsewhere
+    currentUser, // Read-only access is fine now
+    isAdmin,     // Read-only access is fine now
+    // Import state functions
     initializeCoreState,
     initializeAndMergeEnergyTypes,
-    mergedEnergyTypes
+    mergedEnergyTypes,
+    // Import SETTER functions
+    setCurrentUser,
+    setIsAdmin
 } from './state.js';
 
 // Database function for loading state and checking admin status
@@ -59,37 +62,30 @@ export function setupAuthListener() {
     if (!auth) { /* ... error handling ... */ return; }
 
     onAuthStateChanged(auth, async (user) => {
-        console.log("Auth state changed. User object:", user); // Log user object immediately
+        console.log("Auth state changed. User object:", user);
 
         if (user) {
             // --- User is signed in ---
-            console.log("Auth Listener: User signed in. Current `currentUser` (before assignment):", currentUser); // Log BEFORE assignment
-            console.log("Auth Listener: User object received:", user);
-            try {
-                // Modify the imported 'let' variables directly using their original names
-                currentUser = user; // Assign directly to imported 'currentUser' - ERROR LIKELY HERE (line ~64)
-                console.log("Auth Listener: Assignment to `currentUser` successful.");
-            } catch (e) {
-                console.error("!!! Error assigning to currentUser !!!", e); // Catch specific error
-            }
-            console.log("Auth Listener: `currentUser` (after assignment attempt):", currentUser);
+            console.log("Auth Listener: User signed in.");
+            // --- Use SETTER functions ---
+            setCurrentUser(user); // Use setter
+            console.log("Auth Listener: Set currentUser via setter.");
 
             // Update Auth UI
             if (userInfoSpan) userInfoSpan.textContent = `Signed in as: ${user.displayName || user.email || 'User'}`;
             if (googleSignInBtn) googleSignInBtn.classList.add('hidden');
             if (signOutBtn) signOutBtn.classList.remove('hidden');
 
-            // Check Admin Status & Update State
-            console.log("Auth Listener: Current `isAdmin` (before check):", isAdmin); // Log BEFORE assignment
-            let adminStatusResult = false; // Default
+            // Check Admin Status & Update State via SETTER
+            let adminStatusResult = false;
             try {
                 adminStatusResult = await checkAdminStatus(user.uid);
-                isAdmin = adminStatusResult; // Assign directly to imported 'isAdmin' - ERROR MIGHT BE HERE TOO
-                console.log("Auth Listener: Assignment to `isAdmin` successful.");
+                setIsAdmin(adminStatusResult); // Use setter
+                console.log("Auth Listener: Set isAdmin via setter:", adminStatusResult);
             } catch (e) {
-                 console.error("!!! Error assigning to isAdmin !!!", e); // Catch specific error
+                 console.error("!!! Error checking admin status or setting isAdmin !!!", e);
+                 setIsAdmin(false); // Default to false on error
             }
-            console.log("Admin status checked:", isAdmin);
             updateAdminUI(); // Update button visibility based on new status
 
             // Attempt to load state
@@ -101,16 +97,17 @@ export function setupAuthListener() {
             // Initialize core state if nothing was loaded
             if (!stateLoaded) {
                 console.log("Auth Listener: No state loaded, initializing core state.");
-                initializeCoreState(); // Resets state vars (incl. isAdmin to false)
+                initializeCoreState(); // Resets state vars (incl. isAdmin to false via its own setter call)
                 // Re-check admin status AFTER core state reset
                 console.log("Auth Listener: Re-checking admin status after core state reset...");
                 try {
-                     isAdmin = await checkAdminStatus(user.uid); // Re-assign
-                     console.log("Auth Listener: Re-assignment to `isAdmin` successful.");
+                     adminStatusResult = await checkAdminStatus(user.uid);
+                     setIsAdmin(adminStatusResult); // Use setter again
+                     console.log("Auth Listener: Re-set isAdmin via setter:", adminStatusResult);
                 } catch(e) {
-                     console.error("!!! Error re-assigning to isAdmin !!!", e);
+                     console.error("!!! Error re-setting isAdmin !!!", e);
+                     setIsAdmin(false);
                 }
-                console.log("Admin status after reset/re-check:", isAdmin);
                 updateAdminUI(); // Ensure button visibility is correct after reset
             }
 
@@ -140,19 +137,18 @@ export function setupAuthListener() {
 
         } else {
             // --- User is signed out ---
-            console.log("Auth Listener: User signed out. Current `currentUser` (before null assignment):", currentUser);
-             try {
-                 currentUser = null; // Modify imported 'let'
-                 console.log("Auth Listener: Assigned null to `currentUser`.");
-             } catch(e) { console.error("!!! Error assigning null to currentUser !!!", e); }
-
-             console.log("Auth Listener: Current `isAdmin` (before false assignment):", isAdmin);
-             try {
-                 isAdmin = false;    // Modify imported 'let'
-                 console.log("Auth Listener: Assigned false to `isAdmin`.");
-             } catch(e) { console.error("!!! Error assigning false to isAdmin !!!", e); }
-
             console.log("Auth Listener: User signed out.");
+             // --- Use SETTER functions ---
+             try {
+                 setCurrentUser(null); // Use setter
+                 console.log("Auth Listener: Set currentUser to null via setter.");
+             } catch(e) { console.error("!!! Error setting currentUser to null !!!", e); }
+
+             try {
+                 setIsAdmin(false);    // Use setter
+                 console.log("Auth Listener: Set isAdmin to false via setter.");
+             } catch(e) { console.error("!!! Error setting isAdmin to false !!!", e); }
+
             // Update Auth UI
              if (userInfoSpan) userInfoSpan.textContent = 'Not signed in.';
              if (googleSignInBtn) googleSignInBtn.classList.remove('hidden');
@@ -160,7 +156,7 @@ export function setupAuthListener() {
              updateAdminUI(); // Hide admin button
 
             // Reset state and UI fully to defaults
-            initializeCoreState();
+            initializeCoreState(); // This now calls setters internally
             initializeDefaultUI();
 
             // Regenerate standard pools/sliders after reset
@@ -179,6 +175,7 @@ export function setupAuthListener() {
              updateStatsDisplay();
              updateEquationDisplay();
         }
-        console.log("Auth state change processed, including admin check and UI update.");
+        console.log("Auth state change processed, using setters.");
     });
 }
+
