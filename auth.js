@@ -59,18 +59,36 @@ export function setupAuthListener() {
     if (!auth) { /* ... error handling ... */ return; }
 
     onAuthStateChanged(auth, async (user) => {
+        console.log("Auth state changed. User object:", user); // Log user object immediately
+
         if (user) {
             // --- User is signed in ---
-            // Modify the imported 'let' variables directly using their original names
-            currentUser = user; // Assign directly to imported 'currentUser'
-            console.log("Auth Listener: User signed in:", user.displayName, user.uid);
+            console.log("Auth Listener: User signed in. Current `currentUser` (before assignment):", currentUser); // Log BEFORE assignment
+            console.log("Auth Listener: User object received:", user);
+            try {
+                // Modify the imported 'let' variables directly using their original names
+                currentUser = user; // Assign directly to imported 'currentUser' - ERROR LIKELY HERE (line ~64)
+                console.log("Auth Listener: Assignment to `currentUser` successful.");
+            } catch (e) {
+                console.error("!!! Error assigning to currentUser !!!", e); // Catch specific error
+            }
+            console.log("Auth Listener: `currentUser` (after assignment attempt):", currentUser);
+
             // Update Auth UI
             if (userInfoSpan) userInfoSpan.textContent = `Signed in as: ${user.displayName || user.email || 'User'}`;
             if (googleSignInBtn) googleSignInBtn.classList.add('hidden');
             if (signOutBtn) signOutBtn.classList.remove('hidden');
 
             // Check Admin Status & Update State
-            isAdmin = await checkAdminStatus(user.uid); // Assign directly to imported 'isAdmin'
+            console.log("Auth Listener: Current `isAdmin` (before check):", isAdmin); // Log BEFORE assignment
+            let adminStatusResult = false; // Default
+            try {
+                adminStatusResult = await checkAdminStatus(user.uid);
+                isAdmin = adminStatusResult; // Assign directly to imported 'isAdmin' - ERROR MIGHT BE HERE TOO
+                console.log("Auth Listener: Assignment to `isAdmin` successful.");
+            } catch (e) {
+                 console.error("!!! Error assigning to isAdmin !!!", e); // Catch specific error
+            }
             console.log("Admin status checked:", isAdmin);
             updateAdminUI(); // Update button visibility based on new status
 
@@ -84,7 +102,15 @@ export function setupAuthListener() {
             if (!stateLoaded) {
                 console.log("Auth Listener: No state loaded, initializing core state.");
                 initializeCoreState(); // Resets state vars (incl. isAdmin to false)
-                isAdmin = await checkAdminStatus(user.uid); // Re-check admin status AFTER core state reset
+                // Re-check admin status AFTER core state reset
+                console.log("Auth Listener: Re-checking admin status after core state reset...");
+                try {
+                     isAdmin = await checkAdminStatus(user.uid); // Re-assign
+                     console.log("Auth Listener: Re-assignment to `isAdmin` successful.");
+                } catch(e) {
+                     console.error("!!! Error re-assigning to isAdmin !!!", e);
+                }
+                console.log("Admin status after reset/re-check:", isAdmin);
                 updateAdminUI(); // Ensure button visibility is correct after reset
             }
 
@@ -114,8 +140,18 @@ export function setupAuthListener() {
 
         } else {
             // --- User is signed out ---
-            currentUser = null; // Modify imported 'let'
-            isAdmin = false;    // Modify imported 'let'
+            console.log("Auth Listener: User signed out. Current `currentUser` (before null assignment):", currentUser);
+             try {
+                 currentUser = null; // Modify imported 'let'
+                 console.log("Auth Listener: Assigned null to `currentUser`.");
+             } catch(e) { console.error("!!! Error assigning null to currentUser !!!", e); }
+
+             console.log("Auth Listener: Current `isAdmin` (before false assignment):", isAdmin);
+             try {
+                 isAdmin = false;    // Modify imported 'let'
+                 console.log("Auth Listener: Assigned false to `isAdmin`.");
+             } catch(e) { console.error("!!! Error assigning false to isAdmin !!!", e); }
+
             console.log("Auth Listener: User signed out.");
             // Update Auth UI
              if (userInfoSpan) userInfoSpan.textContent = 'Not signed in.';
