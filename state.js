@@ -98,10 +98,6 @@ export function gatherState() {
  */
 export function applyState(state) {
      // ... (Function content should be correct from previous versions) ...
-     // It modifies state variables like characterForms, calculatorState, etc.
-     // It updates DOM elements based on loaded state.
-     // It calls handleRyokoCheckboxChange after setting checkbox state.
-     // It calls UI updaters like renderFormList, applyActiveFormEffects, etc.
      if (!state) { return; }
      console.log("Applying loaded state...");
      // Restore Core State Variables
