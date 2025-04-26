@@ -16,17 +16,13 @@ import {
 import { ALL_ENERGY_TYPES, ENERGY_TYPE_DETAILS } from './config.js';
 
 // Import Utilities & Formatters
-import { parseFormattedNumber, formatStatNumber, formatSimpleNumber } from './formatters.js'; // Import formatters
-import { safeParseFloat } from './utils.js'; // Import safeParseFloat from utils
+import { parseFormattedNumber, formatStatNumber, formatSimpleNumber } from './formatters.js';
+import { safeParseFloat } from './utils.js';
 
 // Import Functions from other modules
 import { addDynamicModifier, renderFormList, renderActiveFormsSection } from './dom-generators.js';
-import { applyActiveFormEffects, handleRyokoCheckboxChange } from './forms.js'; // Import form handlers
-// NOTE: handleRyokoCheckboxChange is defined in character-stats.js, but applyState calls it.
-// It's better practice for applyState *not* to call event handlers directly.
-// applyState should just set the state (e.g., ryokoCheckbox.checked), and the initial
-// UI setup or a dedicated refresh function should call handleRyokoCheckboxChange if needed.
-// For now, keeping the import here as per previous structure, but this could be improved.
+import { applyActiveFormEffects } from './forms.js'; // Import only form-related handlers
+import { handleRyokoCheckboxChange } from './character-stats.js'; // <-- CORRECTED IMPORT PATH
 import { getEnergyElements } from './energy-pools.js';
 import { updateSingleSliderDisplay } from './calculation.js';
 import { updateSpeedSliderDisplay } from './speed-slider.js';
@@ -200,7 +196,7 @@ export function applyState(state) {
     }
     if (ryokoCheckbox) ryokoCheckbox.checked = state.ryokoCheckboxState || false;
     if (ryokoEquationInput) ryokoEquationInput.value = state.ryokoEquationValue || '';
-    handleRyokoCheckboxChange(); // Use imported handler
+    handleRyokoCheckboxChange(); // Use imported handler from character-stats.js
 
     // --- 3. Restore Dynamic Modifiers ---
     if (dynamicModifiersContainer) {
@@ -223,13 +219,8 @@ export function applyState(state) {
     });
 
     // --- 5. Update UI based on restored state ---
-    // UI Generation (pools, dropdown) should happen AFTER applyState in auth.js
-
-    // 5a. Render form lists based on restored characterForms state
     renderFormList(); // Use imported generator
     renderActiveFormsSection(); // Use imported generator
-
-    // 5b. Apply combined form effects (reads restored activeFormIds)
     applyActiveFormEffects(); // Use imported handler
 
     // 5c. Restore CURRENT Energy *after* totals calculated
@@ -295,7 +286,10 @@ export async function initializeAndMergeEnergyTypes() {
     let standardTypes = [];
     let customTypes = [];
     try {
-        standardTypes = ALL_ENERGY_TYPES.map(typeId => { /* ... format standard type object ... */ });
+        standardTypes = ALL_ENERGY_TYPES.map(typeId => {
+             const details = ENERGY_TYPE_DETAILS[typeId] || {};
+             return { id: typeId, name: details.name || typeId.charAt(0).toUpperCase() + typeId.slice(1), colorName: details.color || null, hexColor: null, formula: null, isStandard: true, details: details };
+        });
     } catch (error) { console.error("Error processing standard energy types:", error); }
     try {
         const loadedCustom = await loadCustomEnergyTypes();
