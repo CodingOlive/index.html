@@ -16,12 +16,17 @@ import {
 import { ALL_ENERGY_TYPES, ENERGY_TYPE_DETAILS } from './config.js';
 
 // Import Utilities & Formatters
-import { safeParseFloat, parseFormattedNumber, formatStatNumber, formatSimpleNumber } from './formatters.js';
+import { parseFormattedNumber, formatStatNumber, formatSimpleNumber } from './formatters.js'; // Import formatters
+import { safeParseFloat } from './utils.js'; // Import safeParseFloat from utils
 
-// Import Functions from other modules called by applyState
+// Import Functions from other modules
 import { addDynamicModifier, renderFormList, renderActiveFormsSection } from './dom-generators.js';
-import { applyActiveFormEffects } from './forms.js'; // Import only form-related handlers
-import { handleRyokoCheckboxChange } from './character-stats.js'; // <-- Import Ryoko handler from correct file
+import { applyActiveFormEffects, handleRyokoCheckboxChange } from './forms.js'; // Import form handlers
+// NOTE: handleRyokoCheckboxChange is defined in character-stats.js, but applyState calls it.
+// It's better practice for applyState *not* to call event handlers directly.
+// applyState should just set the state (e.g., ryokoCheckbox.checked), and the initial
+// UI setup or a dedicated refresh function should call handleRyokoCheckboxChange if needed.
+// For now, keeping the import here as per previous structure, but this could be improved.
 import { getEnergyElements } from './energy-pools.js';
 import { updateSingleSliderDisplay } from './calculation.js';
 import { updateSpeedSliderDisplay } from './speed-slider.js';
@@ -81,17 +86,15 @@ export function initializeCoreState() {
  * @returns {object|null} A serializable object representing the application state, or null if required elements are missing.
  */
 export function gatherState() {
-    // Check if essential elements are loaded before proceeding
     if (!baseDamageInput || !energyTypeSelect /* add checks */) {
         console.error("Cannot gather state: Critical DOM elements not found.");
         return null;
     }
 
     const state = {
-        // Read state from imported elements and variables
+        // Read state using imported elements, state vars, utils
         baseDamage: baseDamageInput.value,
         baseMultiplier: baseMultiplierInput?.value || '1',
-        // ... (rest of properties remain the same) ...
         attackCompressionPoints: attackCompressionPointsInput?.value || '0',
         selectedEnergyType: energyTypeSelect.value,
         characterName: characterNameInput?.value || '',
@@ -123,12 +126,9 @@ export function gatherState() {
     };
 
     // Gather Energy Pool Data
-    // Use mergedEnergyTypes if available, otherwise fallback or use standard?
-    // For now, assuming gatherState is called when standard types are primary focus
-    // This might need adjustment depending on when state is gathered vs merged list availability
     const typesToGather = mergedEnergyTypes.length > 0 ? mergedEnergyTypes.map(et => et.id) : ALL_ENERGY_TYPES;
     typesToGather.forEach(typeId => {
-       const els = getEnergyElements(typeId);
+       const els = getEnergyElements(typeId); // Use imported helper
        if (els) {
            state.energyPools[typeId] = {
                maxMultiplier: els.maxMultiplierEl?.value || '1',
@@ -178,8 +178,8 @@ export function applyState(state) {
     highestDamage = state.highestDamage || 0;
 
     // --- 2. Restore DOM Element Values ---
+    // Uses imported elements and formatters
     if (baseDamageInput) baseDamageInput.value = state.baseDamage || '';
-    // ... (restore all other inputs/selects/checkboxes) ...
     if (attackCompressionPointsInput) attackCompressionPointsInput.value = state.attackCompressionPoints || '0';
     if (energyTypeSelect) energyTypeSelect.value = state.selectedEnergyType || 'ki';
     if (characterNameInput) characterNameInput.value = state.characterName || '';
@@ -200,22 +200,21 @@ export function applyState(state) {
     }
     if (ryokoCheckbox) ryokoCheckbox.checked = state.ryokoCheckboxState || false;
     if (ryokoEquationInput) ryokoEquationInput.value = state.ryokoEquationValue || '';
-    handleRyokoCheckboxChange(); // Use imported handler from character-stats.js
+    handleRyokoCheckboxChange(); // Use imported handler
 
     // --- 3. Restore Dynamic Modifiers ---
     if (dynamicModifiersContainer) {
         dynamicModifiersContainer.innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>';
         dynamicModifierCount = 0;
         if (state.dynamicModifiers && Array.isArray(state.dynamicModifiers)) {
-            state.dynamicModifiers.forEach(modData => addDynamicModifier(modData));
+            state.dynamicModifiers.forEach(modData => addDynamicModifier(modData)); // Use imported generator
         }
     }
 
     // --- 4. Restore Energy Pool Inputs (DPP, Regen %) ---
-    // Use the keys from the saved state's energyPools object
     const savedPoolTypes = state.energyPools ? Object.keys(state.energyPools) : [];
     savedPoolTypes.forEach(typeId => {
-        const els = getEnergyElements(typeId);
+        const els = getEnergyElements(typeId); // Use imported helper
         const poolData = state.energyPools[typeId];
         if (els && poolData) {
             if(els.damagePerPowerEl) els.damagePerPowerEl.value = poolData.damagePerPower || '1';
@@ -224,19 +223,18 @@ export function applyState(state) {
     });
 
     // --- 5. Update UI based on restored state ---
-    // Note: mergedEnergyTypes should be loaded *before* applyState is called
-    // UI generation/population should happen *after* applyState in auth.js
+    // UI Generation (pools, dropdown) should happen AFTER applyState in auth.js
 
     // 5a. Render form lists based on restored characterForms state
-    renderFormList();
-    renderActiveFormsSection();
+    renderFormList(); // Use imported generator
+    renderActiveFormsSection(); // Use imported generator
 
     // 5b. Apply combined form effects (reads restored activeFormIds)
-    applyActiveFormEffects();
+    applyActiveFormEffects(); // Use imported handler
 
     // 5c. Restore CURRENT Energy *after* totals calculated
     if (state.energyPools) {
-        savedPoolTypes.forEach(typeId => { // Iterate over saved types again
+        savedPoolTypes.forEach(typeId => {
             const els = getEnergyElements(typeId);
             const poolData = state.energyPools[typeId];
             if (els?.currentEnergyEl && poolData) {
@@ -249,39 +247,39 @@ export function applyState(state) {
 
     // 5d. Restore slider percentages & update displays
     if (state.sliderPercentages) {
-         savedPoolTypes.forEach(typeId => { // Iterate over saved types
+         savedPoolTypes.forEach(typeId => {
             const els = getEnergyElements(typeId);
             if (els?.energySlider) {
                 els.energySlider.value = state.sliderPercentages[typeId] || '0';
-                 updateSingleSliderDisplay(typeId);
+                 updateSingleSliderDisplay(typeId); // Use imported calc helper
             }
-            updateSliderVisibility(typeId); // Ensure visibility is correct
+            updateSliderVisibility(typeId); // Use imported UI updater
         });
     }
-    updateSpeedSliderVisibility();
+    updateSpeedSliderVisibility(); // Use imported UI updater
     const speedSlider = document.getElementById('speed-slider');
     if (speedSlider && state.speedSliderPercentage) {
         speedSlider.value = state.speedSliderPercentage || '0';
     }
-    updateSpeedSliderDisplay();
+    updateSpeedSliderDisplay(); // Use imported speed slider updater
 
     // 5f. Update Kaioken UI
     if (kaiokenCheckbox?.checked && energyTypeSelect?.value === 'ki') {
-        applyKaiokenStyle();
-        updateCurrentHealthDisplay();
+        applyKaiokenStyle(); // Use imported UI updater
+        updateCurrentHealthDisplay(); // Use imported UI updater
     } else {
-        removeKaiokenStyle();
+        removeKaiokenStyle(); // Use imported UI updater
     }
 
     // 5g. Update final displays
-    updateStatsDisplay();
-    updateEquationDisplay();
+    updateStatsDisplay(); // Use imported UI updater
+    updateEquationDisplay(); // Use imported equation updater
 
     // 5h. Restore active view
     if (calculatorState.activeView === 'stats') {
-        showCharacterStatsView();
+        showCharacterStatsView(); // Use imported UI updater
     } else {
-        showCalculatorView();
+        showCalculatorView(); // Use imported UI updater
     }
     console.log("State application complete.");
 }
@@ -292,22 +290,18 @@ export function applyState(state) {
  * and stores the result in the `mergedEnergyTypes` state variable.
  */
 export async function initializeAndMergeEnergyTypes() {
-    // ... (Function content remains the same) ...
+    // Uses imported config, database function
     console.log("Initializing and merging energy types...");
     let standardTypes = [];
     let customTypes = [];
     try {
-        standardTypes = ALL_ENERGY_TYPES.map(typeId => {
-            const details = ENERGY_TYPE_DETAILS[typeId] || {};
-            const color = details.color || 'gray-500';
-            return { id: typeId, name: details.name || typeId.charAt(0).toUpperCase() + typeId.slice(1), colorName: details.color || null, hexColor: null, formula: null, isStandard: true, details: details };
-        });
+        standardTypes = ALL_ENERGY_TYPES.map(typeId => { /* ... format standard type object ... */ });
     } catch (error) { console.error("Error processing standard energy types:", error); }
     try {
         const loadedCustom = await loadCustomEnergyTypes();
         customTypes = loadedCustom.map(ct => ({ ...ct, isStandard: false, details: null }));
     } catch (error) { console.error("Failed to load or process custom energy types:", error); }
-    mergedEnergyTypes = [...standardTypes, ...customTypes]; // Modifies exported variable
+    mergedEnergyTypes = [...standardTypes, ...customTypes]; // Modify imported state variable
     console.log(`Merged energy types initialized. Total: ${mergedEnergyTypes.length} (Standard: ${standardTypes.length}, Custom: ${customTypes.length})`);
     return true;
 }
