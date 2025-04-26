@@ -1,13 +1,11 @@
-// Inside dom-elements.js, add these:
-export const speedSlider = document.getElementById('speed-slider');
-export const speedSliderValueDisplay = document.getElementById('speed-slider-value-display');
-// --- DOM Element References ---
+// dom-elements.js - Central repository for DOM element references.
 
+// --- DOM Element References ---
 
 // Main Containers / Screens
 export const mainCalculatorContent = document.getElementById('main-calculator-content');
 export const characterStatsScreen = document.getElementById('character-stats-screen');
-export const mainTitle = document.querySelector('h1.text-3xl'); // Using querySelector for the h1
+export const mainTitle = document.querySelector('h1.text-3xl');
 
 // Top Buttons & User Info
 export const googleSignInBtn = document.getElementById('google-signin-btn');
@@ -17,6 +15,7 @@ export const saveBtn = document.getElementById('save-state-btn');
 export const loadBtn = document.getElementById('load-state-btn');
 export const clearBtn = document.getElementById('clear-state-btn');
 export const showCharacterStatsBtn = document.getElementById('show-character-stats-btn');
+export const adminPanelToggleBtn = document.getElementById('admin-panel-toggle-btn'); // Added Admin Toggle
 
 // Message Area
 export const messageArea = document.getElementById('message-area');
@@ -25,7 +24,7 @@ export const messageArea = document.getElementById('message-area');
 export const baseDamageInput = document.getElementById('base-damage');
 export const attackCompressionPointsInput = document.getElementById('attack-compression-points');
 export const baseMultiplierInput = document.getElementById('base-multiplier');
-export const formMultiplierInput = document.getElementById('form-multiplier'); // Read-only display for combined form multiplier
+export const formMultiplierInput = document.getElementById('form-multiplier');
 export const dynamicModifiersContainer = document.getElementById('dynamic-modifiers-container');
 export const addDynamicBoxBtn = document.getElementById('add-dynamic-box');
 
@@ -38,8 +37,8 @@ export const energyTypeSelect = document.getElementById('energy-type');
 
 // Containers for Dynamic Elements
 export const energyPoolsContainer = document.getElementById('energy-pools-container');
-export const slidersGrid = document.getElementById('all-sliders-container'); // Corrected ID if needed, or use 'sliders-grid' if that's the direct parent
-export const allSlidersContainer = document.getElementById('all-sliders-container'); // Container for the sliders grid title + grid
+export const slidersGrid = document.getElementById('sliders-grid'); // The grid itself
+export const allSlidersContainer = document.getElementById('all-sliders-container'); // The parent container with title
 
 // Attack Buttons
 export const attacksSection = document.getElementById('attacks-section');
@@ -118,13 +117,7 @@ export const formEnablePoolBuffCheckbox = document.getElementById('formEnablePoo
 export const formPoolBuffValueInput = document.getElementById('formPoolBuffValue');
 export const formPoolBuffTypeSelect = document.getElementById('formPoolBuffType');
 
-// Templates
-export const energyPoolTemplate = document.getElementById('energy-pool-template');
-export const energySliderTemplate = document.getElementById('energy-slider-template');
-
-
-// Admin Panel Elements
-export const adminPanelToggleBtn = document.getElementById('admin-panel-toggle-btn');
+// Admin Panel Elements (within Character Stats)
 export const adminPanelSection = document.getElementById('adminPanelSection');
 export const adminEditEnergyTypeId = document.getElementById('adminEditEnergyTypeId');
 export const adminEnergyName = document.getElementById('adminEnergyName');
@@ -135,3 +128,12 @@ export const adminClearEnergyFormBtn = document.getElementById('adminClearEnergy
 export const adminFormMessage = document.getElementById('adminFormMessage');
 export const adminCustomEnergyList = document.getElementById('adminCustomEnergyList');
 export const adminColorPreview = document.getElementById('adminColorPreview');
+
+// Templates
+export const energyPoolTemplate = document.getElementById('energy-pool-template');
+export const energySliderTemplate = document.getElementById('energy-slider-template');
+
+// Specific Slider Elements (if needed directly, often accessed via ID)
+// export const speedSlider = document.getElementById('speed-slider');
+// export const speedSliderValueDisplay = document.getElementById('speed-slider-value-display');
+
