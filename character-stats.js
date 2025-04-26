@@ -12,7 +12,8 @@ import {
 import { DEFAULT_RYOKO_EQUATION } from './config.js';
 
 // Import Utilities & Formatters
-import { safeParseFloat, formatSimpleNumber } from './formatters.js'; // Assuming combined for simplicity
+import { formatSimpleNumber } from './formatters.js'; // Import only formatters here
+import { safeParseFloat } from './utils.js'; // Import safeParseFloat from utils
 
 // Import UI Feedback
 import { showMessage } from './ui-feedback.js';
@@ -108,7 +109,7 @@ export function evaluateRyokoEquation() {
     }
 
     // Update the input field using imported element and formatter
-    charBaseMultiplierInput.value = formatSimpleNumber(result);
+    charBaseMultiplierInput.value = formatSimpleNumber(result); // Use imported formatter
 
     // Trigger a full recalculation
     handleStatChange(); // Uses function defined above
