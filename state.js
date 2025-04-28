@@ -73,7 +73,7 @@ export function applyState(state) { /* ... Function remains the same ... */ }
  * and stores the result in the `mergedEnergyTypes` state variable.
  */
 // --- The Function Definition ---
-export async function InitializeAndMergeEnergyTypes() { // Or initialize... ensure case matches call site
+export async function initializeAndMergeEnergyTypes() { // Or initialize... ensure case matches call site
     console.log("STATE: Starting InitializeAndMergeEnergyTypes...");
     let standardTypes = [];
     let customTypes = [];
