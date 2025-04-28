@@ -27,7 +27,7 @@ import {
 } from './ui-updater.js';
 import { updateEquationDisplay } from './equation.js';
 import { loadCustomEnergyTypes } from './database.js';
-
+import { showMessage } from './ui-feedback.js';
 
 // --- State Variables ---
 export let currentUser = null;
@@ -72,8 +72,9 @@ export function applyState(state) { /* ... Function remains the same ... */ }
  * Loads custom energy types from the database, merges them with standard types,
  * and stores the result in the `mergedEnergyTypes` state variable.
  */
-export async function initializeAndMergeEnergyTypes() {
-    console.log("STATE: Starting initializeAndMergeEnergyTypes...");
+// --- The Function Definition ---
+export async function InitializeAndMergeEnergyTypes() { // Or initialize... ensure case matches call site
+    console.log("STATE: Starting InitializeAndMergeEnergyTypes...");
     let standardTypes = [];
     let customTypes = [];
 
@@ -84,79 +85,52 @@ export async function initializeAndMergeEnergyTypes() {
             standardTypes = [];
         } else {
             standardTypes = ALL_ENERGY_TYPES.map(typeId => {
-                if (!typeId || typeof typeId !== 'string') {
-                    console.error("STATE: Invalid typeId found in ALL_ENERGY_TYPES:", typeId);
-                    return null; // Return null for invalid entries
-                }
-                const details = ENERGY_TYPE_DETAILS[typeId] || {};
+                // Create a standard type object structure
                 return {
                     id: typeId,
-                    name: details.name || typeId.charAt(0).toUpperCase() + typeId.slice(1),
-                    colorName: details.color || null,
-                    hexColor: null, // Placeholder - resolving Tailwind names to hex is complex here
-                    formula: null,
+                    name: ENERGY_TYPE_DETAILS[typeId]?.name || typeId, // Get name from details or use ID
+                    color: null, // Standard types use CSS classes, not specific colors here
+                    formula: null, // Standard types use hardcoded formulas elsewhere
                     isStandard: true,
-                    details: details
+                    details: ENERGY_TYPE_DETAILS[typeId] || {} // Include details for styling etc.
                 };
-            }).filter(type => type !== null); // Filter out any nulls created from invalid IDs
+            });
         }
-        console.log(`STATE: Processed ${standardTypes.length} standard types.`);
-        // console.log("STATE_DEBUG: Standard Types:", JSON.stringify(standardTypes)); // Verbose log
-    } catch (error) {
-        console.error("STATE: Error processing standard energy types:", error);
+        console.log("STATE: Standard types processed:", standardTypes); // <--- DEBUG LOG
+    } catch (e) {
+        console.error("STATE: Error processing standard types", e);
+        showMessage("Error loading standard energy types.", "error");
         standardTypes = []; // Ensure it's empty on error
     }
 
     // 2. Load custom types from database
     try {
-        const loadedCustom = await loadCustomEnergyTypes(); // Use imported function
-        console.log("STATE: Loaded custom types from DB:", loadedCustom);
-
-        if (Array.isArray(loadedCustom)) {
-             customTypes = loadedCustom.map(ct => {
-                 // Validate essential custom type properties
-                 if (!ct || typeof ct !== 'object' || !ct.id || !ct.name || !ct.color || !ct.formula) {
-                     console.error("STATE: Invalid custom type object loaded from DB:", ct);
-                     return null; // Return null for invalid entries
-                 }
-                 return {
-                    id: ct.id, // Firebase key
-                    name: ct.name,
-                    colorName: null, // Custom types use hexColor
-                    hexColor: ct.color, // Store the hex color directly
-                    formula: ct.formula,
-                    isStandard: false,
-                    details: null
-                 };
-             }).filter(type => type !== null); // Filter out any nulls from invalid data
-        } else {
-            console.error("STATE: loadCustomEnergyTypes did not return an array:", loadedCustom);
-            customTypes = [];
-        }
-        console.log(`STATE: Processed ${customTypes.length} valid custom types.`);
-        // console.log("STATE_DEBUG: Custom Types:", JSON.stringify(customTypes)); // Verbose log
-
-    } catch (error) {
-        console.error("STATE: Failed to load or process custom energy types:", error);
+        customTypes = await loadCustomEnergyTypes(); // Call the async function from database.js
+        // Add isStandard flag to custom types
+        customTypes = customTypes.map(type => ({ ...type, isStandard: false, details: null }));
+        console.log("STATE: Custom types loaded from DB:", customTypes); // <--- DEBUG LOG
+    } catch (e) {
+        console.error("STATE: Error loading custom energy types from database", e);
+        showMessage("Failed to load custom energy types from database.", "error");
         customTypes = []; // Ensure it's empty on error
     }
 
-    // 3. Merge and store in state
+    // 3. Merge standard and custom types
     try {
-        // Modify the exported 'let' variable
-        mergedEnergyTypes = [...standardTypes, ...customTypes];
-        console.log(`STATE: Final mergedEnergyTypes count: ${mergedEnergyTypes.length}`);
-        // Final check for any undefined/null entries
-        if (mergedEnergyTypes.some(et => et === null || typeof et === 'undefined')) {
-            console.error("STATE: !!! Final mergedEnergyTypes array contains null or undefined elements !!!");
-            mergedEnergyTypes = mergedEnergyTypes.filter(et => et !== null && typeof et !== 'undefined'); // Attempt cleanup
-            console.log(`STATE: Cleaned mergedEnergyTypes count: ${mergedEnergyTypes.length}`);
-        }
-        // console.log("STATE_DEBUG: Final Merged Data:", JSON.stringify(mergedEnergyTypes)); // Verbose log
-    } catch (error) {
-         console.error("STATE: Error during array merge:", error);
-         mergedEnergyTypes = []; // Reset on error
+        // Combine arrays
+        const finalMergedList = [...standardTypes, ...customTypes];
+
+        // Assign the final list to the exported state variable
+        // IMPORTANT: This assumes 'mergedEnergyTypes' is exported as 'let' from this file
+        mergedEnergyTypes = finalMergedList;
+
+        console.log("STATE: Final mergedEnergyTypes:", mergedEnergyTypes); // <--- DEBUG LOG
+
+    } catch (e) {
+        console.error("STATE: Error merging energy types", e);
+        showMessage("Error processing energy type data.", "error");
+        mergedEnergyTypes = [...standardTypes]; // Fallback to standard types maybe? Or empty?
     }
-    console.log("STATE: Finished initializeAndMergeEnergyTypes.");
-    return true;
+
+    console.log("STATE: Finished InitializeAndMergeEnergyTypes."); // <--- DEBUG LOG
 }
