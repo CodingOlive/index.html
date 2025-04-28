@@ -16,7 +16,7 @@ import { /* ... Keep all existing imports from response #49 ... */
 } from './dom-elements.js';
 import { totalDamageDealt, totalEnergySpent, attackCount, highestDamage, calculatorState, activeAttacks } from './state.js';
 import { ENERGY_TYPE_DETAILS, ALL_ENERGY_TYPES, ATTACK_RESERVE_COLOR, SLIDER_TRACK_COLOR } from './config.js';
-import { formatStatNumber, formatSimpleNumber, parseFormattedNumber, convertNumberToWords, safeParseFloat } from './formatters.js';
+import { formatStatNumber, formatSimpleNumber, parseFormattedNumber, convertNumberToWords } from './formatters.js';
 import { triggerAnimation } from './utils.js';
 // import { updateSingleSliderDisplay } from './calculation.js'; // Likely not needed here
 
