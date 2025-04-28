@@ -1,4 +1,5 @@
 // state.js - Manages the application's state variables and save/load logic.
+console.log("***** Running state.js version: WITH_EXPORT_LET *****"); // <-- ADD THIS LINE
 
 // --- Import Dependencies ---
 // Import DOM Elements
