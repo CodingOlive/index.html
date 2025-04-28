@@ -14,9 +14,9 @@ import { googleSignInBtn, signOutBtn, userInfoSpan, adminPanelToggleBtn, energyT
 
 // State variables and functions
 import {
-    // Import state variables for reading
-    currentUser,
-    isAdmin, // <-- Need to READ this value after setting it
+    // Import state variables ONLY for reading if absolutely necessary elsewhere
+    // currentUser, // Avoid importing if only using setter
+    isAdmin,     // Need to read this after setting for updateAdminUI call
     // Import state functions
     initializeCoreState,
     initializeAndMergeEnergyTypes,
@@ -42,8 +42,18 @@ import { updateAdminUI } from './admin.js'; // Import admin UI updater
 
 // --- Authentication Functions ---
 
-export async function handleGoogleSignIn() { /* ... */ }
-export async function handleSignOut() { /* ... */ }
+export async function handleGoogleSignIn() {
+    if (!auth) { showMessage('Firebase Auth not initialized.', 'error'); return; }
+    const provider = new GoogleAuthProvider();
+    try { await signInWithPopup(auth, provider); }
+    catch (error) { /* ... error handling ... */ }
+}
+
+export async function handleSignOut() {
+     if (!auth) { showMessage('Firebase Auth not initialized.', 'error'); return; }
+     try { await signOut(auth); }
+     catch (error) { /* ... error handling ... */ }
+}
 
 /**
  * Sets up the listener that reacts to user sign-in/sign-out events.
@@ -57,7 +67,9 @@ export function setupAuthListener() {
         if (user) {
             // --- User is signed in ---
             console.log("Auth Listener: User signed in.");
-            try { setCurrentUser(user); } catch (e) { /* ... */ }
+            // --- Use SETTER functions ---
+            try { setCurrentUser(user); } // Use setter
+            catch (e) { console.error("!!! Error calling setCurrentUser !!!", e); }
 
             // Update Auth UI
             if (userInfoSpan) userInfoSpan.textContent = `Signed in as: ${user.displayName || user.email || 'User'}`;
@@ -70,8 +82,8 @@ export function setupAuthListener() {
                 adminStatusResult = await checkAdminStatus(user.uid);
                 setIsAdmin(adminStatusResult); // Use setter
             } catch (e) { setIsAdmin(false); /* ... */ }
-            // --- Pass status to UI update function ---
-            updateAdminUI(isAdmin); // <-- Pass the current state value
+            // Read the state *after* setting it to pass to UI update
+            updateAdminUI(isAdmin); // Pass the current state value
 
             // Attempt to load state
             console.log("Auth Listener: Attempting to load state...");
@@ -88,15 +100,28 @@ export function setupAuthListener() {
                      adminStatusResult = await checkAdminStatus(user.uid);
                      setIsAdmin(adminStatusResult); // Use setter again
                 } catch(e) { setIsAdmin(false); /* ... */ }
-                 // --- Pass status to UI update function ---
-                updateAdminUI(isAdmin); // <-- Pass the current state value again
+                updateAdminUI(isAdmin); // Pass status again
             }
 
             // Load and Merge Energy Types
             await initializeAndMergeEnergyTypes();
 
             // Initialize/Update UI AFTER merge
-            // ... (generateEnergySections, populateEnergyTypeDropdown, etc.) ...
+            generateEnergySections();
+            populateEnergyTypeDropdown();
+            updateSpeedSliderVisibility();
+            renderFormList();
+            renderActiveFormsSection();
+
+            // Final UI updates
+             const finalSelectedType = energyTypeSelect?.value;
+             if (finalSelectedType) {
+                 displayEnergyPool(finalSelectedType);
+                 updateAttackButtonStates(finalSelectedType);
+                 updateSliderLimitAndStyle(finalSelectedType);
+             }
+            updateStatsDisplay();
+            updateEquationDisplay();
 
             // Show appropriate welcome message
             if (!stateLoaded) { showMessage('Welcome! No saved state found...', 'info'); }
@@ -105,7 +130,7 @@ export function setupAuthListener() {
         } else {
             // --- User is signed out ---
             console.log("Auth Listener: User signed out.");
-             // Use SETTER functions
+             // --- Use SETTER functions ---
              try { setCurrentUser(null); } catch(e) { /* ... */ }
              try { setIsAdmin(false); }    catch(e) { /* ... */ }
 
@@ -113,15 +138,29 @@ export function setupAuthListener() {
              if (userInfoSpan) userInfoSpan.textContent = 'Not signed in.';
              if (googleSignInBtn) googleSignInBtn.classList.remove('hidden');
              if (signOutBtn) signOutBtn.classList.add('hidden');
-             // --- Pass status to UI update function ---
-             updateAdminUI(isAdmin); // <-- Pass the current state value (which is now false)
+             updateAdminUI(isAdmin); // Pass current state (false)
 
             // Reset state and UI fully to defaults
             initializeCoreState();
             initializeDefaultUI();
 
-            // ... (regenerate standard pools, populate standard dropdown) ...
+            // Regenerate standard pools/sliders after reset
+            generateEnergySections();
+            updateSpeedSliderVisibility();
+            // Populate dropdown with standard types only
+            populateEnergyTypeDropdown();
+
+             // Ensure default energy type is displayed correctly after reset
+             const defaultSelectedType = energyTypeSelect?.value;
+             if (defaultSelectedType) {
+                 displayEnergyPool(defaultSelectedType);
+                 updateAttackButtonStates(defaultSelectedType);
+                 updateSliderLimitAndStyle(defaultSelectedType);
+             }
+             updateStatsDisplay();
+             updateEquationDisplay();
         }
         console.log("Auth state change processed, using setters and passing status to UI update.");
     });
 }
+
