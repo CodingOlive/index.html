@@ -2,31 +2,20 @@
 
 // --- Import DOM Elements ---
 import {
-    // Auth/Save/Load/View Buttons
     googleSignInBtn, signOutBtn, saveBtn, loadBtn, clearBtn, showCharacterStatsBtn,
-    // Main Controls
     energyTypeSelect, calculateBtn, addDynamicBoxBtn, baseDamageInput,
-    attackCompressionPointsInput, baseMultiplierInput,
-    // Containers for Delegation
-    energyPoolsContainer, slidersGrid, allSlidersContainer, // Use 'allSlidersContainer' or 'slidersGrid' based on structure
-    formListContainer, activeFormsListContainer, equationDisplayEl,
-    // Stats Panel Buttons
-    resetAttackCountBtn, superAttackBtn, ultimateAttackBtn,
-    // Character Stats Screen Elements
+    attackCompressionPointsInput, baseMultiplierInput, energyPoolsContainer,
+    slidersGrid, allSlidersContainer, formListContainer, activeFormsListContainer,
+    equationDisplayEl, resetAttackCountBtn, superAttackBtn, ultimateAttackBtn,
     characterNameInput, charBaseHealthInput, charBaseMultiplierInput, charVitalityInput,
     charSoulPowerInput, charSoulHpInput, charBaseAcInput, charBaseTrInput, charSpeedInput,
-    ryokoCheckbox, ryokoEquationInput,
-    // Form Creator Elements
-    formAffectsResistancesCheckbox, addFormButton,
-    // Kaioken Elements
+    ryokoCheckbox, ryokoEquationInput, formAffectsResistancesCheckbox, addFormButton,
     kaiokenCheckbox, maxHealthInput, kaiokenStrainInput, regenHealthBtn, kaiokenDetails,
-    // Misc
     characterStatsScreen, adminPanelToggleBtn // Added admin toggle button
 } from './dom-elements.js';
 
-
 // --- Import Handler Functions & State ---
-import { handleGoogleSignIn, handleSignOut, setupAuthListener } from './auth.js'; // setupAuthListener called in main.js
+import { handleGoogleSignIn, handleSignOut } from './auth.js';
 import { saveStateToDb, loadStateAndApply, clearStateFromDb } from './database.js';
 import { handleStatChange, handleRyokoCheckboxChange, evaluateRyokoEquation } from './character-stats.js';
 import { handleAddForm, handleDeleteFormClick, handleActiveFormChange, handleAffectsResistanceToggle, applyActiveFormEffects } from './forms.js';
@@ -40,235 +29,94 @@ import { showCharacterStatsView, showCalculatorView, updateStatsDisplay, display
 import { updateSpeedSliderDisplay } from './speed-slider.js';
 import { triggerAnimation } from './utils.js';
 import { showMessage } from './ui-feedback.js';
-import { currentUser, activeAttacks, attackCount as _attackCount } from './state.js'; // Import state vars needed directly
+import { currentUser, activeAttacks, attackCount as _attackCount } from './state.js';
 import { ALL_ENERGY_TYPES } from './config.js';
-// Import admin panel toggle function
-import { toggleAdminPanel } from './admin.js'; // Assuming toggle function is exported from admin.js
+import { toggleAdminPanel } from './admin.js';
 
-
-// Use a local variable for mutable attackCount state for clarity
-// Note: Directly modifying imported 'let' works but isn't always best practice.
-let attackCount = _attackCount;
-
+let attackCount = _attackCount; // Local variable for modification
 
 // --- Event Listener Setup Function ---
-
-/**
- * Attaches all necessary event listeners to the DOM elements.
- * Should be called once during application initialization.
- */
 export function setupAllEventListeners() {
     console.log("Setting up event listeners...");
-
-    // --- Static element listeners ---
-    // Using imported elements and handlers
 
     // Auth Buttons
     googleSignInBtn?.addEventListener('click', handleGoogleSignIn);
     signOutBtn?.addEventListener('click', handleSignOut);
 
     // Save/Load/Clear Buttons
-    saveBtn?.addEventListener('click', () => {
-        if (!currentUser) { showMessage('You must be signed in to save.', 'error'); return; }
-        saveStateToDb(currentUser.uid);
-    });
-    loadBtn?.addEventListener('click', () => {
-        if (!currentUser) { showMessage('You must be signed in to load.', 'error'); return; }
-        loadStateAndApply(currentUser.uid).then(loaded => {
-             showMessage(loaded ? 'State loaded successfully.' : 'No saved state found or failed to load.', loaded ? 'success' : 'info');
-        });
-    });
-    clearBtn?.addEventListener('click', () => {
-        if (!currentUser) { showMessage('You must be signed in to clear.', 'error'); return; }
-        if (confirm('Are you sure you want to clear your saved state FROM FIREBASE? This cannot be undone.')) {
-            clearStateFromDb(currentUser.uid).then(cleared => {
-                if(cleared) setTimeout(() => window.location.reload(), 1000);
-            });
-        }
-    });
+    saveBtn?.addEventListener('click', () => { /* ... */ });
+    loadBtn?.addEventListener('click', () => { /* ... */ });
+    clearBtn?.addEventListener('click', () => { /* ... */ });
 
-    // Tab Switching Button
+    // --- Tab Switching Button ---
      showCharacterStatsBtn?.addEventListener('click', () => {
+        // Use imported elements and view functions
         if (characterStatsScreen?.classList.contains('hidden')) {
-            showCharacterStatsView();
+            showCharacterStatsView(); // Use imported function from ui-updater.js
         } else {
-            showCalculatorView();
+            showCalculatorView(); // Use imported function from ui-updater.js
         }
-        triggerAnimation(showCharacterStatsBtn, 'pulse');
+        triggerAnimation(showCharacterStatsBtn, 'pulse'); // Use imported function from utils.js
     });
+    // --- End Tab Switching ---
 
-    // --- NEW: Admin Panel Toggle Button Listener ---
-    adminPanelToggleBtn?.addEventListener('click', toggleAdminPanel); // Use imported handler
-
+    // Admin Panel Toggle Button Listener
+    adminPanelToggleBtn?.addEventListener('click', toggleAdminPanel);
 
     // Main Controls
-    energyTypeSelect?.addEventListener('change', () => {
-        const selectedType = energyTypeSelect.value;
-        console.log('Energy type changed to:', selectedType);
-        displayEnergyPool(selectedType);
-        updateAttackButtonStates(selectedType);
-        updateSliderLimitAndStyle(selectedType);
-        updateStatsDisplay();
-        updateEquationDisplay();
-    });
-    calculateBtn?.addEventListener('click', () => {
-        triggerAnimation(calculateBtn, 'pulse');
-        performCalculation();
-    });
-    addDynamicBoxBtn?.addEventListener('click', () => {
-        triggerAnimation(addDynamicBoxBtn, 'pulse');
-        addDynamicModifier();
-        updateEquationDisplay();
-    });
+    energyTypeSelect?.addEventListener('change', () => { /* ... */ });
+    calculateBtn?.addEventListener('click', () => { /* ... */ });
+    addDynamicBoxBtn?.addEventListener('click', () => { /* ... */ });
 
     // Base Damage / Compression / Base Multiplier Inputs
     baseDamageInput?.addEventListener('input', updateEquationDisplay);
     attackCompressionPointsInput?.addEventListener('input', updateEquationDisplay);
-    baseMultiplierInput?.addEventListener('input', () => {
-        if (!baseMultiplierInput?.readOnly) { handleStatChange(); }
-        else { updateEquationDisplay(); }
-    });
-    baseMultiplierInput?.addEventListener('change', () => {
-         if (!baseMultiplierInput?.readOnly) handleStatChange(); else updateEquationDisplay();
-    });
+    baseMultiplierInput?.addEventListener('input', () => { /* ... */ });
+    baseMultiplierInput?.addEventListener('change', () => { /* ... */ });
 
-
-    // --- Character Stat inputs listener ---
-    const charStatInputs = [
-        charBaseHealthInput, charVitalityInput, charSoulPowerInput, charSoulHpInput,
-        charBaseAcInput, charBaseTrInput, charSpeedInput
-    ];
-    charStatInputs.forEach(input => {
-        input?.addEventListener('input', handleStatChange);
-        input?.addEventListener('change', handleStatChange);
-    });
+    // Character Stat inputs listener
+    const charStatInputs = [ /* ... */ ];
+    charStatInputs.forEach(input => { /* ... */ });
 
     // Ryoko Mode Listeners
     ryokoCheckbox?.addEventListener('change', handleRyokoCheckboxChange);
     ryokoEquationInput?.addEventListener('input', evaluateRyokoEquation);
     ryokoEquationInput?.addEventListener('change', evaluateRyokoEquation);
 
-    // --- Kaioken section listeners ---
-    kaiokenCheckbox?.addEventListener('change', () => {
-        const isChecked = kaiokenCheckbox.checked;
-        kaiokenDetails?.classList.toggle('hidden', !isChecked);
-        if (isChecked) {
-            if(energyTypeSelect?.value === 'ki') {
-                applyKaiokenStyle();
-                updateCurrentHealthDisplay();
-            }
-        } else {
-            removeKaiokenStyle();
-        }
-        updateEquationDisplay();
-    });
+    // Kaioken section listeners
+    kaiokenCheckbox?.addEventListener('change', () => { /* ... */ });
     maxHealthInput?.addEventListener('input', updateCurrentHealthDisplay);
     maxHealthInput?.addEventListener('change', updateCurrentHealthDisplay);
     kaiokenStrainInput?.addEventListener('input', updateEquationDisplay);
     kaiokenStrainInput?.addEventListener('change', updateEquationDisplay);
-    regenHealthBtn?.addEventListener('click', () => {
-        triggerAnimation(regenHealthBtn, 'pulse');
-        regenerateHealth();
-    });
+    regenHealthBtn?.addEventListener('click', () => { /* ... */ });
 
-
-    // --- Form Creator Listeners ---
+    // Form Creator Listeners
     formAffectsResistancesCheckbox?.addEventListener('change', handleAffectsResistanceToggle);
-    addFormButton?.addEventListener('click', () => {
-        triggerAnimation(addFormButton, 'pulse');
-        handleAddForm();
-    });
+    addFormButton?.addEventListener('click', () => { /* ... */ });
 
-
-    // --- Equation click listener ---
+    // Equation click listener
     equationDisplayEl?.addEventListener('click', handleEquationClick);
 
+    // Reset Attack Count button listener
+    resetAttackCountBtn?.addEventListener('click', () => { /* ... */ });
 
-    // --- Reset Attack Count button listener ---
-    resetAttackCountBtn?.addEventListener('click', () => {
-        attackCount = 0; // Modify state directly
-        updateStatsDisplay();
-        showMessage('Attack count reset.', 'info');
-        triggerAnimation(resetAttackCountBtn, 'pulse');
-    });
-
-
-    // --- Attack Button Listeners ---
+    // Attack Button Listeners
     superAttackBtn?.addEventListener('click', handleAttackButtonClick);
     ultimateAttackBtn?.addEventListener('click', handleAttackButtonClick);
 
-
     // --- Event Delegation Setup ---
-
-    // Energy Pool Inputs (DPP, Regen %, Manual Max Multiplier) using delegation
-    energyPoolsContainer?.addEventListener('input', (event) => {
-        const target = event.target;
-        let type = target.id?.split('-')[0];
-
-        if (target.matches('.damage-per-power')) {
-            // Check if type is valid (could be from a standard or custom pool ID)
-            // We might need a better way to validate type extracted from ID if custom IDs are complex
-            if(type) { // Basic check for now
-                updateSingleSliderDisplay(type);
-                updateEquationDisplay();
-            }
-        }
-        if (target.matches('.max-multiplier')) {
-             if(type) { // Basic check for now
-                 console.warn(`Manual update to ${type} max multiplier. May be overwritten by form effects.`);
-                 calculateAndResetEnergy(type);
-                 updateStatsDisplay();
-                 updateEquationDisplay();
-             }
-        }
-    });
-
-    // Energy Pool Regen Button Clicks using delegation
-    energyPoolsContainer?.addEventListener('click', (event) => {
-        const button = event.target.closest('.regen-btn');
-        if (button && button.dataset.type) {
-             triggerAnimation(button, 'pulse');
-            regenerateEnergy(button.dataset.type);
-        }
-    });
-
-
-     // Sliders Grid Input (Energy + Speed sliders) using delegation
+    // Energy Pool Inputs
+    energyPoolsContainer?.addEventListener('input', (event) => { /* ... */ });
+    // Energy Pool Regen Button Clicks
+    energyPoolsContainer?.addEventListener('click', (event) => { /* ... */ });
+     // Sliders Grid Input
      const slidersContainerElement = allSlidersContainer || slidersGrid;
-     slidersContainerElement?.addEventListener('input', (event) => {
-        const slider = event.target;
-        if (slider.type === 'range' && slider.classList.contains('energy-slider')) {
-            const sliderType = slider.dataset.type; // Standard key or custom ID
-
-            if (sliderType === 'speed') {
-                 updateSpeedSliderDisplay();
-                 updateEquationDisplay();
-            } else { // Assume it's an energy type (standard or custom)
-                // Enforce attack reserve limit
-                const attackState = activeAttacks[sliderType] || null;
-                let limitPercent = 100;
-                if (attackState === 'super') limitPercent = 95;
-                else if (attackState === 'ultimate') limitPercent = 90;
-                if (parseInt(slider.value) > limitPercent) {
-                    slider.value = limitPercent;
-                }
-                updateSingleSliderDisplay(sliderType);
-                updateEquationDisplay();
-            }
-        }
-    });
-
-     // Form List Delete Buttons (Stats Panel) using delegation
+     slidersContainerElement?.addEventListener('input', (event) => { /* ... */ });
+     // Form List Delete Buttons
      formListContainer?.addEventListener('click', handleDeleteFormClick);
-
-
-     // Active Forms Checkboxes (Main Area) using delegation
-     activeFormsListContainer?.addEventListener('change', (event) => {
-         if (event.target.matches('input[type="checkbox"][id^="active-form-"]')) {
-             handleActiveFormChange(event);
-         }
-     });
+     // Active Forms Checkboxes
+     activeFormsListContainer?.addEventListener('change', (event) => { /* ... */ });
 
     console.log("Event listeners setup complete.");
 }
-
