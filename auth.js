@@ -42,8 +42,18 @@ import { updateAdminUI } from './admin.js'; // Import admin UI updater
 
 // --- Authentication Functions ---
 
-export async function handleGoogleSignIn() { /* ... */ }
-export async function handleSignOut() { /* ... */ }
+export async function handleGoogleSignIn() {
+    if (!auth) { showMessage('Firebase Auth not initialized.', 'error'); return; }
+    const provider = new GoogleAuthProvider();
+    try { await signInWithPopup(auth, provider); }
+    catch (error) { /* ... error handling ... */ }
+}
+
+export async function handleSignOut() {
+     if (!auth) { showMessage('Firebase Auth not initialized.', 'error'); return; }
+     try { await signOut(auth); }
+     catch (error) { /* ... error handling ... */ }
+}
 
 /**
  * Sets up the listener that reacts to user sign-in/sign-out events.
@@ -74,7 +84,8 @@ export function setupAuthListener() {
                  setIsAdmin(false); // Default to false on error
                  currentAdminStatus = false; // Ensure local var is also false
             }
-            updateAdminUI(currentAdminStatus); // <-- PASS STATUS HERE
+            // >>>>> VERIFY THIS CALL: Pass the local variable 'currentAdminStatus' <<<<<
+            updateAdminUI(currentAdminStatus);
 
             // Attempt to load state
             console.log("Auth Listener: Attempting to load state...");
@@ -85,18 +96,19 @@ export function setupAuthListener() {
             // Initialize core state if nothing was loaded
             if (!stateLoaded) {
                 console.log("Auth Listener: No state loaded, initializing core state.");
-                initializeCoreState(); // Resets state vars (incl. isAdmin to false via its setter)
+                initializeCoreState(); // Resets state vars (incl. isAdmin to false via its own setter call)
                 // Re-check admin status AFTER core state reset
                 console.log("Auth Listener: Re-checking admin status after core state reset...");
                 try {
-                     currentAdminStatus = await checkAdminStatus(user.uid); // Check again
+                     currentAdminStatus = await checkAdminStatus(user.uid); // Check again, update local var
                      setIsAdmin(currentAdminStatus); // Use setter again
                      console.log("Auth Listener: Re-set isAdmin via setter:", currentAdminStatus);
                 } catch(e) {
                      console.error("!!! Error re-setting isAdmin !!!", e);
                      setIsAdmin(false); currentAdminStatus = false; // Ensure state and local var are false
                 }
-                updateAdminUI(currentAdminStatus); // <-- PASS STATUS HERE AGAIN
+                 // >>>>> VERIFY THIS CALL: Pass the local variable 'currentAdminStatus' <<<<<
+                updateAdminUI(currentAdminStatus);
             }
 
             // Load and Merge Energy Types
@@ -132,7 +144,8 @@ export function setupAuthListener() {
              if (userInfoSpan) userInfoSpan.textContent = 'Not signed in.';
              if (googleSignInBtn) googleSignInBtn.classList.remove('hidden');
              if (signOutBtn) signOutBtn.classList.add('hidden');
-             updateAdminUI(false); // <-- PASS 'false' HERE
+             // >>>>> VERIFY THIS CALL: Pass 'false' directly <<<<<
+             updateAdminUI(false);
 
             // Reset state and UI fully to defaults
             initializeCoreState();
