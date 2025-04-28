@@ -7,10 +7,7 @@ import {
     adminFormMessage, adminCustomEnergyList, adminColorPreview
 } from './dom-elements.js';
 
-// Import state (still need mergedEnergyTypes for list population)
-import { mergedEnergyTypes, initializeAndMergeEnergyTypes } from './state.js';
-// REMOVED: import { isAdmin } from './state.js'; // No longer needed directly in updateAdminUI
-
+import { isAdmin, mergedEnergyTypes, initializeAndMergeEnergyTypes } from './state.js';
 import { showMessage } from './ui-feedback.js';
 import { saveCustomEnergyType, deleteCustomEnergyType } from './database.js';
 import { populateEnergyTypeDropdown, generateEnergySections } from './dom-generators.js';
@@ -23,24 +20,19 @@ import { populateEnergyTypeDropdown, generateEnergySections } from './dom-genera
  * Called after login/logout in auth.js.
  * @param {boolean} isAdminStatus - The current admin status of the user.
  */
-export function updateAdminUI(isAdminStatus) { // <-- Added parameter
-    if (!adminPanelToggleBtn) {
-        console.warn("Admin toggle button element not found.");
-        return;
-    }
-    // Use the passed parameter instead of imported state variable
+export function updateAdminUI(isAdminStatus) {
+    if (!adminPanelToggleBtn) { return; }
     console.log("Updating Admin UI based on isAdmin status:", isAdminStatus);
-    adminPanelToggleBtn.classList.toggle('hidden', !isAdminStatus); // Use parameter
-
-    // Ensure panel itself remains hidden until toggled by the button click
-    if(adminPanelSection) adminPanelSection.classList.add('hidden');
+    adminPanelToggleBtn.classList.toggle('hidden', !isAdminStatus);
+    if(adminPanelSection) adminPanelSection.classList.add('hidden'); // Ensure panel starts hidden
 }
 
 /**
  * Toggles the visibility of the main Admin Panel section.
  * Called when the adminPanelToggleBtn is clicked.
+ * Needs to be exported so event-listeners.js can import it.
  */
-export function toggleAdminPanel() { // <-- Needs export
+export function toggleAdminPanel() {
     if (!adminPanelSection) return;
     const isHidden = adminPanelSection.classList.toggle('hidden');
     console.log("Admin panel toggled:", isHidden ? "Hidden" : "Visible");
@@ -51,39 +43,12 @@ export function toggleAdminPanel() { // <-- Needs export
 }
 
 // --- Internal Helper Functions ---
-// (clearAdminEnergyForm, handleColorChange, populateCustomTypeList,
-// handleEditCustomTypeClick, handleDeleteCustomTypeClick, handleSaveEnergyType,
-// refreshDataAndUI - these remain the same as in admin_js_final_v2 artifact)
-
-function clearAdminEnergyForm() { /* ... */ }
-function handleColorChange() { /* ... */ }
-function populateCustomTypeList() { /* ... */ }
-function handleEditCustomTypeClick(event) { /* ... */ }
-async function handleDeleteCustomTypeClick(event) { /* ... calls deleteCustomEnergyType and refreshDataAndUI ... */ }
-async function handleSaveEnergyType() { /* ... calls saveCustomEnergyType and refreshDataAndUI ... */ }
-async function refreshDataAndUI() { /* ... calls initializeAndMergeEnergyTypes, populateCustomTypeList, etc. ... */ }
-
-
-// --- Setup Admin Panel Event Listeners ---
-/**
- * Attaches event listeners specific to the Admin Panel controls.
- * Exported function to be called once during initialization.
- */
-export function setupAdminPanelListeners() {
-    console.log("Setting up Admin Panel listeners...");
-    adminPanelToggleBtn?.addEventListener('click', toggleAdminPanel); // Uses exported toggle function
-    adminClearEnergyFormBtn?.addEventListener('click', clearAdminEnergyForm);
-    adminEnergyColor?.addEventListener('input', handleColorChange);
-    adminSaveEnergyTypeBtn?.addEventListener('click', handleSaveEnergyType);
-    // Listeners for edit/delete buttons are added dynamically in populateCustomTypeList
-}
-
-// --- Need to re-add the internal functions that were omitted above ---
 
 /**
  * Clears the input fields in the admin energy type creator form.
+ * (Internal helper function, doesn't need export)
  */
-function clearAdminEnergyForm() {
+function clearAdminEnergyForm() { // <-- DEFINED ONCE HERE
     if (adminEditEnergyTypeId) adminEditEnergyTypeId.value = '';
     if (adminEnergyName) adminEnergyName.value = '';
     if (adminEnergyColor) adminEnergyColor.value = '#64748B';
@@ -96,6 +61,7 @@ function clearAdminEnergyForm() {
 
 /**
  * Updates the color preview swatch when the color input changes.
+ * (Internal helper function, doesn't need export)
  */
 function handleColorChange() {
     if(adminEnergyColor && adminColorPreview) {
@@ -105,6 +71,8 @@ function handleColorChange() {
 
 /**
  * Populates the list (#adminCustomEnergyList) with existing custom types.
+ * Filters the mergedEnergyTypes list.
+ * (Internal helper function)
  */
 function populateCustomTypeList() {
     if (!adminCustomEnergyList) return;
@@ -128,12 +96,12 @@ function populateCustomTypeList() {
         editBtn.textContent = 'Edit';
         editBtn.className = 'text-xs text-blue-600 hover:text-blue-800 focus:outline-none';
         editBtn.dataset.id = type.id;
-        editBtn.addEventListener('click', handleEditCustomTypeClick);
+        editBtn.addEventListener('click', handleEditCustomTypeClick); // Use function below
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
         deleteBtn.className = 'text-xs text-red-600 hover:text-red-800 focus:outline-none';
         deleteBtn.dataset.id = type.id;
-        deleteBtn.addEventListener('click', handleDeleteCustomTypeClick);
+        deleteBtn.addEventListener('click', handleDeleteCustomTypeClick); // Use function below
         buttons.appendChild(editBtn); buttons.appendChild(deleteBtn);
         li.appendChild(typeInfo); li.appendChild(buttons);
         adminCustomEnergyList.appendChild(li);
@@ -142,6 +110,8 @@ function populateCustomTypeList() {
 
 /**
  * Handles clicking the "Edit" button for a custom type.
+ * Populates the admin form with the data of the selected type.
+ * (Internal helper function)
  */
 function handleEditCustomTypeClick(event) {
     const typeId = event.target.dataset.id;
@@ -159,50 +129,73 @@ function handleEditCustomTypeClick(event) {
 
 /**
  * Handles clicking the "Delete" button for a custom type.
+ * (Internal helper function)
  */
 async function handleDeleteCustomTypeClick(event) {
     const typeId = event.target.dataset.id;
     const typeToDelete = mergedEnergyTypes.find(et => et.id === typeId && !et.isStandard);
     if (!typeToDelete) { return; }
     if (confirm(`Are you sure you want to delete "${typeToDelete.name}"?`)) {
-        const success = await deleteCustomEnergyType(typeId);
+        const success = await deleteCustomEnergyType(typeId); // Use imported DB function
         if (success) {
             showMessage(`"${typeToDelete.name}" deleted. Refreshing...`, 'success');
-            await refreshDataAndUI();
+            await refreshDataAndUI(); // Use helper below
         } else { showMessage(`Failed to delete "${typeToDelete.name}".`, 'error'); }
     }
 }
 
 /**
  * Handles saving a new or edited custom energy type.
+ * (Internal helper function)
  */
 async function handleSaveEnergyType() {
     const typeId = adminEditEnergyTypeId?.value || null;
     const name = adminEnergyName?.value.trim();
     const color = adminEnergyColor?.value || '#000000';
     const formula = adminEnergyFormula?.value.trim();
+    // --- Validation ---
     if (!name || !formula) { if(adminFormMessage) adminFormMessage.textContent = 'Name and Formula are required.'; return; }
     const validFormulaChars = /^[a-zA-Z0-9\s\+\-\*\/\(\)\.]+$/;
      if (!validFormulaChars.test(formula)) { if(adminFormMessage) adminFormMessage.textContent = 'Formula contains invalid characters.'; return; }
     if(adminFormMessage) adminFormMessage.textContent = '';
+    // --- End Validation ---
     const energyData = { name, color, formula };
-    const success = await saveCustomEnergyType(typeId, energyData);
+    const success = await saveCustomEnergyType(typeId, energyData); // Use imported DB function
     if (success) {
         showMessage(`"${name}" ${typeId ? 'updated' : 'saved'}. Refreshing...`, 'success');
-        clearAdminEnergyForm();
-        await refreshDataAndUI();
+        clearAdminEnergyForm(); // Use internal helper
+        await refreshDataAndUI(); // Use helper below
     } else { showMessage(`Failed to save "${name}".`, 'error'); }
 }
 
+
 /**
  * Helper function to refresh the merged energy types and update relevant UI parts.
+ * (Internal helper function)
  */
 async function refreshDataAndUI() {
     console.log("Refreshing data and UI after admin action...");
-    await initializeAndMergeEnergyTypes();
-    populateCustomTypeList();
-    populateEnergyTypeDropdown();
-    generateEnergySections();
+    await initializeAndMergeEnergyTypes(); // Re-fetch and merge state
+    populateCustomTypeList(); // Update admin list display (uses function in this file)
+    populateEnergyTypeDropdown(); // Update main dropdown display (uses imported function)
+    generateEnergySections(); // Regenerate pools/sliders based on new merged list (uses imported function)
     console.log("UI refreshed.");
 }
+
+
+// --- Setup Admin Panel Event Listeners ---
+/**
+ * Attaches event listeners specific to the Admin Panel controls.
+ * Exported function to be called once during initialization.
+ */
+export function setupAdminPanelListeners() {
+    console.log("Setting up Admin Panel listeners...");
+    adminPanelToggleBtn?.addEventListener('click', toggleAdminPanel); // Uses exported toggle function
+    adminClearEnergyFormBtn?.addEventListener('click', clearAdminEnergyForm); // Uses internal helper
+    adminEnergyColor?.addEventListener('input', handleColorChange); // Uses internal helper
+    adminSaveEnergyTypeBtn?.addEventListener('click', handleSaveEnergyType); // Uses internal helper
+    // Listeners for edit/delete buttons are added dynamically in populateCustomTypeList
+}
+
+// NOTE: Ensure clearAdminEnergyForm is defined ONLY ONCE (above) in this file.
 
