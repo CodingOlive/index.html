@@ -1,6 +1,7 @@
 // dom-generators.js - Functions for dynamically creating HTML elements using merged energy types.
 
 // --- Import Dependencies ---
+// Import DOM Elements
 import {
     energyPoolTemplate, energySliderTemplate, energyPoolsContainer, slidersGrid,
     dynamicModifiersContainer, formListContainer, activeFormsListContainer,
@@ -13,14 +14,13 @@ import { ENERGY_TYPE_DETAILS, SPEED_DETAILS } from './config.js';
 // Import State variables
 import {
     characterForms, calculatorState, mergedEnergyTypes,
-    // Import the state variable directly for modification
-    dynamicModifierCount
+    dynamicModifierCount as _dynamicModifierCount // Import state var
 } from './state.js';
-// REMOVED: let dynamicModifierCount = _dynamicModifierCount; // No local copy needed
+let dynamicModifierCount = _dynamicModifierCount; // Local variable linked to state
 
 // Import Utilities and Formatters
-import { escapeHtml, safeParseFloat } from './utils.js';
-import { formatSimpleNumber } from './formatters.js';
+import { escapeHtml, safeParseFloat } from './utils.js'; // Import safeParseFloat from utils
+import { formatSimpleNumber } from './formatters.js'; // Import only formatters here
 
 // Import functions from other modules
 import { addListenersToModifierBox } from './modifiers.js';
@@ -35,7 +35,10 @@ import { handleActiveFormChange, handleDeleteFormClick } from './forms.js';
  */
 export function generateEnergySections() {
     // Uses imported elements and mergedEnergyTypes state
-    if (!energyPoolTemplate || !energySliderTemplate || !energyPoolsContainer || !slidersGrid) { /* ... error ... */ return; }
+    if (!energyPoolTemplate || !energySliderTemplate || !energyPoolsContainer || !slidersGrid) {
+        console.error("Required templates or containers not found! Cannot generate energy sections.");
+        return;
+    }
     energyPoolsContainer.innerHTML = '';
     slidersGrid.innerHTML = '';
 
@@ -53,14 +56,19 @@ export function generateEnergySections() {
             if (!poolDiv) throw new Error('Could not find .energy-pool in template clone');
             poolDiv.id = `${typeId}-pool`;
             poolDiv.style.display = 'none';
-            // Styling logic...
-            if (isStandard && details) { /* ... */ } else if (!isStandard && customColor) { /* ... */ } else { /* ... */ }
+            // Styling logic... (using details or customColor)
+            if (isStandard && details) { /* ... apply standard styles ... */ }
+            else if (!isStandard && customColor) { /* ... apply custom styles ... */ }
+            else { poolDiv.classList.add('border-l-gray-400'); }
+
             const titleEl = poolDiv.querySelector('.pool-title');
             if (titleEl) { /* ... set title and color ... */ }
+
             // Setup inputs/spans
-            const setupElement = (selectorSuffix, isInput = true, focusRingClass = '') => { /* ... */ };
+            const setupElement = (selectorSuffix, isInput = true, focusRingClass = '') => { /* ... setup IDs, labels, focus rings ... */ };
             const standardFocusRing = isStandard && details ? details.focusRing : '';
             setupElement('base-max-energy', false);
+            setupElement('max-multiplier', true, standardFocusRing);
             // ... setup other elements ...
             const regenBtn = poolDiv.querySelector('.regen-btn');
             if (regenBtn) { /* ... set dataset and style ... */ }
@@ -103,58 +111,54 @@ export function populateEnergyTypeDropdown() {
 // --- Other generator functions ---
 
 export function generateSpeedSlider() {
-    // ... (Keep existing code) ...
+    // Uses imported elements and config
+    if (document.getElementById('speed-slider-section')) return;
+    if (!energySliderTemplate || !slidersGrid) { return; }
+    console.log("Attempting to generate speed slider DOM...");
+    try { /* ... create elements using template ... */ }
+    catch(error) { console.error("Error generating speed slider:", error); }
 }
 
-/**
- * Adds a new dynamic modifier box to the UI.
- * @param {object|null} [modifierData=null] - Optional data to pre-fill the box.
- */
 export function addDynamicModifier(modifierData = null) {
+    // Uses imported container, state, utils, and listener function
      if (!dynamicModifiersContainer) { return; }
-
-     // --- MODIFIED PART: Increment imported state variable directly ---
-     // We need a way to modify the imported 'let'. This is tricky.
-     // Option 1: Re-import state and modify (less clean)
-     // Option 2: state.js exports a setter function (cleaner)
-     // Option 3: Modify the imported variable directly (works if exported with 'let', but can be confusing)
-
-     // Let's try Option 3 for now, assuming state.js has 'export let dynamicModifierCount;'
-     // This relies on the module system allowing modification of imported 'let' bindings.
-     // If this causes issues later, we'll switch to a setter function in state.js.
-     let newCount = dynamicModifierCount + 1;
-     // We cannot directly assign back to the import: `dynamicModifierCount = newCount;` will likely fail.
-     // We need state.js to provide a way to update its own variable.
-
-     // --- TEMPORARY WORKAROUND (Needs fix in state.js) ---
-     // Let's use a temporary global or re-fetch from state if needed,
-     // but the clean way is a setter in state.js.
-     // For now, let's just log and use a potentially stale count. This WILL break ID uniqueness over time.
-     console.warn("Need a setter function in state.js to properly increment dynamicModifierCount globally.");
-     const currentCountForId = dynamicModifierCount; // Use potentially stale value for ID generation
-     const modifierId = `dynamic-modifier-${currentCountForId + 1}`; // Increment for ID, but doesn't update global state
-     // --- END TEMPORARY WORKAROUND ---
-
-
+     // Increment state counter
+     dynamicModifierCount++;
+     const modifierId = `dynamic-modifier-${dynamicModifierCount}`;
      const newModifierDiv = document.createElement('div');
-     const initialType = modifierData?.type || 'additive';
-     const initialValue = modifierData?.value || '0';
-     const initialName = modifierData?.name || '';
-     const isActiveAdditive = initialType === 'additive';
-     const boxClasses = `dynamic-box ... ${isActiveAdditive ? 'additive ...' : 'multiplicative ...'}`; // Simplified
-     newModifierDiv.className = boxClasses;
-     newModifierDiv.id = modifierId;
-     newModifierDiv.innerHTML = ``;
+     // ... (set up innerHTML using escapeHtml) ...
      dynamicModifiersContainer.appendChild(newModifierDiv);
      addListenersToModifierBox(newModifierDiv); // Use imported listener setup
-     newModifierDiv.addEventListener('animationend', () => { /* ... cleanup ... */ }, { once: true });
+     // ... (animation cleanup) ...
 }
 
 export function renderFormList() {
-    // ... (Keep existing code) ...
+    // Uses imported container, state, utils, formatters, handler
+     if (!formListContainer) { return; }
+     formListContainer.innerHTML = '';
+     if (!characterForms || characterForms.length === 0) { /* ... render 'No forms' ... */ return; }
+     const formsByEnergyType = characterForms.reduce((acc, form) => { /* ... group ... */ return acc; }, {});
+     const sortedEnergyTypes = Object.keys(formsByEnergyType).sort(/* ... */);
+     for (const type of sortedEnergyTypes) { /* ... create group ... */
+         formsByEnergyType[type].forEach(form => { /* ... create item, button ... */
+             const deleteButton = document.createElement('button');
+             // ... setup delete button ...
+             deleteButton.addEventListener('click', handleDeleteFormClick); // Use imported handler
+             // ... append elements ...
+         });
+     }
 }
 
 export function renderActiveFormsSection() {
-    // ... (Keep existing code) ...
+    // Uses imported container, state, handler
+    if (!activeFormsListContainer) { return; }
+    activeFormsListContainer.innerHTML = '';
+    if (!characterForms || characterForms.length === 0) { /* ... render 'No forms' ... */ return; }
+    const activeIds = Array.isArray(calculatorState.activeFormIds) ? calculatorState.activeFormIds : [];
+    characterForms.forEach(form => { /* ... create checkbox, label ... */
+        const checkbox = document.createElement('input');
+        // ... setup checkbox ...
+        checkbox.addEventListener('change', handleActiveFormChange); // Use imported handler
+        // ... append elements ...
+    });
 }
-
