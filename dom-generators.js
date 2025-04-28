@@ -15,8 +15,6 @@ import {
     characterForms, calculatorState, mergedEnergyTypes,
     dynamicModifierCount as _dynamicModifierCount // Import state var
 } from './state.js';
-// Use local variable for mutable count state if needed, though direct modification of imported let works
-let dynamicModifierCount = _dynamicModifierCount;
 
 
 // Import Utilities and Formatters
