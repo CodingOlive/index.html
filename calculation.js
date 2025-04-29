@@ -34,7 +34,7 @@ let currentAnimationId = null; // To cancel ongoing animations
  * @param {number} targetValue - The final number value to display.
  * @param {number} [duration=500] - Animation duration in milliseconds.
  */
-function animateValue(element, targetValue, duration = 500) {
+function animateValue(element, targetValue, duration = 2000) {
     if (!element) return;
 
     // Cancel any previous animation on this element
