@@ -7,35 +7,39 @@ import {
     formAffectsResistancesCheckbox, formResistanceBonusInputsDiv, formAcBonusInput,
     formTrueResistanceBonusInput, formEnableFormBuffCheckbox, formFormBuffValueInput,
     formFormBuffTypeSelect, formEnablePoolBuffCheckbox, formPoolBuffValueInput, formPoolBuffTypeSelect,
-    formMultiplierInput // Main display input for combined form multiplier
+    formMultiplierInput
 } from './dom-elements.js';
 
-// Import State (needs state object/vars for reading, setters for writing, and merged types list)
+// Import State
 import {
-    // Import state variables/objects needed for reading
-    characterForms,        // Keep for reading
-    calculatorState,       // Keep for reading
-    mergedEnergyTypes,   // <<< *** ADDED MISSING IMPORT ***
-
-    // Import the NEW state setter functions
+    characterForms,
+    calculatorState,
+    mergedEnergyTypes, // Correctly importing this now
     addCharacterForm,
     removeCharacterForm,
     setActiveFormIds
 } from './state.js';
 
 // Import Config
-import { ALL_ENERGY_TYPES, ENERGY_TYPE_DETAILS } from './config.js'; // For applyActiveFormEffects fallback if needed
+import { ALL_ENERGY_TYPES, ENERGY_TYPE_DETAILS } from './config.js';
 
 // Import Utilities & Formatters
 import { formatSimpleNumber } from './formatters.js';
 import { safeParseFloat, triggerAnimation } from './utils.js';
 
-// Import UI / Calculation / Generator Functions
+// --- Import UI / Calculation / Generator Functions ---
 import { showMessage } from './ui-feedback.js';
 import { renderFormList, renderActiveFormsSection } from './dom-generators.js';
-import { updateStatsDisplay, updateSliderVisibility, updateSingleSliderDisplay, updateSliderLimitAndStyle } from './ui-updater.js'; // Added more UI updaters
+// CORRECTED: Removed updateSingleSliderDisplay from ui-updater import
+import {
+    updateStatsDisplay, updateSliderVisibility, updateSliderLimitAndStyle
+} from './ui-updater.js';
 import { calculateAndResetEnergy, getEnergyElements } from './energy-pools.js';
 import { updateEquationDisplay } from './equation.js';
+// CORRECTED: Added updateSingleSliderDisplay to calculation import
+import {
+    performCalculation, updateSingleSliderDisplay // <-- Importing from correct file now
+} from './calculation.js';
 
 
 // --- Form System Functions ---
@@ -53,7 +57,6 @@ export function handleAddForm() {
         formNameInput?.focus();
         return;
     }
-    // Check for duplicate name using the current state array
     if (characterForms.some(form => form.name.toLowerCase() === formName.toLowerCase())) {
         showMessage(`A form named "${formName}" already exists. Please use a unique name.`, 'error');
         formNameInput?.focus();
@@ -72,7 +75,7 @@ export function handleAddForm() {
         name: formName,
         formMultiplier: safeParseFloat(formFormMultiplierInput?.value, 1),
         poolMaxMultiplier: safeParseFloat(formPoolMaxMultiplierInput?.value, 1),
-        energyType: energyType, // Can be 'None' or a specific type ID
+        energyType: energyType,
         affectsResistances: affectsResistances,
         acBonus: affectsResistances ? safeParseFloat(formAcBonusInput?.value, 0) : 0,
         trueResistanceBonus: affectsResistances ? safeParseFloat(formTrueResistanceBonusInput?.value, 0) : 0,
@@ -84,16 +87,13 @@ export function handleAddForm() {
         poolBuffType: poolBuffType
     };
 
-    // Use the setter from state.js
     const added = addCharacterForm(newForm);
 
-    if (added) { // Only proceed if adding to state was successful
+    if (added) {
         console.log("Form Added:", newForm);
         showMessage(`Form "${newForm.name}" added!`, 'success');
-
-        renderFormList(); // Update the list in the stats panel
-        renderActiveFormsSection(); // Update the checkboxes in the main area
-
+        renderFormList();
+        renderActiveFormsSection();
         // Reset Form Creator fields
         if(formNameInput) formNameInput.value = '';
         if(formEnergyTypeSelect) formEnergyTypeSelect.value = 'None';
@@ -101,7 +101,7 @@ export function handleAddForm() {
         if(formPoolMaxMultiplierInput) formPoolMaxMultiplierInput.value = '1';
         if(formAffectsResistancesCheckbox) {
             formAffectsResistancesCheckbox.checked = false;
-            handleAffectsResistanceToggle(); // Ensure dependent fields hide
+            handleAffectsResistanceToggle();
         }
         if(formAcBonusInput) formAcBonusInput.value = '0';
         if(formTrueResistanceBonusInput) formTrueResistanceBonusInput.value = '0';
@@ -112,7 +112,7 @@ export function handleAddForm() {
         if(formPoolBuffValueInput) formPoolBuffValueInput.value = '0';
         if(formPoolBuffTypeSelect) formPoolBuffTypeSelect.value = 'add';
     } else {
-         showMessage(`Failed to add form "${newForm.name}". Check console for details (e.g., duplicate ID).`, 'error');
+         showMessage(`Failed to add form "${newForm.name}". Check console for details.`, 'error');
     }
 }
 
@@ -135,19 +135,16 @@ export function handleDeleteFormClick(event) {
     }
 
     if (confirm(`Are you sure you want to delete the form "${formToDelete.name}"? This cannot be undone.`)) {
-        // Use the remover function from state.js
         const removed = removeCharacterForm(formIdToDelete);
 
-        if (removed) { // Check if removal from state was successful
-            // Update active forms list using its setter
+        if (removed) {
             const currentActiveIds = Array.isArray(calculatorState.activeFormIds) ? calculatorState.activeFormIds : [];
             const newActiveIds = currentActiveIds.filter(id => id !== formIdToDelete);
-            setActiveFormIds(newActiveIds); // Use setter from state.js
+            setActiveFormIds(newActiveIds);
 
-            // Update UI
             renderFormList();
             renderActiveFormsSection();
-            applyActiveFormEffects(); // Recalculate effects
+            applyActiveFormEffects();
             updateEquationDisplay();
             showMessage(`Form "${formToDelete.name}" deleted successfully.`, 'success');
         } else {
@@ -179,12 +176,9 @@ export function handleActiveFormChange(event) {
         }
     }
 
-    // Use the setter to update the state
     setActiveFormIds(currentActiveIds);
-
     console.log("Active Form IDs changed (via setter):", calculatorState.activeFormIds);
 
-    // Recalculate effects and update UI
     applyActiveFormEffects();
     updateEquationDisplay();
 }
@@ -199,20 +193,14 @@ export function applyActiveFormEffects() {
     let combinedAcBonus = 0;
     let combinedTrBonus = 0;
 
-    // Use mergedEnergyTypes (now correctly imported) to get all relevant type IDs
-    // Fallback to ALL_ENERGY_TYPES only if mergedEnergyTypes is somehow empty/unavailable
-    // *** This line caused the error previously because mergedEnergyTypes wasn't imported ***
     const typesToConsider = (mergedEnergyTypes && mergedEnergyTypes.length > 0)
                            ? mergedEnergyTypes.map(et => et.id)
                            : ALL_ENERGY_TYPES;
-    // ***-----------------------------------------------------------------------------***
-
 
     if (typesToConsider.length === 0) {
-         console.warn("applyActiveFormEffects: No energy types found (merged or default) to apply pool multipliers to.");
+         console.warn("applyActiveFormEffects: No energy types found to apply pool multipliers to.");
     }
 
-    // Initialize pool multipliers for all types to 1
     typesToConsider.forEach(typeId => {
         combinedPoolMultipliers[typeId] = 1;
     });
@@ -222,7 +210,6 @@ export function applyActiveFormEffects() {
         .map(id => characterForms.find(f => f.id === id))
         .filter(Boolean);
 
-    // Calculate combined effects
     activeForms.forEach(form => {
         combinedFormMultiplierSum += form.formMultiplier;
 
@@ -231,7 +218,6 @@ export function applyActiveFormEffects() {
             combinedTrBonus += form.trueResistanceBonus;
         }
 
-        // Apply pool multiplier (PRODUCT stacking)
         const targetType = form.energyType;
         const poolMult = form.poolMaxMultiplier;
 
@@ -246,25 +232,19 @@ export function applyActiveFormEffects() {
 
     const finalCombinedFormMultiplier = combinedFormMultiplierSum === 0 ? 1 : combinedFormMultiplierSum;
 
-    // --- Update UI and State ---
-
-    // 1. Update main Form Multiplier display
     if (formMultiplierInput) {
         const currentDisplayVal = safeParseFloat(formMultiplierInput.value);
         const newDisplayVal = safeParseFloat(finalCombinedFormMultiplier);
-        // Only update DOM if value actually changed to avoid unnecessary triggers
-        if (Math.abs(currentDisplayVal - newDisplayVal) > 1e-9) { // Allow for floating point comparison issues
+        if (Math.abs(currentDisplayVal - newDisplayVal) > 1e-9) {
             formMultiplierInput.value = formatSimpleNumber(newDisplayVal);
             triggerAnimation(formMultiplierInput, 'pulse-source');
             console.log("Applied SUM combined Form Multiplier:", newDisplayVal);
         }
     }
 
-    // 2. Update AC/TR bonus in calculatorState
-    calculatorState.appliedAcBonus = combinedAcBonus; // Direct mutation or use setter if available
+    calculatorState.appliedAcBonus = combinedAcBonus;
     calculatorState.appliedTrueResistanceBonus = combinedTrBonus;
 
-    // 3. Update individual Energy Pool Max Multiplier inputs and recalculate pools
     typesToConsider.forEach(typeId => {
         const maxMultiplierEl = document.getElementById(`${typeId}-max-multiplier`);
         const els = getEnergyElements(typeId);
@@ -273,29 +253,26 @@ export function applyActiveFormEffects() {
             const currentPoolMultVal = safeParseFloat(maxMultiplierEl.value);
             const newPoolMultVal = safeParseFloat(applicablePoolMultiplier);
 
-            // Only update DOM if value changed
             if (Math.abs(currentPoolMultVal - newPoolMultVal) > 1e-9) {
                 maxMultiplierEl.value = formatSimpleNumber(newPoolMultVal);
                 triggerAnimation(maxMultiplierEl, 'pulse-source');
                 console.log(`Updated Pool Multiplier for ${typeId}:`, newPoolMultVal);
             }
-            // Always recalculate energy pools as base stats might have changed even if pool mult didn't
             calculateAndResetEnergy(typeId);
-            // Update slider UI after recalc
             updateSliderVisibility(typeId);
+            // *** This call now works because it's imported from calculation.js ***
             updateSingleSliderDisplay(typeId);
             updateSliderLimitAndStyle(typeId);
 
-        } else if (els) { // Pool exists but input missing? Still recalc energy.
+        } else if (els) {
             console.warn(`applyActiveFormEffects: Input element ${typeId}-max-multiplier not found, but pool exists. Recalculating energy.`);
              calculateAndResetEnergy(typeId);
              updateSliderVisibility(typeId);
-             updateSingleSliderDisplay(typeId);
+             updateSingleSliderDisplay(typeId); // Call should work now
              updateSliderLimitAndStyle(typeId);
         }
     });
 
-    // 4. Update the main stats panel display
     updateStatsDisplay();
     console.log("Finished applying active form effects.");
 }
