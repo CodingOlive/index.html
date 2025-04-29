@@ -1,34 +1,40 @@
 // state.js - Manages the application's state variables and save/load logic.
 
 // --- Import Dependencies ---
+
+// CORRECTED: Import DOM Elements needed for gatherState and applyState from dom-elements.js
 import {
-    // DOM Elements needed for gatherState and applyState
     baseDamageInput, baseMultiplierInput, attackCompressionPointsInput,
     energyTypeSelect, characterNameInput, charBaseHealthInput,
     charBaseMultiplierInput, charVitalityInput, charSoulPowerInput,
     charSoulHpInput, charBaseAcInput, charBaseTrInput, charSpeedInput,
     ryokoCheckbox, ryokoEquationInput, kaiokenCheckbox, maxHealthInput,
     kaiokenStrainInput, currentHealthEl, dynamicModifiersContainer,
-    formMultiplierInput, // Added missing import
-    // Import ALL_ENERGY_TYPES and details for looping/defaults
-    ALL_ENERGY_TYPES, ENERGY_TYPE_DETAILS
-} from './config.js'; // Assuming config is in the same directory
+    formMultiplierInput
+} from './dom-elements.js'; // <<< CORRECT SOURCE for DOM elements
+
+// CORRECTED: Import Config constants from config.js
+import {
+    ALL_ENERGY_TYPES, ENERGY_TYPE_DETAILS // Add other needed config constants like FIREBASE_SAVE_PATH_BASE if needed directly here
+} from './config.js'; // <<< CORRECT SOURCE for Config constants
+
+// --- Other Imports ---
 import { parseFormattedNumber, formatStatNumber, formatSimpleNumber } from './formatters.js';
 import { safeParseFloat } from './utils.js';
 // Import functions needed by applyState (dynamically loaded/called)
 // Defer direct import if circular dependency occurs, call via a function map if needed
-import { addDynamicModifier, renderFormList, renderActiveFormsSection, populateEnergyTypeDropdown, generateEnergySections } from './dom-generators.js'; // Added dropdown/section generators
+import { addDynamicModifier, renderFormList, renderActiveFormsSection, populateEnergyTypeDropdown, generateEnergySections } from './dom-generators.js';
 import { applyActiveFormEffects } from './forms.js';
 import { handleRyokoCheckboxChange } from './character-stats.js';
-import { getEnergyElements, calculateAndResetEnergy } from './energy-pools.js'; // Added calculateAndResetEnergy
+import { getEnergyElements, calculateAndResetEnergy } from './energy-pools.js';
 import { updateSingleSliderDisplay } from './calculation.js';
 import { updateSpeedSliderDisplay } from './speed-slider.js';
 import {
     updateSliderVisibility, updateSpeedSliderVisibility,
     applyKaiokenStyle, removeKaiokenStyle,
-    showCharacterStatsView, showCalculatorView, // Added view switchers
-    updateStatsDisplay, updateCurrentHealthDisplay, // Added health display
-    updateAttackButtonStates, updateSliderLimitAndStyle // Added attack/slider updaters
+    showCharacterStatsView, showCalculatorView,
+    updateStatsDisplay, updateCurrentHealthDisplay,
+    updateAttackButtonStates, updateSliderLimitAndStyle
 } from './ui-updater.js';
 import { updateEquationDisplay } from './equation.js';
 import { loadCustomEnergyTypes } from './database.js';
@@ -174,12 +180,12 @@ export function setActiveAttack(energyType, attackType) {
 
 /**
  * Resets all core state variables to their initial default values.
- * IMPORTANT: Should ideally use the setters defined above for consistency.
+ * Uses the setters defined above for consistency.
  */
 export function initializeCoreState() {
     console.log("Initializing core state variables...");
 
-    // --- Use Setters (Recommended way) ---
+    // --- Use Setters ---
     setCurrentUser(null);
     setIsAdmin(false);
     resetAttackStats(); // Resets damage, energy, count, highest
@@ -198,26 +204,6 @@ export function initializeCoreState() {
     // Reset merged types - this will be repopulated by initializeAndMergeEnergyTypes
     mergedEnergyTypes = [];
     console.log("Core state initialized.");
-
-    // --- Direct Mutation (Old way - less maintainable) ---
-    /*
-    currentUser = null;
-    isAdmin = false;
-    totalDamageDealt = 0;
-    totalEnergySpent = 0;
-    attackCount = 0;
-    highestDamage = 0;
-    dynamicModifierCount = 0;
-    characterForms = [];
-    calculatorState = {
-        activeFormIds: [],
-        appliedAcBonus: 0,
-        appliedTrueResistanceBonus: 0,
-        activeView: 'calculator'
-    };
-    activeAttacks = {};
-    mergedEnergyTypes = [];
-    */
 }
 
 /**
@@ -226,8 +212,11 @@ export function initializeCoreState() {
  */
 export function gatherState() {
     console.log("Gathering state...");
-    if (!characterNameInput || !baseDamageInput /* ... add checks for all essential inputs */) {
+    // Add checks for other essential inputs if necessary
+    if (!characterNameInput || !baseDamageInput || !charBaseHealthInput /* ... */) {
         console.error("Cannot gather state: Essential DOM elements are missing.");
+        // Consider showing a user message here as well
+        // showMessage("Error gathering state: Some input fields are missing.", "error");
         return null;
     }
 
@@ -236,7 +225,8 @@ export function gatherState() {
         characterName: characterNameInput.value,
         baseDamage: baseDamageInput.value,
         attackCompressionPoints: attackCompressionPointsInput?.value || '0',
-        baseMultiplier: baseMultiplierInput?.value || '1', // Use charBaseMultiplierInput if Ryoko is off? Check logic.
+        // Determine correct baseMultiplier source based on Ryoko mode
+        baseMultiplier: (ryokoCheckbox?.checked ? charBaseMultiplierInput?.value : baseMultiplierInput?.value) || '1',
         charBaseHealth: charBaseHealthInput?.value || '0',
         charVitality: charVitalityInput?.value || '0',
         charSoulPower: charSoulPowerInput?.value || '0',
@@ -265,7 +255,7 @@ export function gatherState() {
         forms: characterForms, // Save the created forms array directly
         calculatorState: calculatorState, // Save the calculator state object
         activeAttacks: activeAttacks, // Save the active attack states
-        // dynamicModifierCount is implicitly saved by the length/IDs of dynamicModifiers
+        // dynamicModifierCount is implicitly saved via the IDs of dynamicModifiers
     };
 
     // Gather dynamic modifier data
@@ -275,17 +265,13 @@ export function gatherState() {
         const typeOption = box.querySelector('.modifier-type-option.active');
         if (nameInput && valueInput && typeOption) {
             state.dynamicModifiers.push({
-                id: box.id, // Save the ID to potentially restore it later
+                id: box.id, // Save the ID to restore it later
                 name: nameInput.value,
                 value: valueInput.value,
                 type: typeOption.dataset.value
             });
         }
     });
-     // Reset dynamicModifierCount before applying state to ensure new IDs don't overlap if state is partial
-    dynamicModifierCount = state.dynamicModifiers.length > 0
-        ? Math.max(...state.dynamicModifiers.map(mod => parseInt(mod.id.split('-').pop()) || 0))
-        : 0;
 
 
     // Gather energy pool data (Iterate through MERGED types)
@@ -318,7 +304,6 @@ export function gatherState() {
 
 /**
  * Applies a previously gathered state object to the application UI and internal state.
- * IMPORTANT: Should ideally use the setters defined above for consistency.
  * @param {object} state - The state object to apply.
  */
 export function applyState(state) {
@@ -334,150 +319,159 @@ export function applyState(state) {
 
     try {
         // --- Apply Character Info & Base Stats ---
-        if (characterNameInput && state.characterName) characterNameInput.value = state.characterName;
-        if (baseDamageInput && state.baseDamage) baseDamageInput.value = state.baseDamage;
-        if (attackCompressionPointsInput && state.attackCompressionPoints) attackCompressionPointsInput.value = state.attackCompressionPoints;
-        // Base multiplier needs care due to Ryoko mode potentially overriding it
-        if (baseMultiplierInput && state.baseMultiplier && !state.ryokoMode?.enabled) baseMultiplierInput.value = state.baseMultiplier;
-        if (charBaseHealthInput && state.charBaseHealth) charBaseHealthInput.value = state.charBaseHealth;
-        if (charVitalityInput && state.charVitality) charVitalityInput.value = state.charVitality;
-        if (charSoulPowerInput && state.charSoulPower) charSoulPowerInput.value = state.charSoulPower;
-        if (charSoulHpInput && state.charSoulHp) charSoulHpInput.value = state.charSoulHp;
-        if (charBaseAcInput && state.charBaseAc) charBaseAcInput.value = state.charBaseAc;
-        if (charBaseTrInput && state.charBaseTr) charBaseTrInput.value = state.charBaseTr;
-        if (charSpeedInput && state.charSpeed) charSpeedInput.value = state.charSpeed;
+        if (characterNameInput && state.characterName !== undefined) characterNameInput.value = state.characterName;
+        if (baseDamageInput && state.baseDamage !== undefined) baseDamageInput.value = state.baseDamage;
+        if (attackCompressionPointsInput && state.attackCompressionPoints !== undefined) attackCompressionPointsInput.value = state.attackCompressionPoints;
+        // Base multiplier is handled below within Ryoko section
+        if (charBaseHealthInput && state.charBaseHealth !== undefined) charBaseHealthInput.value = state.charBaseHealth;
+        if (charVitalityInput && state.charVitality !== undefined) charVitalityInput.value = state.charVitality;
+        if (charSoulPowerInput && state.charSoulPower !== undefined) charSoulPowerInput.value = state.charSoulPower;
+        if (charSoulHpInput && state.charSoulHp !== undefined) charSoulHpInput.value = state.charSoulHp;
+        if (charBaseAcInput && state.charBaseAc !== undefined) charBaseAcInput.value = state.charBaseAc;
+        if (charBaseTrInput && state.charBaseTr !== undefined) charBaseTrInput.value = state.charBaseTr;
+        if (charSpeedInput && state.charSpeed !== undefined) charSpeedInput.value = state.charSpeed;
 
-        // --- Apply Ryoko Mode ---
+        // --- Apply Ryoko Mode & Base Multiplier ---
+        // Apply Ryoko state first as it determines if baseMultiplierInput is read-only
         if (ryokoCheckbox && state.ryokoMode) {
             ryokoCheckbox.checked = state.ryokoMode.enabled;
             if (ryokoEquationInput) ryokoEquationInput.value = state.ryokoMode.equation || '';
-            // IMPORTANT: Trigger the handler to update UI (readonly state, evaluation) AFTER setting checkbox and equation value
-             handleRyokoCheckboxChange(); // This will call evaluateRyokoEquation if checked
+            handleRyokoCheckboxChange(); // Update UI (readonly state, etc.) based on checkbox
+            // If Ryoko mode is ON, the baseMultiplier field is updated by evaluateRyokoEquation (called by handler)
         }
+         // Apply baseMultiplier from state ONLY IF Ryoko mode is OFF
+        if (baseMultiplierInput && state.baseMultiplier !== undefined && !ryokoCheckbox?.checked) {
+             baseMultiplierInput.value = state.baseMultiplier;
+         }
+
 
         // --- Apply Kaioken ---
         if (kaiokenCheckbox && state.kaioken) {
             kaiokenCheckbox.checked = state.kaioken.enabled;
-            if (maxHealthInput) maxHealthInput.value = state.kaioken.maxHealth || '1000';
-            if (kaiokenStrainInput) kaiokenStrainInput.value = state.kaioken.strainPercent || '10';
-            // Apply current health AFTER max health is set
-            if (currentHealthEl && state.kaioken.currentHealth) {
-                 // Validate current health against the max health just set
-                 const maxHp = safeParseFloat(maxHealthInput.value, 0);
-                 const currentHp = parseFormattedNumber(state.kaioken.currentHealth); // Use parser
-                 currentHealthEl.textContent = formatStatNumber(Math.min(currentHp, maxHp)); // Use formatter
-            }
-            // Trigger Kaioken UI style update
-            if (state.kaioken.enabled) { applyKaiokenStyle(); } else { removeKaiokenStyle(); }
-            if (kaiokenDetails) kaiokenDetails.classList.toggle('hidden', !state.kaioken.enabled);
+            if (maxHealthInput && state.kaioken.maxHealth !== undefined) maxHealthInput.value = state.kaioken.maxHealth;
+            if (kaiokenStrainInput && state.kaioken.strainPercent !== undefined) kaiokenStrainInput.value = state.kaioken.strainPercent;
+             // Trigger the handler AFTER setting checkbox value
+             const event = new Event('change'); // Create a synthetic event if needed, or just call helper funcs
+             // kaiokenCheckbox.dispatchEvent(event); // Or manually update UI:
+             if(kaiokenDetails) kaiokenDetails.classList.toggle('hidden', !kaiokenCheckbox.checked);
+             if(kaiokenCheckbox.checked) applyKaiokenStyle(); else removeKaiokenStyle();
+
+             // Apply current health AFTER max health is set
+             if (currentHealthEl && state.kaioken.currentHealth !== undefined) {
+                 const maxHp = safeParseFloat(maxHealthInput?.value, 0); // Read max health *now*
+                 const currentHp = parseFormattedNumber(state.kaioken.currentHealth);
+                 currentHealthEl.textContent = formatStatNumber(Math.max(0, Math.min(currentHp, maxHp))); // Cap at new max, ensure >= 0
+             } else if (currentHealthEl) {
+                  // If no saved current health, reset based on max health
+                  updateCurrentHealthDisplay();
+             }
         }
 
-        // --- Apply Cumulative Stats (Use Setters) ---
+        // --- Apply Cumulative Stats (Use Setters for internal state) ---
         if (state.stats) {
-            // Temporarily set directly, or create setters if needed for these raw values
+            // Update internal state directly or via more specific setters if created
             totalDamageDealt = safeParseFloat(state.stats.totalDamageDealt, 0);
             totalEnergySpent = safeParseFloat(state.stats.totalEnergySpent, 0);
             attackCount = parseInt(state.stats.attackCount, 10) || 0;
             highestDamage = safeParseFloat(state.stats.highestDamage, 0);
              console.log("Applied cumulative stats state.");
+             // UI update for stats panel happens later in updateStatsDisplay()
         }
 
         // --- Apply Forms (Use Setters) ---
         if (state.forms && Array.isArray(state.forms)) {
              setCharacterForms(state.forms); // Use setter
-             // Re-render UI lists
-             renderFormList();
-             renderActiveFormsSection(); // Ensure this runs AFTER characterForms is set
+             // UI list update happens later
         }
 
         // --- Apply Calculator State (Use Setters) ---
+        // Do this BEFORE applying form effects, as activeFormIds are needed
         if (state.calculatorState) {
             setActiveFormIds(state.calculatorState.activeFormIds || []); // Use setter
-            setCalculatorStateValue('appliedAcBonus', state.calculatorState.appliedAcBonus || 0);
-            setCalculatorStateValue('appliedTrueResistanceBonus', state.calculatorState.appliedTrueResistanceBonus || 0);
-            setCalculatorStateValue('activeView', state.calculatorState.activeView || 'calculator');
+            // Using direct mutation for sub-properties for now, or use setCalculatorStateValue
+            calculatorState.appliedAcBonus = state.calculatorState.appliedAcBonus || 0;
+            calculatorState.appliedTrueResistanceBonus = state.calculatorState.appliedTrueResistanceBonus || 0;
+            calculatorState.activeView = state.calculatorState.activeView || 'calculator';
             // Apply other calculatorState properties if they exist
              console.log("Applied calculator state.");
-              // Update active form checkboxes based on the now-set activeFormIds
-            renderActiveFormsSection(); // Re-render to check the correct boxes
-
-            // Apply the effects of the loaded active forms (crucial!)
-            applyActiveFormEffects(); // This recalculates energy pools based on form multipliers
         }
+
+        // --- Re-render form lists/checkboxes AFTER forms and active IDs are set ---
+        renderFormList();
+        renderActiveFormsSection(); // Checks the correct boxes based on loaded activeFormIds
+
+        // --- Apply Active Form Effects ---
+        // This is crucial as it updates formMultiplierInput, pool multipliers, and recalculates energy pools
+        applyActiveFormEffects();
 
 
         // --- Apply Active Attacks (Use Setters) ---
         if (state.activeAttacks && typeof state.activeAttacks === 'object') {
-            // Clear existing attacks first
-            activeAttacks = {};
-             // Iterate and use setter
+            activeAttacks = {}; // Clear existing
              for (const typeId in state.activeAttacks) {
-                // Check if the typeId still exists in the merged list? Optional.
-                if (mergedEnergyTypes.some(et => et && et.id === typeId)) {
-                     setActiveAttack(typeId, state.activeAttacks[typeId]);
+                // Optionally check if typeId exists in mergedEnergyTypes before setting
+                 if (mergedEnergyTypes.some(et => et && et.id === typeId)) {
+                     setActiveAttack(typeId, state.activeAttacks[typeId]); // Use setter
                  } else {
-                     console.warn(`ApplyState: Ignoring active attack for non-existent/unmerged energy type "${typeId}"`);
+                      console.warn(`ApplyState: Ignoring active attack for non-existent energy type "${typeId}"`);
                  }
              }
              console.log("Applied active attacks state.");
-              // Update attack button UI for the currently focused energy type
-              const selectedType = energyTypeSelect?.value;
-              if(selectedType) {
-                 updateAttackButtonStates(selectedType);
-             }
+             // Attack button UI update happens later
         }
 
 
         // --- Restore Dynamic Modifiers ---
-        if (dynamicModifiersContainer) dynamicModifiersContainer.innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>'; // Clear existing before adding
+        dynamicModifierCount = 0; // Reset counter before adding
+        if (dynamicModifiersContainer) dynamicModifiersContainer.innerHTML = '<h4 class="text-md font-semibold mb-2 text-gray-700">Additional Factors:</h4>'; // Clear existing
         if (state.dynamicModifiers && Array.isArray(state.dynamicModifiers)) {
-             // Reset the counter based on loaded modifiers BEFORE adding them
-             dynamicModifierCount = state.dynamicModifiers.length > 0
-                 ? Math.max(...state.dynamicModifiers.map(mod => parseInt(mod.id?.split('-').pop() || '0', 10) || 0))
-                 : 0;
-             console.log("Reset dynamicModifierCount based on loaded state to:", dynamicModifierCount);
-
              state.dynamicModifiers.forEach(modData => {
-                addDynamicModifier(modData); // This function creates and adds listeners
+                addDynamicModifier(modData); // Creates and adds listeners
             });
-            console.log("Restored dynamic modifiers.");
+             // Recalculate dynamicModifierCount based on the loaded items' IDs
+             dynamicModifierCount = state.dynamicModifiers.length > 0
+                 ? Math.max(0, ...state.dynamicModifiers.map(mod => parseInt(mod.id?.split('-').pop() || '0', 10) || 0))
+                 : 0;
+             console.log("Restored dynamic modifiers. Next ID counter set to:", dynamicModifierCount + 1);
         }
 
 
          // --- Apply Energy Pool States ---
-         // This MUST run AFTER mergeEnergyTypes has populated mergedEnergyTypes AND after applyActiveFormEffects
-         // has potentially updated the maxMultiplier inputs based on active forms.
-         console.log("Applying energy pool states...");
+         // This MUST run AFTER applyActiveFormEffects (which might change max multipliers)
+         console.log("Applying energy pool states (post form effects)...");
          if (state.energyPools && typeof state.energyPools === 'object') {
              mergedEnergyTypes.forEach(type => {
-                  if (!type || !type.id) return; // Skip invalid types
+                  if (!type || !type.id) return;
                  const typeId = type.id;
                  const poolState = state.energyPools[typeId];
                  const els = getEnergyElements(typeId);
 
                  if (poolState && els) {
-                     // Apply values that were saved
-                     if (els.maxMultiplierEl && poolState.maxMultiplier) els.maxMultiplierEl.value = poolState.maxMultiplier;
-                     if (els.damagePerPowerEl && poolState.damagePerPower) els.damagePerPowerEl.value = poolState.damagePerPower;
-                     if (els.regenPercentEl && poolState.regenPercent) els.regenPercentEl.value = poolState.regenPercent;
+                     // Apply saved inputs (maxMultiplier already potentially updated by form effects)
+                     if (els.damagePerPowerEl && poolState.damagePerPower !== undefined) els.damagePerPowerEl.value = poolState.damagePerPower;
+                     if (els.regenPercentEl && poolState.regenPercent !== undefined) els.regenPercentEl.value = poolState.regenPercent;
 
-                     // Recalculate total based on potentially changed inputs (like character stats or form mults)
-                     const totalEnergy = calculateAndResetEnergy(typeId); // Recalculates base, total, adjusts current
+                     // Recalculate total energy based on current stats and applied multipliers
+                     const totalEnergy = calculateAndResetEnergy(typeId);
 
-                     // Now, specifically apply the SAVED currentEnergy, capped by the NEW total
-                     if (els.currentEnergyEl && poolState.currentEnergy) {
+                     // Apply the SAVED currentEnergy, capped by the NEWLY calculated total
+                     if (els.currentEnergyEl && poolState.currentEnergy !== undefined) {
                          const savedCurrent = parseFormattedNumber(poolState.currentEnergy);
-                         els.currentEnergyEl.textContent = formatStatNumber(Math.min(savedCurrent, totalEnergy));
+                         const cappedCurrent = Math.max(0, Math.min(savedCurrent, totalEnergy)); // Ensure >= 0 and <= total
+                         els.currentEnergyEl.textContent = formatStatNumber(cappedCurrent);
+                     } else if(els.currentEnergyEl) {
+                          // If no saved current energy, calculateAndResetEnergy already reset it to total
+                          // We might want to ensure it's formatted correctly here if needed
+                         els.currentEnergyEl.textContent = formatStatNumber(totalEnergy);
                      }
 
-                     // Apply slider value and update its display
-                     if (els.energySlider && poolState.sliderValue) {
+                     // Apply slider value and update displays
+                     if (els.energySlider && poolState.sliderValue !== undefined) {
                          els.energySlider.value = poolState.sliderValue;
                      }
-                     // Update the display text (e.g., "E: xxx, D: xxx") for the slider
                       updateSingleSliderDisplay(typeId);
                       updateSliderLimitAndStyle(typeId); // Apply attack limits/styles
-                      updateSliderVisibility(typeId); // Ensure visibility is correct
+                      updateSliderVisibility(typeId); // Ensure visibility
 
                  } else if(poolState && !els) {
                       console.warn(`ApplyState: Found saved state for energy type "${typeId}", but its DOM elements are missing.`);
@@ -488,21 +482,30 @@ export function applyState(state) {
 
 
         // --- Apply Speed Slider Value ---
-        if (state.speedSliderValue) {
+        if (state.speedSliderValue !== undefined) {
             const speedSliderEl = document.getElementById('speed-slider');
             if (speedSliderEl) {
                 speedSliderEl.value = state.speedSliderValue;
-                updateSpeedSliderDisplay(); // Update its display text
-                updateSpeedSliderVisibility(); // Ensure it's visible if speed > 0
+                updateSpeedSliderDisplay();
+                updateSpeedSliderVisibility();
             }
         }
 
 
         // --- Final UI Updates ---
-        updateStatsDisplay(); // Refresh stats panel with loaded values
-        updateEquationDisplay(); // Refresh equation display
+        updateStatsDisplay(); // Refresh stats panel with all loaded/recalculated values
+        updateEquationDisplay(); // Refresh equation display based on all inputs
         const currentFocus = energyTypeSelect?.value;
-        if(currentFocus) displayEnergyPool(currentFocus); // Show the pool for the selected focus
+        if(currentFocus && document.getElementById(`${currentFocus}-pool`)) { // Check element exists
+             displayEnergyPool(currentFocus); // Show the pool for the selected focus
+             updateAttackButtonStates(currentFocus); // Update attack buttons for current focus
+         } else if (mergedEnergyTypes.length > 0 && energyTypeSelect) {
+             // If focus was invalid, default to first type
+             const firstTypeId = mergedEnergyTypes[0].id;
+             energyTypeSelect.value = firstTypeId;
+              displayEnergyPool(firstTypeId);
+              updateAttackButtonStates(firstTypeId);
+         }
 
 
         // --- Restore Active View ---
@@ -516,6 +519,7 @@ export function applyState(state) {
 
     } catch (error) {
         console.error("Error applying state:", error);
+        showMessage("An error occurred while applying the saved state. Some settings may be incorrect.", "error");
         // Optionally, reset to defaults if applying state fails critically
         // initializeCoreState();
         // initializeDefaultUI(); // Assuming you have a function to reset UI inputs
