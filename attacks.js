@@ -1,19 +1,23 @@
 // attacks.js - Handles logic for Super/Ultimate attack buttons.
 
 // --- Import Dependencies ---
-// Import state (needs mutable access to the activeAttacks state object)
-import { activeAttacks } from './state.js';
+// Import state (setter for modification, variable for reading current state)
+import {
+    // activeAttacks, // Remove direct import for mutation
+    setActiveAttack, // <-- Import the new setter
+    activeAttacks   // <-- Keep importing for READ access needed below
+} from './state.js';
 // Import DOM elements
-import { energyTypeSelect } from './dom-elements.js';
+import { energyTypeSelect } from './dom-elements.js'; // Keep needed DOM elements
 
 // Import UI update functions
 import {
     updateAttackButtonStates,
     updateSliderLimitAndStyle
-} from './ui-updater.js';
+} from './ui-updater.js'; // Keep UI updaters
 
 // Import utilities
-import { triggerAnimation } from './utils.js';
+import { triggerAnimation } from './utils.js'; // Keep utilities
 
 
 // --- Attack Button Logic ---
@@ -33,23 +37,35 @@ export function handleAttackButtonClick(event) {
         console.error("Cannot handle attack button click: energy type select or attack type missing.");
         return;
     }
-    // Check if the imported state object exists
+
+    const selectedEnergyType = energyTypeSelect.value;
+     if (!selectedEnergyType) {
+         console.error("Cannot handle attack button click: No energy type selected.");
+         // Optionally show a user message here
+         return;
+     }
+
+    // Check if the imported state object exists for reading current state
     if (typeof activeAttacks === 'undefined') {
-         console.error("Cannot handle attack button click: activeAttacks state is not available.");
+        console.error("Cannot handle attack button click: activeAttacks state is not available for reading.");
         return;
     }
 
 
-    const selectedEnergyType = energyTypeSelect.value;
-
     // Determine the new state: if the current attack is the one clicked, turn it off (null).
     // Otherwise, set the new attack type.
-    const currentAttackForType = activeAttacks[selectedEnergyType] || null; // Read from imported state
+    const currentAttackForType = activeAttacks[selectedEnergyType] || null; // Read current state
     const newAttackState = (currentAttackForType === attackType) ? null : attackType;
 
-    // Update the state object (modifies the imported 'let' variable from state.js)
-    activeAttacks[selectedEnergyType] = newAttackState;
-    console.log(`Active attack state updated for ${selectedEnergyType}:`, activeAttacks);
+    // ********************************************
+    // *** CHANGE IS HERE ***
+    // Update the state object using the SETTER
+    setActiveAttack(selectedEnergyType, newAttackState);
+    // activeAttacks[selectedEnergyType] = newAttackState; // <-- OLD WAY
+    // ********************************************
+
+
+    console.log(`Active attack state updated (via setter) for ${selectedEnergyType} to:`, newAttackState); // Log the state after update
 
     // Trigger UI updates using imported functions
     updateAttackButtonStates(selectedEnergyType);
@@ -60,4 +76,3 @@ export function handleAttackButtonClick(event) {
 }
 
 // NOTE: Ensure there are no other declarations like 'let activeAttacks = ...' in this file.
-
