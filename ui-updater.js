@@ -519,6 +519,5 @@ export {
     displayEnergyPool, // Make sure the corrected version is exported
     displayAllFormats,
     showCharacterStatsView,
-    showCalculatorView,
-    initializeDefaultUI
+    showCalculatorView
 };
