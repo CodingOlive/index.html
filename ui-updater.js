@@ -517,6 +517,5 @@ export {
     updateAttackButtonStates,
     updateSliderLimitAndStyle,
     displayEnergyPool, // Make sure the corrected version is exported
-    displayAllFormats,
-    showCalculatorView
+    displayAllFormats
 };
